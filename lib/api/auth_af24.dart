@@ -1,7 +1,12 @@
 import 'dart:convert';
 import 'package:af24/Model/GetcategoriesModel.dart';
 import 'package:af24/Model/ProductlistModel.dart';
+import 'package:af24/Model/SellerOrderDetailsModel.dart';
+import 'package:af24/Model/SellerOrderListModel.dart';
+import 'package:af24/Model/getChatModel.dart';
+import 'package:af24/Model/getNotification.dart';
 import 'package:af24/Model/getbrand.dart';
+import 'package:af24/Model/getsizeModel.dart';
 
 import 'package:af24/Model/productinfoModel.dart';
 import 'package:af24/Model/shippingCostModel.dart';
@@ -11,6 +16,8 @@ import 'package:af24/api/global_variable.dart';
 import 'package:af24/api/urls.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
+
+import '../Model/getColors.dart';
 /* import 'package:streaming_plug/Models/SearchPageModel.dart';
 import 'package:streaming_plug/api_services/urls.dart';
 
@@ -50,6 +57,38 @@ class DataApiService {
     }
   }
 
+  Future getSignUptoken(Map<String, dynamic> body, context) async {
+    String url = baseUrl + register_url;
+    StatusCode = '403';
+    print(url);
+    try {
+      http.Response response = await http.post(
+        Uri.parse(url),
+        body: body,
+      );
+
+      final result = jsonDecode(response.body);
+      // Customer_Token.value = (result['token']);
+      print("fhfvbkf abgfb jwegfkasvkag fbashfoi");
+
+      // SignUpCode = jsonDecode(response.statusCode.toString());
+      print(response.statusCode);
+      StatusCode = response.statusCode.toString();
+      if (response.statusCode == 200) {
+        SnackMessage = 'Account created successfully';
+      } else {
+        print('sgvcznxfgfbvsvfcgfbvc');
+        print(result['errors'][0]['message']);
+        SnackMessage = result['errors'][0]['message'];
+        print(SnackMessage);
+      }
+    } on Exception {
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future getshopinfo() async {
     String url = baseUrl + shop_url;
     print(url);
@@ -75,6 +114,7 @@ class DataApiService {
             rating: 5,
             ratingCount: 5); */
         shopinfoContent = shopinfoModel.fromJson(result);
+        print('success');
         print(shopinfoContent.image);
       } else {
         print("unsucess");
@@ -136,6 +176,60 @@ class DataApiService {
         catergorylist = List<CategoryModel>.from(
             result['data'].map((x) => CategoryModel.fromJson(x)));
         print(catergorylist[0].subCategories[0].name);
+      } else {
+        print("unsuccess");
+      }
+    } on Exception {
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future getcolorlist() async {
+    String url = baseUrl + colors_url;
+    print(url);
+
+    try {
+      http.Response response = await http.get(Uri.parse(url), headers: {
+        "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
+      });
+      print(response.body);
+      final result = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        print('Success');
+        print(result["data"]);
+        print("divider");
+        colorList = List<ColorsModel>.from(
+            result['data'].map((x) => ColorsModel.fromJson(x)));
+        print(colorList[0].name);
+      } else {
+        print("unsuccess");
+      }
+    } on Exception {
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future getsizelist() async {
+    String url = baseUrl + getSize_url;
+    print(url);
+
+    try {
+      http.Response response = await http.get(Uri.parse(url), headers: {
+        "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
+      });
+      print(response.body);
+      final result = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        print('Success');
+        print(result["data"]);
+        print("divider");
+        sizeList = List<SizeModel>.from(
+            result['data'].map((x) => SizeModel.fromJson(x)));
+        print(sizeList[0].label);
       } else {
         print("unsuccess");
       }
@@ -256,23 +350,57 @@ class DataApiService {
     }
   }
 
+  /* Future uploadImage(String uploadimg, context) async {
+    String url = baseUrl + uploadImage_url;
+    print(url);
+    var headers = {
+      "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
+      "Accept": "application/json"
+    };
+    var request = http.MultipartRequest('POST', Uri.parse(url));
+    request.fields.addAll({'type': 'product'});
+    request.files.add(await http.MultipartFile.fromPath('images', uploadimg));
+    
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    String ans = await response.stream.bytesToString();
+
+    final result = jsonDecode(ans);
+
+    if (response.statusCode == 200) {
+     
+      print('success');
+      print(result['image_name']);
+    } else {
+     
+      print('unccess');
+    }
+    
+  } */
+
   Future uploadImage(Map<String, dynamic> uploadimg, context) async {
     String url = baseUrl + uploadImage_url;
     print(url);
 
     try {
-      http.Response response = await http.post(Uri.parse(url),
-          body: uploadimg,
-          headers: {
-            "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
-            "Accept": "application/json"
-          });
+      http.Response response = await http.post(
+        Uri.parse(url),
+        body: uploadimg,
+        headers: {
+          "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
+          "Accept": "application/json"
+        },
+      );
 
       print(response.body);
       final result = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
         print('Success3');
+        print('ddddddddddddddddddddddddddddd');
+        print(result['image_name']);
         snackmessage = result['image_name'];
         imageName = result['image_name'];
         imaglist.add(imageName);
@@ -287,11 +415,150 @@ class DataApiService {
     }
   }
 
-  Future updateStoreInfo(Map<String, dynamic> updatestore, context) async {
-    String url = baseUrl + updatestore_url;
+  Future updateProfileContent(String image, String type) async {
+    String url = baseUrl + uploadImage_url;
+
+    print(url);
+    var headers = {
+      'Accept': 'application/json',
+      "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
+    };
+    print(type);
+    var request = http.MultipartRequest('POST', Uri.parse(url));
+    request.fields.addAll({
+      'type': type,
+    });
+    request.files.add(await http.MultipartFile.fromPath('image', image));
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    String ans = await response.stream.bytesToString();
+    final result = jsonDecode(ans);
+
+    if (response.statusCode == 200) {
+      print("sssss");
+      print(result);
+      imageName = result['image_name'];
+      if (type == 'thumbnail') {
+        thumbnaiImage = imageName;
+      } else {
+        imaglist.add(imageName);
+        imageditlist.add(imageName);
+      }
+      print('thumbnail');
+      print(thumbnaiImage);
+      print(imageditlist);
+      return result;
+    } else {
+      print(response.reasonPhrase);
+    }
+
+    //
+    // print(url);
+    // try {
+    //   var response =
+    //       await http.post(Uri.parse(url), body: body, headers: {
+    //     "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
+    //   });
+    //  // response.files.add(await http.MultipartFile.fromPath('image', '/C:/Users/Zunair Shahid/Pictures/WBS.png'));
+    //   // print(response.body);
+    //   final result = jsonDecode(response.body);
+    //   return result;
+    // } on Exception {
+    //   rethrow;
+    // } catch (e) {
+    //   rethrow;
+    // }
+  }
+
+  Future getSellerOrderList() async {
+    String url = baseUrl + getSellerOrderList_url;
     print(url);
 
     try {
+      http.Response response = await http.get(Uri.parse(url), headers: {
+        "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
+      });
+      print(response.body);
+      final result = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        print('Seller Order');
+        print(result);
+        print("List");
+        sellerOrderList = List<SellerOrderListModel>.from(
+            result.map((x) => SellerOrderListModel.fromJson(x)));
+        print(sellerOrderList.length);
+      } else {
+        print("Seller Order List");
+      }
+    } on Exception {
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future getSellerOrderDetails(int id) async {
+    String url = baseUrl + getSellerOrderDetails_url + id.toString();
+    print(url);
+
+    try {
+      http.Response response = await http.get(Uri.parse(url), headers: {
+        "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
+      });
+      print(response.body);
+      final result = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        print('Seller Order');
+        print(result);
+        print("Details");
+        sellerOrderDetails = List<SellerOrderDetailsModel>.from(
+            result.map((x) => SellerOrderDetailsModel.fromJson(x)));
+        print(sellerOrderDetails.length);
+      } else {
+        print("Seller Order Details");
+      }
+    } on Exception {
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future updateStoreInfo(
+      String name, String number, String address, String file, context) async {
+    String url = baseUrl + updatestore_url;
+    print(url);
+    print(url);
+    var headers = {
+      'Accept': 'application/json',
+      "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
+    };
+
+    var request = http.MultipartRequest('POST', Uri.parse(url));
+    request.fields.addAll({
+      "name": name,
+      "contact": number,
+      "address": address,
+    });
+    request.files.add(await http.MultipartFile.fromPath('image', file));
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    String ans = await response.stream.bytesToString();
+    final result = jsonDecode(ans);
+
+    if (response.statusCode == 200) {
+      print("sssss");
+      print(result);
+
+      return result;
+    } else {
+      print(response.reasonPhrase);
+    }
+    /* try {
       http.Response response = await http.post(Uri.parse(url),
           body: updatestore,
           headers: {
@@ -305,6 +572,7 @@ class DataApiService {
       if (response.statusCode == 200) {
         print('Success3');
         StatusCode = '200';
+        snackmessage = result;
       } else {
         print("unsucess3");
         StatusCode = '403';
@@ -313,7 +581,7 @@ class DataApiService {
       rethrow;
     } catch (e) {
       rethrow;
-    }
+    } */
   }
 
   Future sellerinfoupdate() async {
@@ -377,6 +645,94 @@ class DataApiService {
     }
   }
 
+  Future getNotification(String body, context) async {
+    String url = baseUrl + notification_url;
+    print(url);
+
+    try {
+      http.Response response = await http.post(Uri.parse(url), body: {
+        'user_id': body
+      }, headers: {
+        "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
+        "Accept": "application/json"
+      });
+      print(response.body);
+      final result = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        print('Success3');
+
+        getNotifiationList = List<GetNotificationModel>.from(
+            result.map((x) => GetNotificationModel.fromJson(x)));
+      } else {
+        print("unsucess3");
+      }
+    } on Exception {
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future sendMessage(Map<String, dynamic> body, context) async {
+    String url = baseUrl + sendMessage_url;
+    print(url);
+
+    try {
+      http.Response response = await http.post(Uri.parse(url),
+          body: body,
+          headers: {
+            "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
+            "Accept": "application/json"
+          });
+      print(response.body);
+      final result = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        print('Success3');
+
+        /*  getNotifiationList = List<GetNotificationModel>.from(
+            result.map((x) => GetNotificationModel.fromJson(x))); */
+        print(response.body);
+      } else {
+        print("unsucess3");
+      }
+    } on Exception {
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future getChat(Map<String, dynamic> body, context) async {
+    String url = baseUrl + getChat_url;
+    print(url);
+
+    try {
+      http.Response response = await http.post(Uri.parse(url),
+          body: body,
+          headers: {
+            "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
+            "Accept": "application/json"
+          });
+      print(response.body);
+      final result = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        print('Success3');
+        print(response.body);
+        getChatList = List<GetChatModel>.from(
+            result.map((x) => GetChatModel.fromJson(x)));
+      } else {
+        print("unsucess3");
+      }
+    } on Exception {
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future setCategoryCost(Map<String, dynamic> categoryCost, context) async {
     String url = baseUrl + setCategory_url;
     print(url);
@@ -404,18 +760,18 @@ class DataApiService {
     }
   }
 
-  Future updateproducts(int id, String pname, String pSubname) async {
-    String url = baseUrl +
-        updateproduct_url +
-        '/' +
-        '$id?name=${pname}&sub_name=${pSubname}&category_id=1&brand_id=1&unit=pc&images[]=2022-07-14-62cf0f8147b41.png&thumbnail=2022-07-14-62cf0f8149791.png&discount_type=percent&tax=10&lang[]=en&unit_price=60&purchase_price=40&discount=20&shipping_cost=15&description=abc&price_type=wholesale';
+  Future updateproducts(
+      int id, Map<String, dynamic> updateproduct, context) async {
+    String url = baseUrl + updateproduct_url + '/' + '$id';
     print(url);
 
     try {
-      http.Response response = await http.put(Uri.parse(url), headers: {
-        "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
-        "Accept": "application/json"
-      });
+      http.Response response = await http.put(Uri.parse(url),
+          body: updateproduct,
+          headers: {
+            "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
+            "Accept": "application/json"
+          });
       print(response.body);
       final result = jsonDecode(response.body);
 

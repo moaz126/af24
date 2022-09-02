@@ -1,4 +1,4 @@
-package com.example.af24
+package com.af24.seller
 
 import io.flutter.embedding.android.FlutterActivity
 

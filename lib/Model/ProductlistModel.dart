@@ -7,9 +7,6 @@ import 'dart:convert';
 ProductlistModel productlistModelFromJson(String str) =>
     ProductlistModel.fromJson(json.decode(str));
 
-String productlistModelToJson(ProductlistModel data) =>
-    json.encode(data.toJson());
-
 class ProductlistModel {
   ProductlistModel({
     required this.list,
@@ -28,12 +25,6 @@ class ProductlistModel {
         imagesPath: json["images_path"],
         thumbnailPath: json["thumbnail_path"],
       );
-
-  Map<String, dynamic> toJson() => {
-        "list": List<dynamic>.from(list.map((x) => x.toJson())),
-        "images_path": imagesPath,
-        "thumbnail_path": thumbnailPath,
-      };
 }
 
 class ListElement {
@@ -87,61 +78,67 @@ class ListElement {
     required this.size,
     required this.subName,
     required this.reviewsCount,
+    required this.categoryName,
+    required this.brandName,
     required this.translations,
     required this.reviews,
+    required this.subCategoryName,
   });
 
   int id;
-  String addedBy;
+  dynamic addedBy;
   int userId;
   String name;
   String slug;
   String categoryIds;
   int brandId;
-  String unit;
+  dynamic unit;
   int minQty;
   int refundable;
-  String images;
+  List<dynamic> images;
   String thumbnail;
-  dynamic featured;
+  int? featured;
   dynamic flashDeal;
-  String videoProvider;
+  dynamic videoProvider;
   dynamic videoUrl;
-  String colors;
+  dynamic colors;
   int variantProduct;
-  String attributes;
-  String choiceOptions;
+  dynamic attributes;
+  dynamic choiceOptions;
   String variation;
   int published;
   int unitPrice;
-  int purchasePrice;
-  String priceType;
-  int tax;
-  dynamic taxType;
+  double purchasePrice;
+  dynamic priceType;
+  double tax;
+  String? taxType;
   int discount;
-  String discountType;
-  dynamic currentStock;
-  String details;
+  String? discountType;
+  int? currentStock;
+  String? details;
   int freeShipping;
   dynamic attachment;
   DateTime createdAt;
   DateTime updatedAt;
   int status;
   int featuredStatus;
-  dynamic metaTitle;
-  dynamic metaDescription;
-  dynamic metaImage;
+  String? metaTitle;
+  String? metaDescription;
+  String? metaImage;
   int requestStatus;
   dynamic deniedNote;
   int shippingCost;
   int multiplyQty;
   dynamic tempShippingCost;
   dynamic isShippingCostUpdated;
-  String size;
+  dynamic size;
   String subName;
   int reviewsCount;
+  dynamic categoryName;
+  String brandName;
   List<dynamic> translations;
-  List<dynamic> reviews;
+  List<Review> reviews;
+  String? subCategoryName;
 
   factory ListElement.fromJson(Map<String, dynamic> json) => ListElement(
         id: json["id"],
@@ -154,9 +151,9 @@ class ListElement {
         unit: json["unit"],
         minQty: json["min_qty"],
         refundable: json["refundable"],
-        images: json["images"],
+        images: jsonDecode(json["images"]),
         thumbnail: json["thumbnail"],
-        featured: json["featured"],
+        featured: json["featured"] == null ? null : json["featured"],
         flashDeal: json["flash_deal"],
         videoProvider: json["video_provider"],
         videoUrl: json["video_url"],
@@ -167,14 +164,15 @@ class ListElement {
         variation: json["variation"],
         published: json["published"],
         unitPrice: json["unit_price"],
-        purchasePrice: json["purchase_price"],
+        purchasePrice: json["purchase_price"].toDouble(),
         priceType: json["price_type"],
-        tax: json["tax"],
-        taxType: json["tax_type"],
+        tax: json["tax"].toDouble(),
+        taxType: json["tax_type"] == null ? null : json["tax_type"],
         discount: json["discount"],
         discountType:
-            json["discount_type"] == null ? "" : json["discount_type"],
-        currentStock: json["current_stock"],
+            json["discount_type"] == null ? null : json["discount_type"],
+        currentStock:
+            json["current_stock"] == null ? null : json["current_stock"],
         details: json["details"],
         freeShipping: json["free_shipping"],
         attachment: json["attachment"],
@@ -182,73 +180,62 @@ class ListElement {
         updatedAt: DateTime.parse(json["updated_at"]),
         status: json["status"],
         featuredStatus: json["featured_status"],
-        metaTitle: json["meta_title"],
-        metaDescription: json["meta_description"],
-        metaImage: json["meta_image"],
+        metaTitle: json["meta_title"] == null ? null : json["meta_title"],
+        metaDescription:
+            json["meta_description"] == null ? null : json["meta_description"],
+        metaImage: json["meta_image"] == null ? null : json["meta_image"],
         requestStatus: json["request_status"],
         deniedNote: json["denied_note"],
         shippingCost: json["shipping_cost"],
         multiplyQty: json["multiply_qty"],
         tempShippingCost: json["temp_shipping_cost"],
         isShippingCostUpdated: json["is_shipping_cost_updated"],
-        size: json["size"] == null ? "" : json["size"],
+        size: json["size"] == null ? null : json["size"],
         subName: json["sub_name"],
         reviewsCount: json["reviews_count"],
+        categoryName: json["category_name"],
+        brandName: json["brand_name"],
         translations: List<dynamic>.from(json["translations"].map((x) => x)),
-        reviews: List<dynamic>.from(json["reviews"].map((x) => x)),
+        reviews:
+            List<Review>.from(json["reviews"].map((x) => Review.fromJson(x))),
+        subCategoryName: json["sub_category_name"] == null
+            ? null
+            : json["sub_category_name"],
       );
+}
 
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "added_by": addedBy,
-        "user_id": userId,
-        "name": name,
-        "slug": slug,
-        "category_ids": categoryIds,
-        "brand_id": brandId,
-        "unit": unit,
-        "min_qty": minQty,
-        "refundable": refundable,
-        "images": images,
-        "thumbnail": thumbnail,
-        "featured": featured,
-        "flash_deal": flashDeal,
-        "video_provider": videoProvider,
-        "video_url": videoUrl,
-        "colors": colors,
-        "variant_product": variantProduct,
-        "attributes": attributes,
-        "choice_options": choiceOptions,
-        "variation": variation,
-        "published": published,
-        "unit_price": unitPrice,
-        "purchase_price": purchasePrice,
-        "price_type": priceType,
-        "tax": tax,
-        "tax_type": taxType,
-        "discount": discount,
-        "discount_type": discountType == null ? null : discountType,
-        "current_stock": currentStock,
-        "details": details,
-        "free_shipping": freeShipping,
-        "attachment": attachment,
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
-        "status": status,
-        "featured_status": featuredStatus,
-        "meta_title": metaTitle,
-        "meta_description": metaDescription,
-        "meta_image": metaImage,
-        "request_status": requestStatus,
-        "denied_note": deniedNote,
-        "shipping_cost": shippingCost,
-        "multiply_qty": multiplyQty,
-        "temp_shipping_cost": tempShippingCost,
-        "is_shipping_cost_updated": isShippingCostUpdated,
-        "size": size == null ? null : size,
-        "sub_name": subName,
-        "reviews_count": reviewsCount,
-        "translations": List<dynamic>.from(translations.map((x) => x)),
-        "reviews": List<dynamic>.from(reviews.map((x) => x)),
-      };
+class Review {
+  Review({
+    required this.id,
+    required this.productId,
+    required this.customerId,
+    required this.comment,
+    required this.attachment,
+    required this.rating,
+    required this.status,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  int id;
+  int productId;
+  int customerId;
+  String comment;
+  dynamic attachment;
+  int rating;
+  int status;
+  DateTime createdAt;
+  DateTime updatedAt;
+
+  factory Review.fromJson(Map<String, dynamic> json) => Review(
+        id: json["id"],
+        productId: json["product_id"],
+        customerId: json["customer_id"],
+        comment: json["comment"],
+        attachment: json["attachment"],
+        rating: json["rating"],
+        status: json["status"],
+        createdAt: DateTime.parse(json["created_at"]),
+        updatedAt: DateTime.parse(json["updated_at"]),
+      );
 }

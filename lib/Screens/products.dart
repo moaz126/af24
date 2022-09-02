@@ -1,3 +1,4 @@
+import 'package:af24/api/global_variable.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:sizer/sizer.dart';
@@ -73,7 +74,7 @@ class _productsState extends State<products> {
             child: Stack(
               alignment: Alignment.bottomRight,
               children: [
-                Image.asset(
+               /*  Image.asset(
                   'assets/icons/Seller app icon (6).png',
                   height: 3.7.h,
                 ),
@@ -91,7 +92,7 @@ class _productsState extends State<products> {
                     "2",
                     style: TextStyle(color: Colors.black, fontSize: 8),
                   ),
-                )
+                ) */
               ],
             ),
           ),
@@ -119,16 +120,16 @@ class _productsState extends State<products> {
                             CarouselSlider(
                               carouselController: controller1,
                               items: [
-                                for (int i = 7; i < imgList.length + 7; i++)
+                                for (int i = 0; i < productlistContent[widget.index].images.length; i++)
                                   //1st Image of Slider
                                   Container(
                                     margin: EdgeInsets.all(0.0),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(0.0),
                                       image: DecorationImage(
-                                        image: (i == 7)
-                                            ? AssetImage('assets/png (9).png')
-                                            : AssetImage('assets/png ($i).png'),
+                                        image:NetworkImage('http://becknowledge.com/af24/storage/app/public/product/' +
+                                              productlistContent[widget.index]
+                                                  .images[i],),
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -216,7 +217,7 @@ class _productsState extends State<products> {
                             ),
                             AnimatedSmoothIndicator(
                               activeIndex: activeIndex,
-                              count: imgList.length,
+                              count: productlistContent[widget.index].images.length,
                               curve: Curves.bounceInOut,
                               effect: SlideEffect(
                                 radius: 2,
@@ -235,7 +236,7 @@ class _productsState extends State<products> {
                       Container(
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
-                          child: Text("Louis Vuitton",
+                          child: Text(productlistContent[widget.index].brandName,
                               style: TextStyle(
                                   fontWeight: FontWeight.w600, fontSize: 30),
                               textDirection: TextDirection.ltr),
@@ -245,7 +246,7 @@ class _productsState extends State<products> {
                       Container(
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                          child: Text("Monogram M43154".toUpperCase(),
+                          child: Text(productlistContent[widget.index].slug.toUpperCase(),
                               style: TextStyle(
                                   fontSize: 16.sp, fontWeight: FontWeight.w400),
                               textDirection: TextDirection.ltr),
@@ -260,7 +261,7 @@ class _productsState extends State<products> {
                           padding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
                           child: Row(
                             children: [
-                              Text("5,509,00",
+                              Text(productlistContent[widget.index].unitPrice.toString(),
                                   style: TextStyle(
                                     fontSize: 18.sp,
                                     fontWeight: FontWeight.bold,
@@ -463,7 +464,7 @@ class _productsState extends State<products> {
                             ),
                           ),
                           Container(
-                            width: 30.w,
+                            width: 25.w,
                             child: ElevatedButton(
                               onPressed: () {},
                               child: Text("Follow"),
@@ -500,7 +501,7 @@ class _productsState extends State<products> {
                                     "Proceed to payment(2) / Payment completed(5)",
                                     style: TextStyle(
                                         fontWeight: FontWeight.w600,
-                                        fontSize: 1.3.h,
+                                        fontSize: 1.2.h,
                                         color: Colors.blue),
                                   ),
                                 ],

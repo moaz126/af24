@@ -1,10 +1,17 @@
+import 'dart:convert';
+
+import 'package:af24/api/auth_af24.dart';
+import 'package:af24/api/global_variable.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:sizer/sizer.dart';
-
+import 'package:http/http.dart' as http;
 import '../Model/chatNotificationList.dart';
+import '../Model/getChatModel.dart';
+import '../api/urls.dart';
+import 'package:cron/cron.dart';
 
 class chatBox extends StatefulWidget {
   final String imagePath;
@@ -15,6 +22,58 @@ class chatBox extends StatefulWidget {
 }
 
 class _chatBoxState extends State<chatBox> {
+  TextEditingController messageController = TextEditingController();
+  List<String> messages = [];
+  getmessages() {
+    for (var i = 0; i < getChatList.length; i++) {
+      messages.add(getChatList[i].message);
+    }
+  }
+
+  final cron = Cron();
+  delay() async {
+    final cron = Cron();
+
+    try {
+      cron.schedule(Schedule.parse('*/2 * * * * *'), () async {
+        Map<String, dynamic> userdata1 = {
+          'user_id': '3',
+          'seller_id': '1',
+        };
+
+        await DataApiService.instance.getChat(userdata1, context);
+        setState(() {});
+      });
+
+      await Future.delayed(Duration(hours: 30));
+      await cron.close();
+    } on ScheduleParseException {
+      // "ScheduleParseException" is thrown if cron parsing is failed.
+      await cron.close();
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    delay();
+  }
+
+  var containerKey = GlobalKey();
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    Future.delayed(Duration(milliseconds: 100), () {
+      Scrollable.ensureVisible(
+        containerKey.currentContext!,
+        duration: const Duration(milliseconds: 0),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,13 +82,14 @@ class _chatBoxState extends State<chatBox> {
         elevation: 0,
         leading: InkWell(
             onTap: () {
+              cron.close();
               Get.back();
             },
             child: Icon(
               Icons.arrow_back_ios,
               color: Colors.black,
             )),
-        actions: [
+        /* actions: [
           Padding(
             padding: const EdgeInsets.only(bottom: 11.0),
             child: Stack(
@@ -60,14 +120,15 @@ class _chatBoxState extends State<chatBox> {
           SizedBox(
             width: 10,
           ),
-        ],
+        ], */
       ),
       body: Container(
         decoration: BoxDecoration(
           color: Colors.grey[100],
         ),
         child: Padding(
-          padding: const EdgeInsets.only(left: 18,right:18,top: 8.0,bottom: 2),
+          padding:
+              const EdgeInsets.only(left: 18, right: 18, top: 8.0, bottom: 2),
           child: Column(
             children: [
               Expanded(
@@ -126,7 +187,7 @@ class _chatBoxState extends State<chatBox> {
                       SizedBox(
                         height: 30,
                       ),
-                      Container(
+                      /*  Container(
                         alignment: Alignment.topCenter,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -174,78 +235,102 @@ class _chatBoxState extends State<chatBox> {
                             ],
                           ),
                         ),
-                      ),
-                      for (int index = 0; index < msgsList.length; index++)
+                      ), */
+                      for (int index = 0; index < getChatList.length; index++)
                         Container(
                           padding: EdgeInsets.only(left: 10, right: 10),
-                          alignment: msgsList[index].left == true
+                          alignment: getChatList[index].sentByCustomer == 1
                               ? Alignment.centerLeft
                               : Alignment.centerRight,
                           height: 50,
                           child: Container(
                             child: Row(
-                                mainAxisAlignment: msgsList[index].left
-                                    ? MainAxisAlignment.start
-                                    : MainAxisAlignment.end,
-                                children: msgsList[index].left
+                                mainAxisAlignment:
+                                    getChatList[index].sentByCustomer == 1
+                                        ? MainAxisAlignment.start
+                                        : MainAxisAlignment.end,
+                                children: getChatList[index].sentByCustomer == 1
                                     ? [
                                         Image.asset(
                                           'assets/icons/Seller app icon (8).png',
                                           height: 5.h,
                                         ),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 10, vertical: 5),
-                                          margin: EdgeInsets.symmetric(
-                                              horizontal: 10, vertical: 3),
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(30),
-                                            color: msgsList[index].left == true
-                                                ? Colors.grey[300]
-                                                : Colors.blue,
-                                          ),
-                                          child: Text(
-                                            '${msgsList[index].msg}',
-                                            style: TextStyle(
-                                              fontSize: 14.sp,
-                                              color: msgsList[index].left == true
-                                                  ? Colors.black
-                                                  : Colors.white,
+                                        Flexible(
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 10, vertical: 5),
+                                            margin: EdgeInsets.symmetric(
+                                                horizontal: 10, vertical: 3),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(30),
+                                              color: getChatList[index]
+                                                          .sentByCustomer ==
+                                                      1
+                                                  ? Colors.grey[300]
+                                                  : Colors.blue,
+                                            ),
+                                            child: Text(
+                                              '${getChatList[index].message}',
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 10,
+                                              style: TextStyle(
+                                                fontSize: 14.sp,
+                                                color: getChatList[index]
+                                                            .sentByCustomer ==
+                                                        1
+                                                    ? Colors.black
+                                                    : Colors.white,
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ]
                                     : [
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 10, vertical: 5),
-                                          margin: EdgeInsets.symmetric(
-                                              horizontal: 10, vertical: 3),
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(30),
-                                            color: msgsList[index].left == true
-                                                ? Colors.grey[300]
-                                                : Colors.blue,
-                                          ),
-                                          child: Text(
-                                            '${msgsList[index].msg}',
-                                            style: TextStyle(
-                                              fontSize: 14.sp,
-                                              color: msgsList[index].left == true
-                                                  ? Colors.black
-                                                  : Colors.white,
+                                        Flexible(
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 10, vertical: 5),
+                                            margin: EdgeInsets.symmetric(
+                                                horizontal: 10, vertical: 3),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(30),
+                                              color: getChatList[index]
+                                                          .sentByCustomer ==
+                                                      1
+                                                  ? Colors.grey[300]
+                                                  : Colors.blue,
+                                            ),
+                                            child: Text(
+                                              '${getChatList[index].message}',
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 10,
+                                              style: TextStyle(
+                                                fontSize: 14.sp,
+                                                color: getChatList[index]
+                                                            .sentByCustomer ==
+                                                        1
+                                                    ? Colors.black
+                                                    : Colors.white,
+                                              ),
                                             ),
                                           ),
                                         ),
-                                        Image.asset(
-                                          'assets/icons/Seller app icon (7).png',
+                                        ClipOval(
+                                            child: Image.network(
+                                          'https://becknowledge.com/af24/public/storage/shop/' +
+                                              shopinfoContent.image,
                                           height: 5.h,
-                                        )
+                                          width: 5.h,
+                                          fit: BoxFit.fill,
+                                        ))
                                       ]),
                           ),
-                        )
+                        ),
+                      Container(
+                        key: containerKey,
+                      ),
                     ],
                   ),
                 ),
@@ -258,11 +343,34 @@ class _chatBoxState extends State<chatBox> {
                   margin: EdgeInsets.symmetric(horizontal: 10, vertical: 1),
                   child: Center(
                     child: TextField(
+                      controller: messageController,
                       cursorColor: Colors.black,
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.black26.withOpacity(0.04),
-                        suffixIcon: Icon(Icons.send, size: 20),
+                        suffixIcon: InkWell(
+                            onTap: () async {
+                              Map<String, dynamic> sendmessage = {
+                                'user_id': '3',
+                                'message': messageController.text,
+                              };
+                              Scrollable.ensureVisible(
+                                containerKey.currentContext!,
+                                duration: const Duration(milliseconds: 0),
+                                curve: Curves.easeInOut,
+                              );
+
+                              await DataApiService.instance
+                                  .sendMessage(sendmessage, context);
+
+                              messageController.clear();
+                              Scrollable.ensureVisible(
+                                containerKey.currentContext!,
+                                duration: const Duration(milliseconds: 0),
+                                curve: Curves.easeInOut,
+                              );
+                            },
+                            child: Icon(Icons.send, size: 20)),
                         hintText: "Write a message",
                         hintStyle: TextStyle(
                           color: Colors.black26,

@@ -1,5 +1,7 @@
 import 'package:af24/Model/OrderConfirmedDetails.dart';
 import 'package:af24/Screens/orderConfirmed.dart';
+import 'package:af24/api/auth_af24.dart';
+import 'package:af24/api/global_variable.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:horizontal_data_table/horizontal_data_table.dart';
@@ -27,8 +29,6 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
   String now = DateFormat("dd-MM-yyyy").format(DateTime.now());
 
   @override
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,22 +51,27 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
             ),
           ),
         ),
-        body:     SafeArea(
+        body: SafeArea(
           child: Column(
             children: [
               SizedBox(
                 height: 2.h,
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 10.0,right: 10),
+                padding: const EdgeInsets.only(left: 10.0, right: 10),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
                       children: [
-                        SizedBox(height: 3.h,),
-                        Text('$now',style: TextStyle(fontSize: 13.sp),),
+                        SizedBox(
+                          height: 3.h,
+                        ),
+                        Text(
+                          '$now',
+                          style: TextStyle(fontSize: 13.sp),
+                        ),
                       ],
                     ),
                     Container(
@@ -85,19 +90,22 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,
                                             fontSize: 18),
-                                        doneStyle:
-                                        TextStyle(color: Colors.black, fontSize: 16)),
-                                    onChanged: (date) {
-                                      print('change $date in time zone ' +
-                                          date.timeZoneOffset.inHours.toString());
-                                    }, onConfirm: (date) {
-                                      print('confirm $date');
-                                    }, currentTime: DateTime.now(), locale: LocaleType.en);
+                                        doneStyle: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 16)), onChanged: (date) {
+                                  print('change $date in time zone ' +
+                                      date.timeZoneOffset.inHours.toString());
+                                }, onConfirm: (date) {
+                                  print('confirm $date');
+                                },
+                                    currentTime: DateTime.now(),
+                                    locale: LocaleType.en);
                               },
-                              child: Icon(
-                                  Icons.date_range
-                              )),
-                          Text('Search Date',style: TextStyle(fontSize: 10.sp),)
+                              child: Icon(Icons.date_range)),
+                          Text(
+                            'Search Date',
+                            style: TextStyle(fontSize: 10.sp),
+                          )
                         ],
                       ),
                     )
@@ -126,23 +134,22 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
                                 });
                               },
                               child: Card(
-                                color: (pressed == i)
-                                    ? Colors.blue
-                                    : Colors.white,
+                                color:
+                                    (pressed == i) ? Colors.blue : Colors.white,
                                 child: Center(
                                     child: Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 4.0, right: 4),
-                                      child: Text(
-                                        buttontext[i],
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: (pressed == i)
-                                              ? Colors.white
-                                              : Colors.blue,
-                                        ),
-                                      ),
-                                    )),
+                                  padding: const EdgeInsets.only(
+                                      left: 4.0, right: 4),
+                                  child: Text(
+                                    buttontext[i],
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: (pressed == i)
+                                          ? Colors.white
+                                          : Colors.blue,
+                                    ),
+                                  ),
+                                )),
                               ),
                             ),
                           ),
@@ -157,12 +164,12 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
               Expanded(
                 child: HorizontalDataTable(
                   leftHandSideColumnWidth: 80,
-                  rightHandSideColumnWidth: 1200,
+                  rightHandSideColumnWidth: 1100,
                   isFixedHeader: true,
                   headerWidgets: _getTitleWidget(),
                   leftSideItemBuilder: _generateFirstColumnRow,
                   rightSideItemBuilder: _generateRightHandSideColumnRow,
-                  itemCount: orderproductdetails.length,
+                  itemCount: sellerOrderList.length,
                   rowSeparatorWidget: const Divider(
                     color: Colors.black54,
                     height: 1.0,
@@ -174,16 +181,14 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
               ),
             ],
           ),
-        )
-    );
+        ));
   }
 
   List<Widget> _getTitleWidget() {
     return [
-      _getTitleItemWidget('Image', 100),
-      _getTitleItemWidget('Date of Order', 100),
-      _getTitleItemWidget('User ID', 100),
       _getTitleItemWidget('Order No.', 100),
+      _getTitleItemWidget('Date of Order', 100),
+      _getTitleItemWidget('Customer ID', 100),
       _getTitleItemWidget('Tracking ID', 90),
       _getTitleItemWidget('Delivery Company', 110),
       _getTitleItemWidget('Size', 100),
@@ -202,14 +207,15 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
       height: 56,
       padding: EdgeInsets.fromLTRB(7, 0, 0, 0),
       alignment: Alignment.centerLeft,
-      child: Center(child: Text(label, style: TextStyle(fontWeight: FontWeight.bold))),
+      child: Center(
+          child: Text(label, style: TextStyle(fontWeight: FontWeight.bold))),
     );
   }
 
   Widget _generateFirstColumnRow(BuildContext context, int index) {
     return Container(
-      child: Image.asset('${orderproductdetails[index].Image}'),
-      width: 80,
+      child: Center(child: Text('${sellerOrderList[index].id}')),
+      width: 100,
       height: 52,
       padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
       alignment: Alignment.centerLeft,
@@ -222,9 +228,13 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
         Container(
           child: Row(
             children: <Widget>[
-              Center(child: Padding(
+              Center(
+                  child: Padding(
                 padding: const EdgeInsets.only(left: 18.0),
-                child: Text(orderproductdetails[index].DateOfOrder),
+                child: Text(sellerOrderList[index]
+                    .createdAt
+                    .toString()
+                    .substring(0, 10)),
               ))
             ],
           ),
@@ -234,14 +244,8 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
           alignment: Alignment.centerLeft,
         ),
         Container(
-          child: Center(child: Text(orderproductdetails[index].UserID)),
-          width: 100,
-          height: 52,
-          padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
-          alignment: Alignment.centerLeft,
-        ),
-        Container(
-          child: Center(child: Text('${orderproductdetails[index].OrderNo}')),
+          child:
+              Center(child: Text(sellerOrderList[index].customerId.toString())),
           width: 100,
           height: 52,
           padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
@@ -278,28 +282,34 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
           alignment: Alignment.centerLeft,
         ),
         Container(
-          child: Center(child: Text(orderproductdetails[index].Size)),
+          child: Center(
+              child: Text(sellerOrderList[index].billingAddress.toString())),
           width: 100,
           height: 52,
           padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
           alignment: Alignment.centerLeft,
         ),
         Container(
-          child: Center(child: Text(orderproductdetails[index].Color)),
+          child: Center(
+              child: Text(sellerOrderList[index].billingAddress.toString())),
           width: 100,
           height: 52,
           padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
           alignment: Alignment.centerLeft,
         ),
         Container(
-          child: Center(child: Text('${orderproductdetails[index].Qty}')),
+          child: Center(
+              child:
+                  Text('${sellerOrderList[index].billingAddress.toString()}')),
           width: 100,
           height: 52,
           padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
           alignment: Alignment.centerLeft,
         ),
         Container(
-          child: Center(child: Text('${orderproductdetails[index].HSCODE}')),
+          child: Center(
+              child:
+                  Text('${sellerOrderList[index].billingAddress.toString()}')),
           width: 100,
           height: 52,
           padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
@@ -310,10 +320,11 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
           height: 52,
           padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
           alignment: Alignment.centerLeft,
-          child: Center(child: Text('${orderproductdetails[index].Price}')),
+          child: Center(child: Text('${sellerOrderList[index].orderAmount}')),
         ),
         Container(
-          child: Center(child: Text(orderproductdetails[index].Delivery)),
+          child: Center(
+              child: Text(sellerOrderList[index].billingAddress.toString())),
           width: 100,
           height: 52,
           padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
@@ -322,17 +333,16 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
         Container(
           child: Center(
             child: ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
+                await DataApiService.instance
+                    .getSellerOrderDetails(sellerOrderList[index].id!.toInt());
                 Get.to(() => orderDetail());
               },
               child: Text(
                 'Details',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 11.sp),
+                style: TextStyle(color: Colors.white, fontSize: 11.sp),
               ),
-              style: ElevatedButton.styleFrom(
-                  primary: Colors.blue),
+              style: ElevatedButton.styleFrom(primary: Colors.blue),
             ),
           ),
           width: 100,

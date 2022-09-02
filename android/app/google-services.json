@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "60562337535",
+    "project_id": "af24-seller",
+    "storage_bucket": "af24-seller.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:60562337535:android:6b0a0317d877110031e6ca",
+        "android_client_info": {
+          "package_name": "com.af24.seller"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "60562337535-15172imv8veg4m6m7fup49irmrc9mjb5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCOTPq6l_QdGAEbEUSmNkfL2jPDY6dTIoA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "60562337535-15172imv8veg4m6m7fup49irmrc9mjb5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,4 +1,5 @@
 import 'package:af24/Screens/navBar.dart';
+import 'package:af24/Screens/signUp.dart';
 import 'package:af24/api/auth_af24.dart';
 import 'package:af24/api/global_variable.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
@@ -162,23 +163,17 @@ class _LoginState extends State<Login> {
                       DataApiService.instance.getCategoryList();
                       DataApiService.instance.getShippingCost();
                       DataApiService.instance.getBrand();
+                      DataApiService.instance.getshopinfo();
+                      DataApiService.instance.getcolorlist();
+                      DataApiService.instance.getsizelist();
+                      DataApiService.instance.getSellerOrderList();
                       setState(() {
                         loader = false;
                       });
                       // GlobalSnackBar.show(context, LoginSnackMessage);
                       StatusCode == '200'
-                          ? AwesomeDialog(
-                              context: context,
-                              dialogType: DialogType.SUCCES,
-                              animType: AnimType.BOTTOMSLIDE,
-                              title: 'Success',
-                              desc: SnackMessage,
-                              btnOkOnPress: () {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) =>
-                                        navBar(index: 0, see: 1)));
-                              },
-                            ).show()
+                          ? Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => navBar(index: 0, see: 1)))
                           : AwesomeDialog(
                               context: context,
                               dialogType: DialogType.ERROR,
@@ -235,10 +230,30 @@ class _LoginState extends State<Login> {
             SizedBox(
               height: 3.h,
             ),
-            Container(
-              child: Text(
-                "Forgot Password?",
-                style: TextStyle(fontSize: 13),
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    child: Text(
+                      "Don't have an account?",
+                      style: TextStyle(fontSize: 13),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => signup()));
+                    },
+                    child: Container(
+                      child: Text(
+                        " Sign Up",
+                        style: TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             SizedBox(

@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:af24/api/global_variable.dart';
 import 'package:af24/constants.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
@@ -20,6 +23,7 @@ class _EditStoreInfoState extends State<EditStoreInfo> {
   final Namecontroller = TextEditingController();
   final Contactcontroller = TextEditingController();
   final Addresscontroller = TextEditingController();
+  late File file;
   bool loader = false;
   final spinkit = SpinKitDancingSquare(
     size: 3.h,
@@ -185,13 +189,13 @@ class _EditStoreInfoState extends State<EditStoreInfo> {
                             child: FlatButton(
                                 onPressed: () async {
                                   Map<String, dynamic> loginToMap = {
-                                    "image": "",
+                                    "image": file,
                                     "name": Namecontroller.text,
                                     "contact": Contactcontroller.text,
                                     "address": Addresscontroller.text,
                                   };
-                                  await DataApiService.instance
-                                      .updateStoreInfo(loginToMap, context);
+                                  /* await DataApiService.instance
+                                      .updateStoreInfo(loginToMap, context); */
                                   GlobalSnackBar.show(context, snackmessage);
                                   /*  if (_formKey.currentState!.validate()) {
                                     setState(() {
@@ -253,5 +257,14 @@ class _EditStoreInfoState extends State<EditStoreInfo> {
         ),
       ),
     );
+  }
+
+  Future selectFile() async {
+    final result = await FilePicker.platform.pickFiles(allowMultiple: false);
+
+    if (result == null) return;
+    final path = result.files.single.path!;
+
+    setState(() => file = File(path));
   }
 }
