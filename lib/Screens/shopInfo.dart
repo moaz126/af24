@@ -31,13 +31,9 @@ class _shopInfoState extends State<shopInfo> {
       );
     },
   );
-  final spinkitcenter = SpinKitDancingSquare(
-    itemBuilder: (BuildContext context, int index) {
-      return DecoratedBox(
-        decoration:
-            BoxDecoration(color: index.isEven ? Colors.black : Colors.grey),
-      );
-    },
+  final spinkitcenter = SpinKitSpinningLines(
+    size: 5.h,
+    color: Colors.black,
   );
   bool loader = false;
   bool loader2 = false;

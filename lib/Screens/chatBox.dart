@@ -237,6 +237,7 @@ class _chatBoxState extends State<chatBox> {
                         ),
                       ), */
                       for (int index = 0; index < getChatList.length; index++)
+                      
                         Container(
                           padding: EdgeInsets.only(left: 10, right: 10),
                           alignment: getChatList[index].sentByCustomer == 1
@@ -354,12 +355,7 @@ class _chatBoxState extends State<chatBox> {
                                 'user_id': '3',
                                 'message': messageController.text,
                               };
-                              Scrollable.ensureVisible(
-                                containerKey.currentContext!,
-                                duration: const Duration(milliseconds: 0),
-                                curve: Curves.easeInOut,
-                              );
-
+                             
                               await DataApiService.instance
                                   .sendMessage(sendmessage, context);
 

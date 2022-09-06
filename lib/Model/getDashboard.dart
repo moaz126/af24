@@ -1,55 +1,101 @@
 // To parse this JSON data, do
 //
-//     final getChatModel = getChatModelFromJson(jsonString);
+//     final getDashboardModel = getDashboardModelFromJson(jsonString);
 
 import 'dart:convert';
 
-List<GetChatModel> getChatModelFromJson(String str) => List<GetChatModel>.from(
-    json.decode(str).map((x) => GetChatModel.fromJson(x)));
+GetDashboardModel getDashboardModelFromJson(String str) =>
+    GetDashboardModel.fromJson(json.decode(str));
 
-String getChatModelToJson(List<GetChatModel> data) =>
-    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String getDashboardModelToJson(GetDashboardModel data) =>
+    json.encode(data.toJson());
 
-class GetChatModel {
-  GetChatModel({
-     this.id,
+class GetDashboardModel {
+  GetDashboardModel({
+    required this.confirmOrder,
+    required this.cancelledOrder,
+    required this.returnedOrder,
+    required this.outForDelivery,
+    required this.delieved,
+    required this.xAxis,
+    required this.yAxis,
+    required this.messages,
+  });
+
+  int confirmOrder;
+  int cancelledOrder;
+  int returnedOrder;
+  int outForDelivery;
+  int delieved;
+  List<int> xAxis;
+  List<int> yAxis;
+  List<Message> messages;
+
+  factory GetDashboardModel.fromJson(Map<String, dynamic> json) =>
+      GetDashboardModel(
+        confirmOrder: json["confirm order"],
+        cancelledOrder: json["cancelled order"],
+        returnedOrder: json["returned order"],
+        outForDelivery: json["out for delivery"],
+        delieved: json["delieved"],
+        xAxis: List<int>.from(json["x-axis"].map((x) => x)),
+        yAxis: List<int>.from(json["y-axis"].map((x) => x)),
+        messages: List<Message>.from(
+            json["messages"].map((x) => Message.fromJson(x))),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "confirm order": confirmOrder,
+        "cancelled order": cancelledOrder,
+        "returned order": returnedOrder,
+        "out for delivery": outForDelivery,
+        "delieved": delieved,
+        "x-axis": List<dynamic>.from(xAxis.map((x) => x)),
+        "y-axis": List<dynamic>.from(yAxis.map((x) => x)),
+        "messages": List<dynamic>.from(messages.map((x) => x.toJson())),
+      };
+}
+
+class Message {
+  Message({
+    required this.id,
     required this.userId,
     required this.sellerId,
     required this.message,
     required this.sentByCustomer,
     required this.sentBySeller,
-     this.seenByCustomer,
-     this.seenBySeller,
-     this.status,
-     this.createdAt,
-     this.updatedAt,
-     this.shopId,
-     this.messageData,
-     this.specialMessage,
-     this.sellerInfo,
-     this.customer,
-     this.shop,
+    required this.seenByCustomer,
+    required this.seenBySeller,
+    required this.status,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.shopId,
+    required this.messageData,
+    required this.specialMessage,
+    required this.sellerInfo,
+    required this.customer,
+    required this.shop,
   });
 
-  int? id;
+  int id;
   int userId;
   int sellerId;
   String message;
   int sentByCustomer;
   int sentBySeller;
-  int? seenByCustomer;
-  int? seenBySeller;
-  int? status;
-  DateTime? createdAt;
-  dynamic? updatedAt;
-  int? shopId;
-  dynamic? messageData;
-  bool? specialMessage;
-  SellerInfo? sellerInfo;
+  int seenByCustomer;
+  int seenBySeller;
+  int status;
+  DateTime createdAt;
+  DateTime? updatedAt;
+  int shopId;
+  MessageData? messageData;
+  bool specialMessage;
+  SellerInfo sellerInfo;
   Customer? customer;
-  Shop? shop;
+  Shop shop;
 
-  factory GetChatModel.fromJson(Map<String, dynamic> json) => GetChatModel(
+  factory Message.fromJson(Map<String, dynamic> json) => Message(
         id: json["id"],
         userId: json["user_id"],
         sellerId: json["seller_id"],
@@ -60,12 +106,18 @@ class GetChatModel {
         seenBySeller: json["seen_by_seller"],
         status: json["status"],
         createdAt: DateTime.parse(json["created_at"]),
-        updatedAt: json["updated_at"],
+        updatedAt: json["updated_at"] == null
+            ? null
+            : DateTime.parse(json["updated_at"]),
         shopId: json["shop_id"],
-        messageData: json["message_data"],
+        messageData: json["message_data"] == null
+            ? null
+            : MessageData.fromJson(json["message_data"]),
         specialMessage: json["special_message"],
         sellerInfo: SellerInfo.fromJson(json["seller_info"]),
-        customer: Customer.fromJson(json["customer"]),
+        customer: json["customer"] == null
+            ? null
+            : Customer.fromJson(json["customer"]),
         shop: Shop.fromJson(json["shop"]),
       );
 
@@ -79,13 +131,13 @@ class GetChatModel {
         "seen_by_customer": seenByCustomer,
         "seen_by_seller": seenBySeller,
         "status": status,
-        "created_at": createdAt!.toIso8601String(),
-        "updated_at": updatedAt,
+        "created_at": createdAt.toIso8601String(),
+        "updated_at": updatedAt == null ? null : updatedAt,
         "shop_id": shopId,
-        "message_data": messageData,
+        "message_data": messageData == null ? null : messageData,
         "special_message": specialMessage,
         "seller_info": sellerInfo,
-        "customer": customer,
+        "customer": customer == null ? null : customer,
         "shop": shop,
       };
 }
@@ -129,11 +181,11 @@ class Customer {
 
   int id;
   dynamic name;
-  String? fName;
-  String? lName;
+  String fName;
+  String lName;
   String phone;
-  String? image;
-  String? email;
+  String image;
+  String email;
   dynamic emailVerifiedAt;
   DateTime createdAt;
   DateTime updatedAt;
@@ -186,31 +238,61 @@ class Customer {
         loginMedium: json["login_medium"],
         socialId: json["social_id"],
         isPhoneVerified: json["is_phone_verified"],
-        temporaryToken: json["temporary_token"],
+        temporaryToken:
+            json["temporary_token"] == null ? null : json["temporary_token"],
         isEmailVerified: json["is_email_verified"],
         walletBalance: json["wallet_balance"],
         loyaltyPoint: json["loyalty_point"],
         title: json["title"],
         dOB: json["d_o_b"],
         newsletter: json["newsletter"],
-        folowed: json["folowed"],
-        followedSeller: json["followed_seller"],
+        folowed: json["folowed"] == null ? null : json["folowed"],
+        followedSeller:
+            json["followed_seller"] == null ? null : json["followed_seller"],
       );
 }
 
-enum CustomerEmail { ZAIN_GMAIL_COM }
+enum CustomerEmail { ZAIN_GMAIL_COM, DUMMYPERSONA_GMAIL_COM }
 
-enum CustomerFName { RIDA }
+enum CustomerFName { RIDA, DUMMY }
 
-enum FollowedSeller { THE_1 }
+enum FollowedSeller { THE_11321631 }
 
 enum Folowed { THE_115 }
 
 enum CustomerImage { DEF_PNG }
 
-enum CustomerLName { RIDA }
+enum CustomerLName { RIDA, PERSONA }
 
-enum TemporaryToken { EKH_HVNZY_LMI_L_MH_LS_G9_MQ_NE_UZJ_OKNS2_QHMS31_ZZ_GK }
+enum TemporaryToken { E3_Q3_KSIR_GT_B3_TU_WE4_DY_Q3_Y1_QQ_X76_RKZH3_IN1_RJ_OZ }
+
+class MessageData {
+  MessageData({
+    required this.productId,
+    required this.productName,
+    required this.quantity,
+    required this.actualPrice,
+  });
+
+  String productId;
+  String productName;
+  String quantity;
+  String actualPrice;
+
+  factory MessageData.fromJson(Map<String, dynamic> json) => MessageData(
+        productId: json["product_id"],
+        productName: json["product_name"],
+        quantity: json["quantity"],
+        actualPrice: json["actual_price"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "product_id": productId,
+        "product_name": productName,
+        "quantity": quantity,
+        "actual_price": actualPrice,
+      };
+}
 
 class SellerInfo {
   SellerInfo({
@@ -237,21 +319,21 @@ class SellerInfo {
   });
 
   int id;
-  String? fName;
-  String? lName;
+  String fName;
+  String lName;
   String phone;
-  String? image;
-  String? email;
-  String? password;
-  String? status;
-  String? rememberToken;
+  String image;
+  String email;
+  String password;
+  String status;
+  String rememberToken;
   DateTime createdAt;
   DateTime updatedAt;
-  String? bankName;
-  String? branch;
+  String bankName;
+  String branch;
   String accountNo;
-  String? holderName;
-  String? authToken;
+  String holderName;
+  String authToken;
   dynamic salesCommissionPercentage;
   dynamic gst;
   String cmFirebaseToken;
@@ -282,7 +364,7 @@ class SellerInfo {
 }
 
 enum AuthToken {
-  RQNPS3_RABS0_XT4_KZVRQ_YWJZ8_MHT1_L338_AR_KQU_E0_P0_T4_UMTB_IU_Z
+  SW_Z6_AU_IA76_UW_H2_J_QR_YT_GR_IT2_PB_TQE_XC_MFX033_DK_TQ4_S_C_JFXK62
 }
 
 enum BankName { K_BANK }
@@ -304,7 +386,7 @@ enum Password {
 }
 
 enum RememberToken {
-  THE_0_DH_F9_WT51_K_AZHM_W_RVX_LE_B2_ZJV_NF3_Y_GU8_JT_D_YA_RDCP67_V_HYC8_J_R4_E_DQ_OQGBDV
+  S_R9_XQTS82_R0_GVVPNCG_LX_TIB_EHXOQF_QO_D0_V9_B_XN_Q_RSU9_UK43_EQZ70_E_NL_DFR_RL
 }
 
 enum Status { APPROVED }
@@ -324,13 +406,13 @@ class Shop {
 
   int id;
   int sellerId;
-  String? name;
-  String? address;
+  String name;
+  String address;
   String contact;
-  String? image;
+  String image;
   DateTime createdAt;
   DateTime updatedAt;
-  String? banner;
+  String banner;
 
   factory Shop.fromJson(Map<String, dynamic> json) => Shop(
         id: json["id"],

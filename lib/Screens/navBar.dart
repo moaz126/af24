@@ -22,8 +22,6 @@ class _navBarState extends State<navBar> {
   int _selectedIndex = -1;
 
   @override
-
-
   void initState() {
     see = widget.see;
     index = widget.index;
@@ -47,7 +45,7 @@ class _navBarState extends State<navBar> {
         currentIndex: index,
         onTap: (value) {
           setState(() {
-            see =0;
+            see = 0;
             index = value;
           });
         },
@@ -96,7 +94,7 @@ class _navBarState extends State<navBar> {
                                 height: 3.h),
                           ),
                   ),
-                  Text('Newsfeed')
+                  Text('Products')
                 ],
               ),
               label: ''),

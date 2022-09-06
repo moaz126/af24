@@ -1,7 +1,9 @@
 import 'package:af24/Screens/image_crop.dart';
+import 'package:af24/Screens/login.dart';
 import 'package:af24/Screens/newsFeedMain.dart';
 import 'package:af24/Screens/shopInfo.dart';
 import 'package:af24/api/auth_af24.dart';
+import 'package:af24/api/global_variable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -24,8 +26,8 @@ class _dashBoardState extends State<dashBoard> {
       loader = true;
     });
 
-    await DataApiService.instance.getproductlist();
-
+    // await DataApiService.instance.getDashboard();
+    await DataApiService.instance.getUserChat();
     setState(() {
       loader = false;
     });
@@ -37,17 +39,16 @@ class _dashBoardState extends State<dashBoard> {
     super.initState();
   }
 
-  final spinkit = SpinKitDancingSquare(
-    size: 3.h,
-    itemBuilder: (BuildContext context, int index) {
-      return DecoratedBox(
-        decoration:
-            BoxDecoration(color: index.isEven ? Colors.black : Colors.black12),
-      );
-    },
+  final spinkit = SpinKitSpinningLines(
+    size: 5.h,
+    color: Colors.black,
   );
   List<String> status = ['Delivered', 'Cancelled', 'Return'];
-  List<String> counter = ['0', '0', '1'];
+  List<String> counter = [
+    getDashboardContent!.delieved.toString(),
+    getDashboardContent!.cancelledOrder.toString(),
+    getDashboardContent!.returnedOrder.toString()
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -67,13 +68,42 @@ class _dashBoardState extends State<dashBoard> {
                         padding: const EdgeInsets.only(
                             left: 13.0, bottom: 30, top: 30),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Image.asset(
                               'assets/icons/Seller app icon (11).png',
                               height: 4.h,
                               fit: BoxFit.fitHeight,
                               color: Colors.white,
+                            ),
+                            Row(
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    Get.to(shopInfo());
+                                  },
+                                  child: Container(
+                                    width: 10.w,
+                                    child: Icon(
+                                      Icons.edit,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    setUserLoggedIn(false);
+                                    Get.offAll(Login());
+                                  },
+                                  child: Container(
+                                    width: 10.w,
+                                    child: Icon(
+                                      Icons.logout,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                )
+                              ],
                             ),
                           ],
                         ),
@@ -146,7 +176,8 @@ class _dashBoardState extends State<dashBoard> {
                                             CrossAxisAlignment.center,
                                         children: [
                                           Text(
-                                            "19",
+                                            getDashboardContent!.confirmOrder
+                                                .toString(),
                                             style: TextStyle(
                                                 fontSize: 40,
                                                 color: Colors.white,
@@ -164,8 +195,9 @@ class _dashBoardState extends State<dashBoard> {
                                       ),
                                     ),
                                     InkWell(
-                                      onTap: () {
-                                        Get.to(imageCrop());
+                                      onTap: () async {
+                                        await DataApiService.instance
+                                            .getDashboard();
                                       },
                                       child: Container(
                                         height: 100.w / 3.3,
@@ -182,7 +214,9 @@ class _dashBoardState extends State<dashBoard> {
                                               CrossAxisAlignment.center,
                                           children: [
                                             Text(
-                                              "7",
+                                              getDashboardContent!
+                                                  .outForDelivery
+                                                  .toString(),
                                               style: TextStyle(
                                                   fontSize: 40,
                                                   color: Colors.white,
@@ -377,20 +411,25 @@ class _dashBoardState extends State<dashBoard> {
                                       BorderRadius.all(Radius.circular(10)),
                                 ),
                                 height: 300,
-                                child: ListView(
-                                  children: [
-                                    for (int i = 0; i < listofUsers.length; i++)
-                                      Column(
+                                child: getUserList.isEmpty
+                                    ? Center(child: Text('No Users'))
+                                    : ListView(
                                         children: [
-                                          ListTile(
-                                            leading: Stack(
-                                              alignment: Alignment.bottomRight,
+                                          for (int i = 0;
+                                              i < getUserList.length;
+                                              i++)
+                                            Column(
                                               children: [
-                                                CircleAvatar(
-                                                  backgroundImage: AssetImage(
-                                                      listofUsers[i].imagepath),
-                                                ),
-                                                Container(
+                                                ListTile(
+                                                  leading: Stack(
+                                                    alignment:
+                                                        Alignment.bottomRight,
+                                                    children: [
+                                                      Image.asset(
+                                                        'assets/icons/Seller app icon (8).png',
+                                                        height: 5.h,
+                                                      ),
+                                                      /* Container(
                                                   height: 11,
                                                   width: 11,
                                                   decoration: BoxDecoration(
@@ -398,46 +437,59 @@ class _dashBoardState extends State<dashBoard> {
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               10)),
-                                                ),
-                                              ],
-                                            ),
-                                            title: Text(
-                                              listofUsers[i].title,
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                            subtitle: Text(
-                                              listofUsers[i].subtitle,
-                                              style:
-                                                  TextStyle(color: Colors.grey),
-                                            ),
-                                            trailing: Container(
-                                              margin: EdgeInsets.only(top: 20),
-                                              child: Column(
-                                                children: [
-                                                  Text(listofUsers[i].time,
-                                                      style: TextStyle(
-                                                          color: Colors.grey))
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          i < listofUsers.length - 1
-                                              ? Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          left: 25, right: 25),
-                                                  child: Divider(
-                                                    color: Colors.grey[300],
-                                                    thickness: 2.0,
-                                                    height: 0,
+                                                ), */
+                                                    ],
                                                   ),
-                                                )
-                                              : SizedBox(),
+                                                  title: Text(
+                                                    getUserList[i]
+                                                        .customer
+                                                        .fName,
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                  subtitle: Text(
+                                                    getUserList[i].lastMessage,
+                                                    style: TextStyle(
+                                                        color: Colors.grey),
+                                                  ),
+                                                  trailing: Container(
+                                                    margin: EdgeInsets.only(
+                                                        top: 20),
+                                                    child: Column(
+                                                      children: [
+                                                        Text(
+                                                            getUserList[i]
+                                                                .createdAt
+                                                                .toString()
+                                                                .substring(
+                                                                    14, 19),
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .grey))
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                i < getUserList.length - 1
+                                                    ? Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .only(
+                                                                left: 25,
+                                                                right: 25),
+                                                        child: Divider(
+                                                          color:
+                                                              Colors.grey[300],
+                                                          thickness: 2.0,
+                                                          height: 0,
+                                                        ),
+                                                      )
+                                                    : SizedBox(),
+                                              ],
+                                            )
                                         ],
-                                      )
-                                  ],
-                                ),
+                                      ),
                               ),
                             ),
                             SizedBox(

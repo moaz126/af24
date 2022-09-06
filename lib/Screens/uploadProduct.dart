@@ -3,13 +3,17 @@ import 'dart:io';
 
 import 'package:af24/Model/getColors.dart';
 import 'package:af24/Model/getsizeModel.dart';
+import 'package:af24/Screens/image_crop.dart';
 import 'package:af24/api/urls.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:sizer/sizer.dart';
 
 import 'package:af24/Model/GetcategoriesModel.dart';
@@ -36,7 +40,22 @@ class _uploadProductState extends State<uploadProduct> {
   final DescriptionController = TextEditingController();
   final ColorController = TextEditingController();
   final SizeController = TextEditingController();
+  List<TextEditingController> _textFieldController = [];
+  List<TextEditingController> _textColorController = [];
+  // create some values
+  Color pickerColor = Color(0xff443a49);
+  Color currentColor = Color(0xff443a49);
+  bool colorcheck = false;
+  bool sizepicker = false;
 
+  String allowRequests = '0';
+  bool getvalue = false;
+// ValueChanged<Color> callback
+  void changeColor(Color color) {
+    setState(() => pickerColor = color);
+  }
+
+  XFile? _picked;
   FocusNode myFocusNode = FocusNode();
   FocusNode myFocusNodeConsumer = FocusNode();
   FocusNode myFocusNodeWhole = FocusNode();
@@ -73,15 +92,9 @@ class _uploadProductState extends State<uploadProduct> {
     'Stock',
     'Re-Stock',
   ];
-  final spinkit = SpinKitDancingSquare(
+  final spinkit = SpinKitSpinningLines(
     size: 3.h,
-    itemBuilder: (BuildContext context, int index) {
-      return DecoratedBox(
-        decoration: BoxDecoration(
-          color: index.isEven ? Colors.white : Colors.white,
-        ),
-      );
-    },
+    color: Colors.white,
   );
 
   bool generateVarient = false;
@@ -90,6 +103,12 @@ class _uploadProductState extends State<uploadProduct> {
       categoryItems.add(catergorylist[i].name);
     }
   }
+
+  /*  addsizefunc() async {
+    await DataApiService.instance.addSize(_textFieldController.text, context);
+
+    await DataApiService.instance.getsizelist();
+  } */
 
   List<String> combination = [];
 
@@ -121,6 +140,7 @@ class _uploadProductState extends State<uploadProduct> {
 
   @override
   void initState() {
+    setState(() {});
     myFocusNode.addListener(() {
       setState(() {});
     });
@@ -194,16 +214,17 @@ class _uploadProductState extends State<uploadProduct> {
                     children: [
                       Row(
                         children: [
-                          for (int i = 0; i < images.length; i++)
+                          for (int i = 0; i < myImages.length; i++)
                             Stack(
                               children: [
                                 InkWell(
                                   onTap: () async {
-                                    await selectFile();
+                                    /*  await selectFile();
                                     Map<String, dynamic> upload = {
                                       'image': file.toString(),
                                       'type': 'product',
-                                    };
+                                    }; */
+                                    await _uploadImage();
                                   },
                                   child: Container(
                                     height: 140,
@@ -217,7 +238,7 @@ class _uploadProductState extends State<uploadProduct> {
                                         color: Colors.white),
                                     child: Padding(
                                       padding: const EdgeInsets.all(3.0),
-                                      child: images[i].isEmpty
+                                      child: myImages[i].isEmpty
                                           ? DottedBorder(
                                               dashPattern: [4, 6],
                                               strokeWidth: 2,
@@ -232,7 +253,7 @@ class _uploadProductState extends State<uploadProduct> {
                                               ),
                                             )
                                           : Image.file(
-                                              File(images[i]),
+                                              File(myImages[i]),
                                               fit: BoxFit.cover,
                                               width: double.infinity,
                                             ),
@@ -245,8 +266,9 @@ class _uploadProductState extends State<uploadProduct> {
                                     child: InkWell(
                                         onTap: () {
                                           setState(() {
-                                            images.removeAt(i);
-                                            imagesfile.removeAt(i);
+                                            /*  images.removeAt(i);
+                                            imagesfile.removeAt(i); */
+                                            myImages.removeAt(i);
                                           });
 
                                           print("helooooooooooooo");
@@ -259,11 +281,13 @@ class _uploadProductState extends State<uploadProduct> {
                           ),
                           InkWell(
                             onTap: () async {
-                              await selectFile();
+                              /*   await selectFile();
                               Map<String, dynamic> upload = {
                                 'image': file.toString(),
                                 'type': 'product',
-                              };
+                              }; */
+                              await _uploadImage();
+                              /*  Get.to(imageCrop()); */
                             },
                             child: Container(
                               height: 140,
@@ -771,46 +795,113 @@ class _uploadProductState extends State<uploadProduct> {
                                 color: Colors.white,
                                 border: Border.all(
                                     color: Colors.black12, width: 1.8)),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButtonFormField(
-                                // value: dropdownvalue4,
-                                decoration:
-                                    InputDecoration.collapsed(hintText: ''),
-                                hint: Text('Size'),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(7)),
-                                icon: Icon(
-                                  Icons.keyboard_arrow_down,
-                                  color: Colors.grey[600],
-                                ),
-                                items: sizeList.map((SizeModel items) {
-                                  return DropdownMenuItem(
-                                    value: items,
-                                    child: Container(
-                                      width: 30.w,
-                                      child: Text(
-                                        items.label,
-                                        overflow: TextOverflow.ellipsis,
-                                        style:
-                                            TextStyle(color: Colors.grey[600]),
-                                      ),
+                            child: sizepicker
+                                ? Center(
+                                    child: TextField(
+                                      onTap: () {
+                                        setState(() {
+                                          sizepicker = false;
+                                        });
+                                      },
+                                      readOnly: true,
+                                      controller: _textFieldController[i],
+                                      decoration: InputDecoration(
+                                          border: InputBorder.none,
+                                          enabledBorder: InputBorder.none,
+                                          focusedBorder: InputBorder.none),
                                     ),
-                                  );
-                                }).toList(),
-                                onChanged: (newValue) {
-                                  setState(() {
-                                    print(newValue);
-                                    SizeModel getsize;
-                                    getsize = newValue as SizeModel;
+                                  )
+                                : DropdownButtonHideUnderline(
+                                    child: DropdownButtonFormField(
+                                      // value: dropdownvalue4,
+                                      decoration: InputDecoration.collapsed(
+                                          hintText: ''),
+                                      hint: Text('Size'),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(7)),
+                                      icon: Icon(
+                                        Icons.keyboard_arrow_down,
+                                        color: Colors.grey[600],
+                                      ),
+                                      items: sizeList.map((SizeModel items) {
+                                        return DropdownMenuItem(
+                                          value: items,
+                                          child: Container(
+                                            width: 30.w,
+                                            child: Text(
+                                              items.label,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  color: Colors.grey[600]),
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (newValue) {
+                                        setState(() {
+                                          SizeModel getsize;
+                                          getsize = newValue as SizeModel;
+                                          if (getsize.label == 'add more') {
+                                            _textFieldController
+                                                .add(TextEditingController());
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return Expanded(
+                                                  child: AlertDialog(
+                                                    title: Text('Add new size'),
+                                                    content: TextField(
+                                                      onChanged: (value) {},
+                                                      controller:
+                                                          _textFieldController[
+                                                              index],
+                                                      decoration:
+                                                          InputDecoration(
+                                                        hintText: "Size",
+                                                      ),
+                                                    ),
+                                                    actions: [
+                                                      FlatButton(
+                                                        textColor: Colors.black,
+                                                        onPressed: () async {
+                                                          await DataApiService
+                                                              .instance
+                                                              .addSize(
+                                                                  _textFieldController[
+                                                                          i]
+                                                                      .text,
+                                                                  context);
 
-                                    sizeVarient.add(getsize.label);
-                                    print(sizeVarient[i]);
-                                    generateVarient = false;
-                                    // dropdownvalue4 = newValue! as String?;
-                                  });
-                                },
-                              ),
-                            ),
+                                                          await DataApiService
+                                                              .instance
+                                                              .getsizelist();
+                                                          setState(() {
+                                                            sizepicker = true;
+                                                          });
+                                                          Navigator.of(context,
+                                                                  rootNavigator:
+                                                                      true)
+                                                              .pop();
+                                                        },
+                                                        child: Text('ADD'),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          }
+                                          print(newValue);
+
+                                          sizeVarient.add(getsize.label);
+                                          print(sizeVarient[i]);
+                                          generateVarient = false;
+
+                                          // dropdownvalue4 = newValue! as String?;
+                                        });
+                                      },
+                                    ),
+                                  ),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(left: 10),
@@ -825,49 +916,130 @@ class _uploadProductState extends State<uploadProduct> {
                                   color: Colors.white,
                                   border: Border.all(
                                       color: Colors.black12, width: 1.8)),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButtonFormField(
-                                  // value: dropdownvalue4,
-                                  decoration:
-                                      InputDecoration.collapsed(hintText: ''),
-                                  hint: Text('Color'),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(7)),
-                                  icon: Icon(
-                                    Icons.keyboard_arrow_down,
-                                    color: Colors.grey[600],
-                                  ),
-                                  items: colorList.map((ColorsModel items) {
-                                    return DropdownMenuItem(
-                                      value: items,
-                                      child: Container(
-                                        width: 30.w,
-                                        child: Text(
-                                          items.name,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                              color: Colors.grey[600]),
+                              child: colorcheck
+                                  ? TextField(
+                                      onTap: () {
+                                        setState(() {
+                                          colorcheck = false;
+                                        });
+                                      },
+                                      readOnly: true,
+                                      controller: _textColorController[i],
+                                    )
+                                  : DropdownButtonHideUnderline(
+                                      child: DropdownButtonFormField(
+                                        // value: dropdownvalue4,
+                                        decoration: InputDecoration.collapsed(
+                                            hintText: ''),
+                                        hint: Text('Color'),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(7)),
+                                        icon: Icon(
+                                          Icons.keyboard_arrow_down,
+                                          color: Colors.grey[600],
                                         ),
+                                        items:
+                                            colorList.map((ColorsModel items) {
+                                          return DropdownMenuItem(
+                                            value: items,
+                                            child: Container(
+                                              width: 30.w,
+                                              child: Text(
+                                                items.name,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    color: Colors.grey[600]),
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                        onChanged: (newValue) {
+                                          setState(() {
+                                            print(newValue);
+                                            generateVarient = false;
+                                            ColorsModel getcolor;
+                                            getcolor = newValue as ColorsModel;
+                                            if (getcolor.name == 'add more') {
+                                              _textColorController
+                                                  .add(TextEditingController());
+                                              showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      title: const Text(
+                                                          'Pick a color!'),
+                                                      content:
+                                                          SingleChildScrollView(
+                                                        child: Column(
+                                                          children: [
+                                                            ColorPicker(
+                                                              pickerColor:
+                                                                  pickerColor,
+                                                              onColorChanged:
+                                                                  changeColor,
+                                                            ),
+                                                            TextField(
+                                                              onChanged:
+                                                                  (value) {},
+                                                              controller:
+                                                                  _textColorController[
+                                                                      i],
+                                                              decoration:
+                                                                  InputDecoration(
+                                                                      hintText:
+                                                                          "Color Name"),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      actions: <Widget>[
+                                                        ElevatedButton(
+                                                          child: const Text(
+                                                              'Got it'),
+                                                          onPressed: () async {
+                                                            setState(() =>
+                                                                currentColor =
+                                                                    pickerColor);
+
+                                                            print(currentColor);
+                                                            Map<String, dynamic>
+                                                                addcolor = {
+                                                              'code': currentColor
+                                                                  .toString(),
+                                                              'name':
+                                                                  _textColorController[
+                                                                          i]
+                                                                      .text,
+                                                            };
+                                                            await DataApiService
+                                                                .instance
+                                                                .addColor(
+                                                                    addcolor,
+                                                                    context);
+                                                            setState(() {
+                                                              colorcheck = true;
+                                                            });
+
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                        ),
+                                                      ],
+                                                    );
+                                                  });
+                                            }
+                                            colorVarient.add(getcolor.name);
+                                            colorCode.add(getcolor.code);
+
+                                            print(colorVarient[i]);
+                                            print(colorCode[i]);
+                                            // dropdownvalue4 = newValue! as String?;
+                                          });
+                                        },
                                       ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (newValue) {
-                                    setState(() {
-                                      print(newValue);
-                                      generateVarient = false;
-                                      ColorsModel getcolor;
-                                      getcolor = newValue as ColorsModel;
-
-                                      colorVarient.add(getcolor.name);
-                                      colorCode.add(getcolor.code);
-
-                                      print(colorVarient[i]);
-                                      print(colorCode[i]);
-                                      // dropdownvalue4 = newValue! as String?;
-                                    });
-                                  },
-                                ),
-                              ),
+                                    ),
                             ),
                           ),
                         ],
@@ -1512,6 +1684,7 @@ class _uploadProductState extends State<uploadProduct> {
                     ],
                   ),
                 ),
+                _isCancelable(),
                 Padding(
                   padding: const EdgeInsets.only(top: 5),
                   child: Row(
@@ -1564,18 +1737,18 @@ class _uploadProductState extends State<uploadProduct> {
                       String product = 'product';
                       String thumbnail = 'thumbnail';
                       await DataApiService.instance
-                          .updateProfileContent(images[0], thumbnail);
-                      for (int i = 0; i < images.length; i++) {
+                          .updateProfileContent(myImages[0], thumbnail);
+                      for (int i = 0; i < myImages.length; i++) {
                         Map<String, dynamic> upload = {
-                          'image': imagesfile[i],
+                          'image': myImages[i],
                           'type': 'product',
                         };
                         print('for');
                         await DataApiService.instance
-                            .updateProfileContent(images[i], product);
+                            .updateProfileContent(myImages[i], product);
                       }
                       Map<String, dynamic> upload = {
-                        'image': imagesfile[0],
+                        'image': myImages[0],
                         'type': 'product',
                       };
 
@@ -1616,6 +1789,8 @@ class _uploadProductState extends State<uploadProduct> {
                         'price_type': 'wholesale',
                         'colors_active': 'true',
                         'size_active': 'true',
+                        'secret_payment': allowRequests.toString(),
+
                         //  'colors[]': colorCode,
                         /*  'colors': [
                           for (int i = 0; i < colorVarient.length; i++)
@@ -1687,6 +1862,21 @@ class _uploadProductState extends State<uploadProduct> {
     );
   }
 
+  Future<void> _uploadImage() async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      pickedImage = pickedFile;
+      setState(() {
+        _picked = pickedFile;
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => imageCrop()),
+        );
+      });
+    }
+  }
+
   Future selectFile() async {
     final result = await FilePicker.platform.pickFiles(allowMultiple: false);
 
@@ -1696,5 +1886,44 @@ class _uploadProductState extends State<uploadProduct> {
 
     setState(() => file = File(path));
     imagesfile.add(file.toString());
+  }
+
+  _isCancelable() {
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: 8.0,
+        bottom: 8.0,
+        left: 0,
+        right: 15.0,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Text(
+              "Allow buy requests",
+              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Switch(
+              onChanged: (value) {
+                setState(
+                  () {
+                    getvalue = value;
+                    if (value) {
+                      allowRequests = '1';
+                    } else {
+                      allowRequests = '0';
+                    }
+
+                    print(allowRequests);
+                  },
+                );
+              },
+              value: getvalue)
+        ],
+      ),
+    );
   }
 }

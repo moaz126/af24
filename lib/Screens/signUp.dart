@@ -48,14 +48,9 @@ class _signupState extends State<signup> {
   //   });
   //
   // }
-  final spinkit = SpinKitDancingSquare(
+  final spinkit = SpinKitSpinningLines(
     size: 3.h,
-    itemBuilder: (BuildContext context, int index) {
-      return DecoratedBox(
-        decoration:
-            BoxDecoration(color: index.isEven ? Colors.black : Colors.grey),
-      );
-    },
+    color: Colors.white,
   );
 
   @override

@@ -1,55 +1,59 @@
-// To parse this JSON data, do
+// To parse required this JSON data, do
 //
-//     final getChatModel = getChatModelFromJson(jsonString);
+//     final getUserChatModel = getUserChatModelFromJson(jsonString);
 
 import 'dart:convert';
 
-List<GetChatModel> getChatModelFromJson(String str) => List<GetChatModel>.from(
-    json.decode(str).map((x) => GetChatModel.fromJson(x)));
+List<GetUserChatModel> getUserChatModelFromJson(String str) =>
+    List<GetUserChatModel>.from(
+        json.decode(str).map((x) => GetUserChatModel.fromJson(x)));
 
-String getChatModelToJson(List<GetChatModel> data) =>
+String getUserChatModelToJson(List<GetUserChatModel> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
-class GetChatModel {
-  GetChatModel({
-     this.id,
+class GetUserChatModel {
+  GetUserChatModel({
+    required this.id,
     required this.userId,
     required this.sellerId,
     required this.message,
     required this.sentByCustomer,
     required this.sentBySeller,
-     this.seenByCustomer,
-     this.seenBySeller,
-     this.status,
-     this.createdAt,
-     this.updatedAt,
-     this.shopId,
-     this.messageData,
-     this.specialMessage,
-     this.sellerInfo,
-     this.customer,
-     this.shop,
+    required this.seenByCustomer,
+    required this.seenBySeller,
+    required this.status,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.shopId,
+    required this.messageData,
+    required this.specialMessage,
+    required this.lastMessage,
+    required this.sellerInfo,
+    required this.customer,
+    required this.shop,
   });
 
-  int? id;
+  int id;
   int userId;
   int sellerId;
   String message;
   int sentByCustomer;
   int sentBySeller;
-  int? seenByCustomer;
-  int? seenBySeller;
-  int? status;
-  DateTime? createdAt;
-  dynamic? updatedAt;
-  int? shopId;
-  dynamic? messageData;
-  bool? specialMessage;
-  SellerInfo? sellerInfo;
-  Customer? customer;
-  Shop? shop;
+  int seenByCustomer;
+  int seenBySeller;
+  int status;
+  DateTime createdAt;
+  DateTime? updatedAt;
+  int shopId;
+  dynamic messageData;
+  bool specialMessage;
+  String lastMessage;
+  SellerInfo sellerInfo;
+  Customer customer;
+  Shop shop;
 
-  factory GetChatModel.fromJson(Map<String, dynamic> json) => GetChatModel(
+  factory GetUserChatModel.fromJson(Map<String, dynamic> json) =>
+      GetUserChatModel(
         id: json["id"],
         userId: json["user_id"],
         sellerId: json["seller_id"],
@@ -60,10 +64,13 @@ class GetChatModel {
         seenBySeller: json["seen_by_seller"],
         status: json["status"],
         createdAt: DateTime.parse(json["created_at"]),
-        updatedAt: json["updated_at"],
+        updatedAt: json["updated_at"] == null
+            ? null
+            : DateTime.parse(json["updated_at"]),
         shopId: json["shop_id"],
         messageData: json["message_data"],
         specialMessage: json["special_message"],
+        lastMessage: json["last_message"],
         sellerInfo: SellerInfo.fromJson(json["seller_info"]),
         customer: Customer.fromJson(json["customer"]),
         shop: Shop.fromJson(json["shop"]),
@@ -79,14 +86,15 @@ class GetChatModel {
         "seen_by_customer": seenByCustomer,
         "seen_by_seller": seenBySeller,
         "status": status,
-        "created_at": createdAt!.toIso8601String(),
-        "updated_at": updatedAt,
+        "created_at": createdAt.toIso8601String(),
+        "updated_at": updatedAt == null ? null : updatedAt!.toIso8601String(),
         "shop_id": shopId,
         "message_data": messageData,
         "special_message": specialMessage,
-        "seller_info": sellerInfo,
-        "customer": customer,
-        "shop": shop,
+        "last_message": lastMessage,
+        "seller_info": sellerInfo.toJson(),
+        "customer": customer.toJson(),
+        "shop": shop.toJson(),
       };
 }
 
@@ -129,11 +137,11 @@ class Customer {
 
   int id;
   dynamic name;
-  String? fName;
-  String? lName;
+  String fName;
+  String lName;
   String phone;
-  String? image;
-  String? email;
+  String image;
+  String email;
   dynamic emailVerifiedAt;
   DateTime createdAt;
   DateTime updatedAt;
@@ -186,31 +194,55 @@ class Customer {
         loginMedium: json["login_medium"],
         socialId: json["social_id"],
         isPhoneVerified: json["is_phone_verified"],
-        temporaryToken: json["temporary_token"],
+        temporaryToken:
+            json["temporary_token"] == null ? null : json["temporary_token"],
         isEmailVerified: json["is_email_verified"],
         walletBalance: json["wallet_balance"],
         loyaltyPoint: json["loyalty_point"],
         title: json["title"],
         dOB: json["d_o_b"],
         newsletter: json["newsletter"],
-        folowed: json["folowed"],
-        followedSeller: json["followed_seller"],
+        folowed: json["folowed"] == null ? null : json["folowed"],
+        followedSeller:
+            json["followed_seller"] == null ? null : json["followed_seller"],
       );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "name": name,
+        "f_name": fName,
+        "l_name": lName,
+        "phone": phone,
+        "image": image,
+        "email": email,
+        "email_verified_at": emailVerifiedAt,
+        "created_at": createdAt.toIso8601String(),
+        "updated_at": updatedAt.toIso8601String(),
+        "street_address": streetAddress,
+        "country": country,
+        "city": city,
+        "zip": zip,
+        "house_no": houseNo,
+        "apartment_no": apartmentNo,
+        "cm_firebase_token": cmFirebaseToken,
+        "is_active": isActive,
+        "payment_card_last_four": paymentCardLastFour,
+        "payment_card_brand": paymentCardBrand,
+        "payment_card_fawry_token": paymentCardFawryToken,
+        "login_medium": loginMedium,
+        "social_id": socialId,
+        "is_phone_verified": isPhoneVerified,
+        "temporary_token": temporaryToken == null ? null : temporaryToken,
+        "is_email_verified": isEmailVerified,
+        "wallet_balance": walletBalance,
+        "loyalty_point": loyaltyPoint,
+        "title": title,
+        "d_o_b": dOB,
+        "newsletter": newsletter,
+        "folowed": folowed == null ? null : folowed,
+        "followed_seller": followedSeller == null ? null : followedSeller,
+      };
 }
-
-enum CustomerEmail { ZAIN_GMAIL_COM }
-
-enum CustomerFName { RIDA }
-
-enum FollowedSeller { THE_1 }
-
-enum Folowed { THE_115 }
-
-enum CustomerImage { DEF_PNG }
-
-enum CustomerLName { RIDA }
-
-enum TemporaryToken { EKH_HVNZY_LMI_L_MH_LS_G9_MQ_NE_UZJ_OKNS2_QHMS31_ZZ_GK }
 
 class SellerInfo {
   SellerInfo({
@@ -237,21 +269,21 @@ class SellerInfo {
   });
 
   int id;
-  String? fName;
-  String? lName;
+  String fName;
+  String lName;
   String phone;
-  String? image;
-  String? email;
-  String? password;
-  String? status;
-  String? rememberToken;
+  String image;
+  String email;
+  String password;
+  String status;
+  String rememberToken;
   DateTime createdAt;
   DateTime updatedAt;
-  String? bankName;
-  String? branch;
+  String bankName;
+  String branch;
   String accountNo;
-  String? holderName;
-  String? authToken;
+  String holderName;
+  String authToken;
   dynamic salesCommissionPercentage;
   dynamic gst;
   String cmFirebaseToken;
@@ -279,35 +311,30 @@ class SellerInfo {
         cmFirebaseToken: json["cm_firebase_token"],
         posStatus: json["pos_status"],
       );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "f_name": fName,
+        "l_name": lName,
+        "phone": phone,
+        "image": image,
+        "email": email,
+        "password": password,
+        "status": status,
+        "remember_token": rememberToken,
+        "created_at": createdAt.toIso8601String(),
+        "updated_at": updatedAt.toIso8601String(),
+        "bank_name": bankName,
+        "branch": branch,
+        "account_no": accountNo,
+        "holder_name": holderName,
+        "auth_token": authToken,
+        "sales_commission_percentage": salesCommissionPercentage,
+        "gst": gst,
+        "cm_firebase_token": cmFirebaseToken,
+        "pos_status": posStatus,
+      };
 }
-
-enum AuthToken {
-  RQNPS3_RABS0_XT4_KZVRQ_YWJZ8_MHT1_L338_AR_KQU_E0_P0_T4_UMTB_IU_Z
-}
-
-enum BankName { K_BANK }
-
-enum Branch { SEOUL_GANGNAM }
-
-enum SellerInfoEmail { SELLER_AF24_COM }
-
-enum SellerInfoFName { JOHN }
-
-enum HolderName { CINDY }
-
-enum SellerInfoImage { THE_2022071362_CEAF08_E03_EF_PNG }
-
-enum SellerInfoLName { DOE }
-
-enum Password {
-  THE_2_Y_10_C_POS_Q0_FCTV_ZB_SSU_UBC4_T_0_CBC_ST_S_KGN_V8_JOK_ITQGRH_AYFJ2_K0_C
-}
-
-enum RememberToken {
-  THE_0_DH_F9_WT51_K_AZHM_W_RVX_LE_B2_ZJV_NF3_Y_GU8_JT_D_YA_RDCP67_V_HYC8_J_R4_E_DQ_OQGBDV
-}
-
-enum Status { APPROVED }
 
 class Shop {
   Shop({
@@ -324,13 +351,13 @@ class Shop {
 
   int id;
   int sellerId;
-  String? name;
-  String? address;
+  String name;
+  String address;
   String contact;
-  String? image;
+  String image;
   DateTime createdAt;
   DateTime updatedAt;
-  String? banner;
+  String banner;
 
   factory Shop.fromJson(Map<String, dynamic> json) => Shop(
         id: json["id"],
@@ -343,12 +370,16 @@ class Shop {
         updatedAt: DateTime.parse(json["updated_at"]),
         banner: json["banner"],
       );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "seller_id": sellerId,
+        "name": name,
+        "address": address,
+        "contact": contact,
+        "image": image,
+        "created_at": createdAt.toIso8601String(),
+        "updated_at": updatedAt.toIso8601String(),
+        "banner": banner,
+      };
 }
-
-enum Address { ABC }
-
-enum Banner { THE_2022071362_CEAF0904772_PNG }
-
-enum ShopImage { THE_2022071362_CEAF0903_CFB_PNG }
-
-enum Name { CHAI_NASHTA }

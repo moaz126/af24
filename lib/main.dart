@@ -1,6 +1,7 @@
 import 'package:af24/Screens/dashBoard.dart';
 import 'package:af24/Screens/login.dart';
 import 'package:af24/Screens/navBar.dart';
+import 'package:af24/Screens/splashscreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -95,7 +96,7 @@ class MyApp extends StatelessWidget {
           fontFamily: "Myriad",
         ),
         debugShowCheckedModeBanner: false,
-        home: Login(),
+        home: SplashScreen(),
       );
     });
   }

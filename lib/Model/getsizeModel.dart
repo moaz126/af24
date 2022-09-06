@@ -10,11 +10,11 @@ String sizeModelToJson(List<SizeModel> data) => json.encode(List<dynamic>.from(d
 
 class SizeModel {
     SizeModel({
-        required this.id,
+         this.id,
         required this.label,
     });
 
-    int id;
+    int? id;
     String label;
 
     factory SizeModel.fromJson(Map<String, dynamic> json) => SizeModel(

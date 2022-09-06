@@ -34,15 +34,9 @@ class _LoginState extends State<Login> {
   //   });
   //
   // }
-  final spinkit = SpinKitDancingSquare(
+  final spinkit = SpinKitSpinningLines(
     size: 3.h,
-    itemBuilder: (BuildContext context, int index) {
-      return DecoratedBox(
-        decoration: BoxDecoration(
-          color: index.isEven ? Colors.white : Colors.white,
-        ),
-      );
-    },
+    color: Colors.white,
   );
   @override
   void initState() {
@@ -167,6 +161,8 @@ class _LoginState extends State<Login> {
                       DataApiService.instance.getcolorlist();
                       DataApiService.instance.getsizelist();
                       DataApiService.instance.getSellerOrderList();
+                      await DataApiService.instance.getDashboard();
+                      
                       setState(() {
                         loader = false;
                       });

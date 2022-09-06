@@ -1,3 +1,4 @@
+import 'package:af24/Screens/chat.dart';
 import 'package:af24/Screens/dashBoard.dart';
 import 'package:af24/Screens/uploadProduct.dart';
 import 'package:af24/api/auth_af24.dart';
@@ -11,7 +12,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 
-import 'chatBox.dart';
+//
 import 'navBar.dart';
 import 'newBar.dart';
 
@@ -81,14 +82,9 @@ class _chatNotificationState extends State<chatNotification> {
     super.initState();
   }
 
-  final spinkit = SpinKitDancingSquare(
-    size: 3.h,
-    itemBuilder: (BuildContext context, int index) {
-      return DecoratedBox(
-        decoration:
-            BoxDecoration(color: index.isEven ? Colors.black : Colors.black12),
-      );
-    },
+  final spinkit = SpinKitSpinningLines(
+    size: 5.h,
+    color: Colors.black,
   );
 
   @override
@@ -265,149 +261,167 @@ class _chatNotificationState extends State<chatNotification> {
                     ),
                   ),
                   MainScreenStatus == true
-                      ? Expanded(
-                          child: ListView.builder(
-                              padding: const EdgeInsets.all(8),
-                              itemCount: getNotifiationList.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return Container(
-                                  padding: EdgeInsets.all(10),
-                                  height: 100,
-                                  margin: EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 3),
-                                  color: Colors.white,
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        height: 8,
-                                        width: 8,
-                                        decoration: BoxDecoration(
-                                            color: Colors.orange[700],
-                                            borderRadius:
-                                                BorderRadius.circular(10)),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 8.0),
-                                        child: Stack(
-                                          alignment: Alignment.topRight,
-                                          children: [
-                                            Image.asset(
-                                              'assets/icons/bottomNavigation (5).png',
-                                              height: 6.9.h,
-                                              color: Colors.grey[400],
-                                            ),
-                                            CircleAvatar(
-                                              maxRadius: 10,
-                                              backgroundColor: Colors.white,
-                                              child: Image.asset(
-                                                'assets/icons/Seller app icon (18).png',
-                                                height: 2.2.h,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: 7,
-                                      ),
-                                      Expanded(
-                                          child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                      ? getNotifiationList.isEmpty
+                          ? Center(
+                              child: Text('No Notification'),
+                            )
+                          : Expanded(
+                              child: ListView.builder(
+                                  padding: const EdgeInsets.all(8),
+                                  itemCount: getNotifiationList.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return Container(
+                                      padding: EdgeInsets.all(10),
+                                      height: 100,
+                                      margin: EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 3),
+                                      color: Colors.white,
+                                      child: Row(
                                         children: [
-                                          SizedBox(
-                                            height: 0.1.h,
+                                          Container(
+                                            height: 8,
+                                            width: 8,
+                                            decoration: BoxDecoration(
+                                                color: Colors.orange[700],
+                                                borderRadius:
+                                                    BorderRadius.circular(10)),
                                           ),
-                                          Text(
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            getNotifiationList[index]
-                                                .description,
-                                            style: TextStyle(
-                                                height: 0.2.h,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 10.sp),
-                                          ),
-                                          SizedBox(
-                                            height: 0.1.h,
-                                          ),
-                                          Text(
-                                            "10days",
-                                            style: TextStyle(
-                                              color: Colors.grey,
-                                              fontSize: 10.sp,
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 8.0),
+                                            child: Stack(
+                                              alignment: Alignment.topRight,
+                                              children: [
+                                                Image.asset(
+                                                  'assets/icons/bottomNavigation (5).png',
+                                                  height: 6.9.h,
+                                                  color: Colors.grey[400],
+                                                ),
+                                                CircleAvatar(
+                                                  maxRadius: 10,
+                                                  backgroundColor: Colors.white,
+                                                  child: Image.asset(
+                                                    'assets/icons/Seller app icon (18).png',
+                                                    height: 2.2.h,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                          )
-                                          // GestureDetector(onTap: ,)
-                                        ],
-                                      )),
-                                      SizedBox(
-                                        width: 9,
-                                      ),
-                                      /*  Image.asset('assets/Bag$index.jpg',
+                                          ),
+                                          SizedBox(
+                                            width: 7,
+                                          ),
+                                          Expanded(
+                                              child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              SizedBox(
+                                                height: 0.1.h,
+                                              ),
+                                              Text(
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                getNotifiationList[index]
+                                                    .description,
+                                                style: TextStyle(
+                                                    height: 0.2.h,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 10.sp),
+                                              ),
+                                              SizedBox(
+                                                height: 0.1.h,
+                                              ),
+                                              Text(
+                                                "10days",
+                                                style: TextStyle(
+                                                  color: Colors.grey,
+                                                  fontSize: 10.sp,
+                                                ),
+                                              )
+                                              // GestureDetector(onTap: ,)
+                                            ],
+                                          )),
+                                          SizedBox(
+                                            width: 9,
+                                          ),
+                                          /*  Image.asset('assets/Bag$index.jpg',
                                       width: 50), */
-                                    ],
-                                  ),
-                                );
-                              }),
-                        )
+                                        ],
+                                      ),
+                                    );
+                                  }),
+                            )
                       : Expanded(
                           child: loader
                               ? spinkit
-                              : ListView.builder(
-                                  padding: const EdgeInsets.only(top: 8),
-                                  itemCount: secrets.length,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return InkWell(
-                                      onTap: () async {
-                                        Map<String, dynamic> userdata = {
+                              : getUserList.isEmpty
+                                  ? Center(
+                                      child: Text('No Users'),
+                                    )
+                                  : ListView.builder(
+                                      padding: const EdgeInsets.only(top: 8),
+                                      itemCount: getUserList.length,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        return InkWell(
+                                          onTap: () async {
+                                            /*  Map<String, dynamic> userdata = {
                                           'user_id': '3',
                                           'seller_id': '1',
                                         };
 
                                         await DataApiService.instance
-                                            .getChat(userdata, context);
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => chatBox(
-                                                    imagePath:
-                                                        'assets/Bag$index.jpg',
-                                                  )),
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: EdgeInsets.all(10),
-                                        height: 100,
-                                        margin: EdgeInsets.symmetric(
-                                            horizontal: 10, vertical: 3),
-                                        color: Colors.white,
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              height: 8,
-                                              width: 8,
-                                              decoration: BoxDecoration(
-                                                  color: Colors.orange[700],
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10)),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 8.0),
-                                              child: Stack(
-                                                alignment: Alignment.topRight,
-                                                children: [
-                                                  Image.asset(
-                                                    'assets/Bag$index.jpg',
-                                                    height: 6.9.h,
-                                                  ),
-                                                  CircleAvatar(
+                                            .getChat(userdata, context); */
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) => chatBox(
+                                                        imagePath:
+                                                            'assets/Bag0.jpg',
+                                                        index: index,
+                                                      )),
+                                            );
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.all(10),
+                                            height: 100,
+                                            margin: EdgeInsets.symmetric(
+                                                horizontal: 10, vertical: 3),
+                                            color: Colors.white,
+                                            child: Row(
+                                              children: [
+                                                getUserList[index]
+                                                            .seenBySeller ==
+                                                        1
+                                                    ? Container(
+                                                        height: 8,
+                                                        width: 8,
+                                                        decoration: BoxDecoration(
+                                                            color: Colors
+                                                                .orange[700],
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10)),
+                                                      )
+                                                    : SizedBox(),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          left: 8.0),
+                                                  child: Stack(
+                                                    alignment:
+                                                        Alignment.topRight,
+                                                    children: [
+                                                      Image.asset(
+                                                        'assets/icons/Seller app icon (8).png',
+                                                        height: 6.9.h,
+                                                      ),
+                                                      /*  CircleAvatar(
                                                     maxRadius: 10,
                                                     backgroundColor:
                                                         Colors.white,
@@ -415,56 +429,78 @@ class _chatNotificationState extends State<chatNotification> {
                                                       'assets/icons/Seller app icon (18).png',
                                                       height: 2.2.h,
                                                     ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: 7,
-                                            ),
-                                            Expanded(
-                                                child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                SizedBox(
-                                                  height: 2,
-                                                ),
-                                                Text(
-                                                  maxLines: 2,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  '${Entries[index]}',
-                                                  style: TextStyle(
-                                                    height: 1.5,
-                                                    fontWeight: FontWeight.w900,
-                                                    fontSize: 10.sp,
+                                                  ), */
+                                                    ],
                                                   ),
                                                 ),
                                                 SizedBox(
-                                                  height: 0.1.h,
+                                                  width: 7,
                                                 ),
-                                                Text(
-                                                  "1h",
-                                                  style: TextStyle(
-                                                      color: Colors.grey,
-                                                      fontSize: 10.sp),
-                                                )
-                                                // GestureDetector(onTap: ,)
-                                              ],
-                                            )),
-                                            /*  SizedBox(
+                                                Expanded(
+                                                    child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceEvenly,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    SizedBox(
+                                                      height: 2,
+                                                    ),
+                                                    Text(
+                                                      maxLines: 2,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      getUserList[index]
+                                                              .customer!
+                                                              .fName! +
+                                                          ' ' +
+                                                          getUserList[index]
+                                                              .customer!
+                                                              .lName,
+                                                      style: TextStyle(
+                                                        height: 1.5,
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        fontSize: 10.sp,
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 5,
+                                                    ),
+                                                    Text(
+                                                      getUserList[index]
+                                                          .lastMessage
+                                                          .toString(),
+                                                      style: TextStyle(
+                                                          color: Colors.grey,
+                                                          fontSize: 10.sp),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 5,
+                                                    ),
+                                                    Text(
+                                                      getUserList[index]
+                                                          .createdAt
+                                                          .toString()
+                                                          .substring(14, 19),
+                                                      style: TextStyle(
+                                                          color: Colors.grey,
+                                                          fontSize: 10.sp),
+                                                    )
+                                                    // GestureDetector(onTap: ,)
+                                                  ],
+                                                )),
+                                                /*  SizedBox(
                                           width: 9,
                                         ),
                                         Image.asset('assets/images/1.PNG',
                                             width: 50), */
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  }),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      }),
                         )
                 ],
               ),

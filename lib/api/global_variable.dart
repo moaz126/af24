@@ -3,7 +3,12 @@ import 'package:af24/Model/ProductlistModel.dart';
 import 'package:af24/Model/SellerOrderDetailsModel.dart';
 import 'package:af24/Model/getChatModel.dart';
 import 'package:af24/Model/getColors.dart';
+import 'package:af24/Model/getDashboard.dart';
+import 'package:af24/Model/getLinkModel.dart';
 import 'package:af24/Model/getNotification.dart';
+import 'package:af24/Model/getSecretModel.dart';
+import 'package:af24/Model/getSecretUserModel.dart';
+import 'package:af24/Model/getUserChat.dart';
 import 'package:af24/Model/getbrand.dart';
 import 'package:af24/Model/getsizeModel.dart';
 
@@ -11,6 +16,8 @@ import 'package:af24/Model/productinfoModel.dart';
 import 'package:af24/Model/stockoutModel.dart';
 
 import 'package:flutter/cupertino.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Model/SellerOrderListModel.dart';
 import '../Model/shippingCostModel.dart';
@@ -32,12 +39,18 @@ List<SellerOrderListModel> sellerOrderList = [];
 List<SellerOrderDetailsModel> sellerOrderDetails = [];
 List<GetNotificationModel> getNotifiationList = [];
 List<GetChatModel> getChatList = [];
+List<GetUserChatModel> getUserList = [];
+List<GetSecretModel> getSecretList = [];
+List<GetSecretUser> secretUserList = [];
+List<GetlinkModel> getlinkuser = [];
+// List<GetDashboardModel> getDashboardContent = [];
+GetDashboardModel? getDashboardContent;
 
 String imagepath = '';
 String thumbnail = '';
 String imageName = '';
 String thumbnaiImage = '';
-
+XFile? pickedImage;
 String snackmessage = '';
 String? ProductName;
 String? SubName;
@@ -55,6 +68,7 @@ String? Description;
 String? Price_type;
 String StatusCode = '403';
 String SnackMessage = "";
+List<String> myImages = [];
 
 /* class combination {
   final String color;
@@ -64,3 +78,25 @@ String SnackMessage = "";
 
 List<combination> comb = [];
  */
+
+
+void setUserLoggedIn(bool key) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.setBool("isLoggedIn", key);
+}
+
+Future getUserLoggedIn() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  var log = prefs.getBool("isLoggedIn") ?? false;
+  return log;
+}
+
+void saveUserDataToken({@required token}) async {
+  SharedPreferences pref = await SharedPreferences.getInstance();
+  await pref.setString("token", token);
+}
+Future getUserDataToken() async {
+  SharedPreferences pref = await SharedPreferences.getInstance();
+  String? result = pref.getString("token");
+  return result;
+}

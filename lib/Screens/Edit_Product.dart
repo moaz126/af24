@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:async';
 
-
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
@@ -122,7 +121,8 @@ class _edit_ProductState extends State<edit_Product> {
         ),
         leading: InkWell(
             onTap: () {
-              Get.offAll((navBar(index: 0, see: 1)));
+              Navigator.of(context).pop();
+              // Get.offAll((navBar(index: 0, see: 1)));
             },
             child: Icon(
               Icons.arrow_back_ios,

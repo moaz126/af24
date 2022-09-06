@@ -1,10 +1,12 @@
 import 'package:af24/Model/OrderConfirmedDetails.dart';
+import 'package:af24/Screens/login.dart';
 import 'package:af24/Screens/orderConfirmed.dart';
 import 'package:af24/api/auth_af24.dart';
 import 'package:af24/api/global_variable.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:horizontal_data_table/horizontal_data_table.dart';
+import 'package:http/http.dart';
 import 'package:sizer/sizer.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'navBar.dart';
@@ -50,6 +52,18 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
               color: Colors.black,
             ),
           ),
+          actions: [
+            InkWell(
+              onTap: () {
+                setUserLoggedIn(false);
+                Get.offAll(Login());
+              },
+              child: Icon(
+                Icons.logout,
+                color: Colors.black,
+              ),
+            ),
+          ],
         ),
         body: SafeArea(
           child: Column(

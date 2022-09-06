@@ -1,12 +1,15 @@
 import 'dart:io';
 
+import 'package:af24/Screens/navBar.dart';
+import 'package:af24/Screens/uploadProduct.dart';
+import 'package:af24/api/global_variable.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-
 
 class imageCrop extends StatelessWidget {
   const imageCrop({Key? key}) : super(key: key);
@@ -16,42 +19,43 @@ class imageCrop extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
           primarySwatch: Colors.blue,
-          highlightColor: const Color(0xFFD0996F),
+          highlightColor: Colors.black,
           backgroundColor: const Color(0xFFFDF5EC),
           canvasColor: const Color(0xFFFDF5EC),
           textTheme: TextTheme(
             headline5: ThemeData.light()
                 .textTheme
                 .headline5!
-                .copyWith(color: const Color(0xFFBC764A)),
+                .copyWith(color: Colors.black),
           ),
           iconTheme: IconThemeData(
             color: Colors.grey[600],
           ),
           appBarTheme: const AppBarTheme(
-            backgroundColor: Color(0xFFBC764A),
+            backgroundColor: Colors.black,
             centerTitle: false,
             foregroundColor: Colors.white,
             actionsIconTheme: IconThemeData(color: Colors.white),
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(
-              backgroundColor: MaterialStateColor.resolveWith(
-                  (states) => const Color(0xFFBC764A)),
+              backgroundColor:
+                  MaterialStateColor.resolveWith((states) => Colors.black),
             ),
           ),
           outlinedButtonTheme: OutlinedButtonThemeData(
             style: ButtonStyle(
               foregroundColor: MaterialStateColor.resolveWith(
-                (states) => const Color(0xFFBC764A),
+                (states) => Colors.black,
               ),
               side: MaterialStateBorderSide.resolveWith(
-                  (states) => const BorderSide(color: Color(0xFFBC764A))),
+                  (states) => const BorderSide(color: Colors.black)),
             ),
           )),
-      home: const HomePage(title: 'Image Cropper Demo'),
+      home: const HomePage(title: 'Crop Image'),
     );
   }
 }
@@ -98,7 +102,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _body() {
-    if (_croppedFile != null || _pickedFile != null) {
+    if (_croppedFile != null || pickedImage != null) {
       return _imageCard();
     } else {
       return _uploaderCard();
@@ -141,8 +145,8 @@ class _HomePageState extends State<HomePage> {
         ),
         child: kIsWeb ? Image.network(path) : Image.file(File(path)),
       );
-    } else if (_pickedFile != null) {
-      final path = _pickedFile!.path;
+    } else if (pickedImage != null) {
+      final path = pickedImage!.path;
       return ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: 0.8 * screenWidth,
@@ -167,6 +171,20 @@ class _HomePageState extends State<HomePage> {
           tooltip: 'Delete',
           child: const Icon(Icons.delete),
         ),
+        SizedBox(
+          width: 20,
+        ),
+        FloatingActionButton(
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => navBar(index: 2, see: 0)),
+            );
+          },
+          backgroundColor: Colors.black,
+          tooltip: 'ok',
+          child: const Icon(Icons.done),
+        ),
         if (_croppedFile == null)
           Padding(
             padding: const EdgeInsets.only(left: 32.0),
@@ -174,7 +192,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {
                 _cropImage();
               },
-              backgroundColor: const Color(0xFFBC764A),
+              backgroundColor: Colors.black,
               tooltip: 'Crop',
               child: const Icon(Icons.crop),
             ),
@@ -255,15 +273,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _cropImage() async {
-    if (_pickedFile != null) {
+    if (pickedImage != null) {
       final croppedFile = await ImageCropper().cropImage(
-        sourcePath: _pickedFile!.path,
+        sourcePath: pickedImage!.path,
         compressFormat: ImageCompressFormat.jpg,
         compressQuality: 100,
         uiSettings: [
           AndroidUiSettings(
               toolbarTitle: 'Cropper',
-              toolbarColor: Colors.deepOrange,
+              toolbarColor: Colors.black,
               toolbarWidgetColor: Colors.white,
               initAspectRatio: CropAspectRatioPreset.original,
               lockAspectRatio: false),
@@ -288,6 +306,8 @@ class _HomePageState extends State<HomePage> {
       if (croppedFile != null) {
         setState(() {
           _croppedFile = croppedFile;
+          final path = _croppedFile!.path;
+          myImages.add(path);
         });
       }
     }
@@ -307,6 +327,8 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _pickedFile = null;
       _croppedFile = null;
+      pickedImage = null;
+      myImages.removeLast();
     });
   }
 }

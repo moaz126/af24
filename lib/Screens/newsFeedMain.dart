@@ -7,6 +7,7 @@ import 'package:af24/Screens/shopInfo.dart';
 import 'package:af24/api/auth_af24.dart';
 import 'package:af24/api/global_variable.dart';
 import 'package:af24/constants.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -49,24 +50,13 @@ class _newsFeedMainState extends State<newsFeedMain> {
     super.initState();
   }
 
-  final spinkit = SpinKitDancingSquare(
-    size: 3.h,
-    itemBuilder: (BuildContext context, int index) {
-      return DecoratedBox(
-        decoration:
-            BoxDecoration(color: index.isEven ? Colors.black : Colors.black12),
-      );
-    },
+  final spinkit = SpinKitSpinningLines(
+    size: 5.h,
+    color: Colors.black,
   );
-  final spinkitimg = SpinKitDancingSquare(
+  final spinkitimg = SpinKitSpinningLines(
     size: 2.h,
-    itemBuilder: (BuildContext context, int index) {
-      return DecoratedBox(
-        decoration: BoxDecoration(
-          color: index.isEven ? Colors.black : Colors.grey,
-        ),
-      );
-    },
+    color: Colors.black,
   );
 
   @override
@@ -77,58 +67,18 @@ class _newsFeedMainState extends State<newsFeedMain> {
         elevation: 0,
         backgroundColor: Colors.white,
         title: Text(
-          'My Products',
+          shopinfoContent.name,
           style: TextStyle(color: Colors.black),
         ),
-        centerTitle: false,
         leading: InkWell(
             onTap: () {
-              // Get.offAll(navBar(index: 0, see: 1));
-              Get.to(dashBoard());
+              Get.offAll((navBar(index: 0, see: 1)));
             },
             child: Icon(
               Icons.arrow_back_ios,
               color: Colors.black,
             )),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 11.0),
-            child: Stack(
-              alignment: Alignment.bottomRight,
-              children: [
-                /*  InkWell(
-                  onTap: () async {
-                     Get.to(shopInfo());
-                   
-                  },
-                  child: Image.asset(
-                    'assets/icons/Seller app icon (6).png',
-                    height: 3.7.h,
-                  ),
-                ), */
-                /*  Container(
-                  height: 10,
-                  width: 10,
-                  decoration: BoxDecoration(
-                      color: Colors.orange[700],
-                      borderRadius: BorderRadius.circular(10)),
-                ),
-                Container(
-                  padding: EdgeInsets.only(right: 2),
-                  //color: Colors.blue,
-                  child: Text(
-                    "2",
-                    style: TextStyle(color: Colors.black, fontSize: 8),
-                  ),
-                ) */
-              ],
-            ),
-          ),
-          SizedBox(
-            width: 10,
-          ),
-        ],
-        iconTheme: IconThemeData(color: Colors.black),
+        centerTitle: true,
       ),
       body: loader
           ? spinkit
@@ -136,8 +86,13 @@ class _newsFeedMainState extends State<newsFeedMain> {
               ? Center(
                   child: Text('List is Empty'),
                 )
-              : ListView.builder(
-                  padding: const EdgeInsets.only(top: 8),
+              : GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 7,
+                      mainAxisSpacing: 10.0,
+                      childAspectRatio: 0.85),
+                  padding: const EdgeInsets.only(top: 15, left: 10, right: 10),
                   itemCount: productlistContent.length,
                   itemBuilder: (BuildContext context, int index) {
                     return InkWell(
@@ -150,126 +105,152 @@ class _newsFeedMainState extends State<newsFeedMain> {
                       },
                       child: Container(
                         padding: EdgeInsets.all(10),
-                        height: 100,
-                        margin:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                        color: Colors.white,
-                        child: Row(
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 3,
+                                offset:
+                                    Offset(2, 3), // changes position of shadow
+                              ),
+                            ],
+                            borderRadius: BorderRadius.circular(6)),
+                        child: Column(
                           children: [
-                            Container(
-                              height: 8,
-                              width: 8,
-                              decoration: BoxDecoration(
-                                  color: Colors.orange[700],
-                                  borderRadius: BorderRadius.circular(10)),
-                            ),
                             Padding(
-                              padding: const EdgeInsets.only(left: 8.0),
-                              child: Stack(
-                                alignment: Alignment.topRight,
-                                children: [
-                                  Container(
-                                    width: 10.w,
-                                    child: CachedNetworkImage(
-                                        imageUrl:
-                                            'https://becknowledge.com/af24/public/storage/product/thumbnail/' +
-                                                productlistContent[index]
-                                                    .thumbnail,
-                                        placeholder: (context, url) =>
-                                            spinkitimg,
-                                        errorWidget: (context, url, error) =>
-                                            Icon(
-                                              Icons.error_outline_sharp,
-                                              color: Colors.red,
-                                            )),
-                                  ),
-                                  /*  Image.network(productlistContent[0].thumbnail), */
-                                  /*  CircleAvatar(
-                                maxRadius: 10,
-                                backgroundColor: Colors.white,
-                                child: Image.asset(
-                                  'assets/icons/Seller app icon (18).png',
-                                  height: 2.2.h,
-                                ),
-                              ), */
-                                ],
+                              padding: const EdgeInsets.only(top: 10.0),
+                              child: Container(
+                                width: 10.h,
+                                height: 10.h,
+                                child: CachedNetworkImage(
+                                    imageUrl:
+                                        'https://becknowledge.com/af24/public/storage/product/thumbnail/' +
+                                            productlistContent[index].thumbnail,
+                                    fit: BoxFit.contain,
+                                    placeholder: (context, url) => spinkitimg,
+                                    errorWidget: (context, url, error) => Icon(
+                                          Icons.error_outline_sharp,
+                                          color: Colors.red,
+                                        )),
                               ),
                             ),
-                            SizedBox(
-                              width: 7,
-                            ),
-                            Expanded(
-                                child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 SizedBox(
-                                  height: 2,
+                                  height: 5,
                                 ),
                                 Text(
-                                  maxLines: 2,
+                                  maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   productlistContent[index].name,
                                   style: TextStyle(
                                     height: 1.5,
                                     fontWeight: FontWeight.w900,
-                                    fontSize: 10.sp,
+                                    fontSize: 13.sp,
                                   ),
                                 ),
                                 SizedBox(
-                                  height: 0.1.h,
+                                  height: 5,
                                 ),
                                 Text(
-                                  "1h",
+                                  productlistContent[index]
+                                      .createdAt
+                                      .toString()
+                                      .substring(14, 19),
                                   style: TextStyle(
                                       color: Colors.grey, fontSize: 10.sp),
-                                )
-                                // GestureDetector(onTap: ,)
-                              ],
-                            )),
-                            /*  SizedBox(
-                                          width: 9,
+                                ),
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: <Widget>[
+                                    InkWell(
+                                      onTap: () {
+                                        Get.to(edit_Product(index));
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                            color: Colors.blue,
+                                            borderRadius:
+                                                BorderRadius.circular(7)),
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 2),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.edit,
+                                              color: Colors.white,
+                                              size: 20,
+                                            ),
+                                            Text(
+                                              'Edit    ',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ],
                                         ),
-                                        Image.asset('assets/images/1.PNG',
-                                            width: 50), */
-
-                            InkWell(
-                              onTap: () {
-                                Get.to(edit_Product(index));
-                              },
-                              child: Container(
-                                height: 10.h,
-                                width: 8.w,
-                                child: Icon(
-                                  Icons.edit,
-                                  size: 3.h,
-                                  color: Colors.blue,
-                                ),
-                              ),
+                                      ),
+                                    ),
+                                    InkWell(
+                                      onTap: () {
+                                        AwesomeDialog(
+                                          context: context,
+                                          dialogType: DialogType.QUESTION,
+                                          animType: AnimType.BOTTOMSLIDE,
+                                          title: 'Delete',
+                                          desc:
+                                              'Are you sure you want to delete',
+                                          btnCancelOnPress: () {},
+                                          btnCancelText: 'No',
+                                          btnOkText: 'Yes',
+                                          btnOkOnPress: () async {
+                                            await DataApiService.instance
+                                                .deleteProduct(
+                                                    productlistContent[index]
+                                                        .id
+                                                        .toString());
+                                            GlobalSnackBar.show(
+                                                context, snackmessage);
+                                            setState(() {
+                                              productlistContent
+                                                  .removeAt(index);
+                                            });
+                                          },
+                                        ).show();
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius:
+                                                BorderRadius.circular(7)),
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 2),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.delete,
+                                              color: Colors.white,
+                                              size: 20,
+                                            ),
+                                            Text(
+                                              'Delete',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                )
+                              ],
                             ),
-                            SizedBox(
-                              width: 2.w,
-                            ),
-                            InkWell(
-                              onTap: () async {
-                                await DataApiService.instance.deleteProduct(
-                                    productlistContent[index].id.toString());
-
-                                GlobalSnackBar.show(context, snackmessage);
-                                setState(() {
-                                  productlistContent.removeAt(index);
-                                });
-                              },
-                              child: Container(
-                                height: 10.h,
-                                width: 8.w,
-                                child: Icon(
-                                  Icons.delete,
-                                  size: 3.h,
-                                  color: Colors.red,
-                                ),
-                              ),
-                            )
                           ],
                         ),
                       ),
