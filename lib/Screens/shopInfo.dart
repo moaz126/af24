@@ -3,11 +3,13 @@ import 'dart:io';
 import 'package:af24/api/global_variable.dart';
 import 'package:af24/constants.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
+import 'package:flutter/services.dart';
 
 import '../api/auth_af24.dart';
 
@@ -19,17 +21,16 @@ class shopInfo extends StatefulWidget {
 }
 
 class _shopInfoState extends State<shopInfo> {
+  final Namecontroller = TextEditingController();
+  final Contactcontroller = TextEditingController();
+  final Addresscontroller = TextEditingController();
+  final emailController = TextEditingController();
+
   String imagepath = '';
-  late File file;
-  final spinkit = SpinKitDancingSquare(
+  File? file;
+  final spinkit = SpinKitSpinningLines(
     size: 3.h,
-    itemBuilder: (BuildContext context, int index) {
-      return DecoratedBox(
-        decoration: BoxDecoration(
-          color: index.isEven ? Colors.white : Colors.white,
-        ),
-      );
-    },
+    color: Colors.white,
   );
   final spinkitcenter = SpinKitSpinningLines(
     size: 5.h,
@@ -43,6 +44,10 @@ class _shopInfoState extends State<shopInfo> {
     });
 
     await DataApiService.instance.getshopinfo();
+    Namecontroller.text = shopinfoContent.name;
+    Contactcontroller.text = shopinfoContent.contact;
+    Addresscontroller.text = shopinfoContent.address;
+    emailController.text = shopinfoContent.email;
 
     setState(() {
       loader = false;
@@ -52,16 +57,17 @@ class _shopInfoState extends State<shopInfo> {
   @override
   void initState() {
     // TODO: implement initState
+
     callApi();
     super.initState();
   }
 
   final _formKey = GlobalKey<FormState>();
-  final Namecontroller = TextEditingController()..text = shopinfoContent.name;
+  /* final Namecontroller = TextEditingController()..text = shopinfoContent.name;
   final Contactcontroller = TextEditingController()
     ..text = shopinfoContent.contact;
   final Addresscontroller = TextEditingController()
-    ..text = shopinfoContent.address;
+    ..text = shopinfoContent.address; */
 
   @override
   Widget build(BuildContext context) {
@@ -90,44 +96,51 @@ class _shopInfoState extends State<shopInfo> {
                     SizedBox(
                       height: 5.h,
                     ),
-                    Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        imagepath == ''
-                            ? ClipOval(
-                                child: Image.network(
-                                'https://becknowledge.com/af24/public/storage/shop/' +
-                                    shopinfoContent.image,
-                                height: 20.h,
-                                width: 20.h,
-                                fit: BoxFit.fill,
-                              ))
-                            : ClipOval(
-                                child: Image.file(
-                                file,
-                                height: 20.h,
-                                width: 20.h,
-                                fit: BoxFit.fill,
-                              )),
-                        InkWell(
-                          onTap: () {
-                            selectFile();
-                          },
-                          child: ClipOval(
-                            child: Container(
-                              height: 3.h,
-                              width: 3.h,
-                              decoration:
-                                  BoxDecoration(color: Colors.orangeAccent),
-                              child: Icon(
-                                Icons.edit_note_rounded,
-                                color: Colors.white,
-                                size: 2.5.h,
+                    Container(
+                      height: 20.h,
+                      child: Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          imagepath == ''
+                              ? ClipOval(
+                                  child: CachedNetworkImage(
+                                    imageUrl:
+                                        'https://becknowledge.com/af24/public/storage/shop/${shopinfoContent.image}',
+                                    fit: BoxFit.fill,
+                                    placeholder: (context, url) => Image.asset(
+                                      'assets/icons/Seller app icon (8).png',
+                                      height: 20.h,
+                                      width: 20.h,
+                                    ),
+                                  ),
+                                )
+                              : ClipOval(
+                                  child: Image.file(
+                                  file!,
+                                  height: 20.h,
+                                  width: 20.h,
+                                  fit: BoxFit.fill,
+                                )),
+                          InkWell(
+                            onTap: () {
+                              selectFile();
+                            },
+                            child: ClipOval(
+                              child: Container(
+                                height: 3.h,
+                                width: 3.h,
+                                decoration:
+                                    BoxDecoration(color: Colors.orangeAccent),
+                                child: Icon(
+                                  Icons.edit_note_rounded,
+                                  color: Colors.white,
+                                  size: 2.5.h,
+                                ),
                               ),
                             ),
-                          ),
-                        )
-                      ],
+                          )
+                        ],
+                      ),
                     ),
                     SizedBox(
                       height: 5.h,
@@ -179,6 +192,29 @@ class _shopInfoState extends State<shopInfo> {
                                   height: 5.h,
                                 ),
                                 Container(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(25, 0, 0, 0),
+                                  width: 70.w,
+                                  decoration: BoxDecoration(
+                                      color: Colors.grey.withOpacity(0.1),
+                                      border: Border.all(
+                                          color: Colors.grey.withOpacity(0.2)),
+                                      borderRadius: BorderRadius.circular(10)),
+                                  child: TextFormField(
+                                    controller: emailController,
+                                    readOnly: true,
+                                    decoration: const InputDecoration(
+                                        hintText: "Email",
+                                        enabledBorder: InputBorder.none,
+                                        focusedBorder: InputBorder.none,
+                                        border: InputBorder.none,
+                                        hintStyle: TextStyle(fontSize: 15)),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 5.h,
+                                ),
+                                Container(
                                   padding: EdgeInsets.fromLTRB(25, 0, 0, 0),
                                   width: 70.w,
                                   decoration: BoxDecoration(
@@ -193,6 +229,11 @@ class _shopInfoState extends State<shopInfo> {
                                         return "This field is required";
                                       }
                                     },
+                                    keyboardType: TextInputType.phone,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                      LengthLimitingTextInputFormatter(15)
+                                    ],
                                     decoration: InputDecoration(
                                         hintText: "Contact",
                                         enabledBorder: InputBorder.none,
@@ -240,12 +281,12 @@ class _shopInfoState extends State<shopInfo> {
                                         setState(() {
                                           loader2 = true;
                                         });
-                                        Map<String, dynamic> loginToMap = {
+                                        /*  Map<String, dynamic> loginToMap = {
                                           "image": file,
                                           "name": Namecontroller.text,
                                           "contact": Contactcontroller.text,
                                           "address": Addresscontroller.text,
-                                        };
+                                        }; */
                                         await DataApiService.instance
                                             .updateStoreInfo(
                                                 Namecontroller.text,

@@ -6,10 +6,12 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../constants.dart';
+import 'forgotPassword.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -23,6 +25,7 @@ class _LoginState extends State<Login> {
   final passcontroller = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool loader = false;
+  bool view = true;
   // callApi() async {
   //   setState(() {
   //     loader = true;
@@ -38,6 +41,8 @@ class _LoginState extends State<Login> {
     size: 3.h,
     color: Colors.white,
   );
+
+  bool status = false;
   @override
   void initState() {
     // TODO: implement initState
@@ -80,11 +85,7 @@ class _LoginState extends State<Login> {
               height: 0.5.h,
             ),
             Container(
-              padding: EdgeInsets.fromLTRB(25, 0, 0, 0),
               width: 88.w,
-              decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.withOpacity(0.2)),
-                  borderRadius: BorderRadius.circular(6)),
               child: TextFormField(
                 validator: (value) {
                   if (value!.isEmpty) {
@@ -93,10 +94,22 @@ class _LoginState extends State<Login> {
                 },
                 controller: emailcontroller,
                 decoration: InputDecoration(
-                    hintText: "Your email address",
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    border: InputBorder.none,
+                    hintText: "email address",
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.grey.withOpacity(0.2),
+                        ),
+                        borderRadius: BorderRadius.circular(6)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.grey.withOpacity(0.2),
+                        ),
+                        borderRadius: BorderRadius.circular(6)),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.grey.withOpacity(0.2),
+                        ),
+                        borderRadius: BorderRadius.circular(6)),
                     hintStyle: TextStyle(fontSize: 15)),
               ),
             ),
@@ -109,28 +122,62 @@ class _LoginState extends State<Login> {
               height: 0.5.h,
             ),
             Container(
-              padding: EdgeInsets.fromLTRB(25, 0, 0, 0),
               width: 88.w,
-              decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.withOpacity(0.2)),
-                  borderRadius: BorderRadius.circular(6)),
               child: TextFormField(
                 validator: (value) {
                   if (value!.isEmpty) {
                     return "This field is required";
                   }
                 },
+                obscureText: view,
                 controller: passcontroller,
                 decoration: InputDecoration(
-                    suffixIcon: Icon(
-                      Icons.remove_red_eye,
-                      size: 20,
-                    ),
-                    hintText: "Your Password",
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    border: InputBorder.none,
+                    suffixIcon: InkWell(
+                        onTap: () {
+                          setState(() {
+                            view = !view;
+                          });
+                        },
+                        child: Icon(
+                            view ? Icons.visibility : Icons.visibility_off)),
+                    hintText: "Password",
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.grey.withOpacity(0.2),
+                        ),
+                        borderRadius: BorderRadius.circular(6)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.grey.withOpacity(0.2),
+                        ),
+                        borderRadius: BorderRadius.circular(6)),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.grey.withOpacity(0.2),
+                        ),
+                        borderRadius: BorderRadius.circular(6)),
                     hintStyle: TextStyle(fontSize: 15)),
+              ),
+            ),
+            SizedBox(
+              height: 3.h,
+            ),
+            Padding(
+              padding: EdgeInsets.only(right: 15),
+              child: InkWell(
+                onTap: () {
+                  Get.to(() => ForgotPassword());
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Text(
+                      "Forgot Password ?",
+                      style:
+                          TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
               ),
             ),
             SizedBox(
@@ -143,72 +190,47 @@ class _LoginState extends State<Login> {
 
               child: FlatButton(
                   onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      StatusCode = '403';
-                      setState(() {
-                        loader = true;
-                      });
-                      Map<String, dynamic> loginToMap = {
-                        "email": emailcontroller.text,
-                        "password": passcontroller.text,
-                      };
-                      await DataApiService.instance
-                          .getlogintoken(loginToMap, context);
-                      DataApiService.instance.getCategoryList();
-                      DataApiService.instance.getShippingCost();
-                      DataApiService.instance.getBrand();
-                      DataApiService.instance.getshopinfo();
-                      DataApiService.instance.getcolorlist();
-                      DataApiService.instance.getsizelist();
-                      DataApiService.instance.getSellerOrderList();
-                      await DataApiService.instance.getDashboard();
-                      
-                      setState(() {
-                        loader = false;
-                      });
-                      // GlobalSnackBar.show(context, LoginSnackMessage);
-                      StatusCode == '200'
-                          ? Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => navBar(index: 0, see: 1)))
-                          : AwesomeDialog(
-                              context: context,
-                              dialogType: DialogType.ERROR,
-                              animType: AnimType.BOTTOMSLIDE,
-                              title: 'Error',
-                              desc: SnackMessage,
-                              btnOkOnPress: () {},
-                            ).show();
-                    } else {
-                      StatusCode = '403';
-                    }
+                    if (loader == false) {
+                      if (_formKey.currentState!.validate()) {
+                        StatusCode = '403';
+                        setState(() {
+                          loader = true;
+                        });
+                        Map<String, dynamic> loginToMap = {
+                          "email": emailcontroller.text,
+                          "password": passcontroller.text,
+                        };
+                        status = await DataApiService.instance
+                            .getlogintoken(loginToMap, context);
+                        setState(() {
+                          loader = false;
+                        });
+                        if (status) {
+                          await DataApiService.instance.getDashboard();
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => navBar(index: 0, see: 1)));
+                          DataApiService.instance.getCategoryList(context);
+                          DataApiService.instance.getShippingCost();
+                          DataApiService.instance.getBrand();
+                          DataApiService.instance.getshopinfo();
+                          DataApiService.instance.getcolorlist();
+                          DataApiService.instance.getsizelist();
+                          DataApiService.instance.getsizelist();
+                          DataApiService.instance.getSellerOrderList(context);
 
-                    // setState(() async {
-                    //   Emaillogin = emailcontroller.text;
-                    //   PassLogin = passcontroller.text;
-                    //   await callApi();
-                    //   GlobalSnackBar.show(context, LoginSnackMessage);
-                    /* StatusCode == '200'
-                        ? AwesomeDialog(
-                            context: context,
-                            dialogType: DialogType.SUCCES,
-                            animType: AnimType.BOTTOMSLIDE,
-                            title: 'Success',
-                            desc: SnackMessage,
-                            btnOkOnPress: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) =>
-                                      navBar(index: 0, see: 1)));
-                            },
-                          ).show()
-                        : AwesomeDialog(
+                          await DataApiService.instance.updateFcmToken();
+                        } else {
+                          AwesomeDialog(
                             context: context,
                             dialogType: DialogType.ERROR,
                             animType: AnimType.BOTTOMSLIDE,
                             title: 'Error',
                             desc: SnackMessage,
                             btnOkOnPress: () {},
-                          ).show(); */
-                    // });
+                          ).show();
+                        }
+                      }
+                    }
                   },
                   child: loader == true
                       ? spinkit
@@ -227,29 +249,30 @@ class _LoginState extends State<Login> {
               height: 3.h,
             ),
             Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    child: Text(
-                      "Don't have an account?",
-                      style: TextStyle(fontSize: 13),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => signup()));
-                    },
-                    child: Container(
-                      child: Text(
+              child: InkWell(
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onTap: () {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) => signup()));
+                },
+                child: Container(
+                  height: 50,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Text(
+                        "Don't have an account?",
+                        style: TextStyle(fontSize: 13),
+                      ),
+                      Text(
                         " Sign Up",
                         style: TextStyle(
                             fontSize: 13, fontWeight: FontWeight.bold),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
             SizedBox(

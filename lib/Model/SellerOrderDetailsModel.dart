@@ -1,15 +1,4 @@
-// To parse required this JSON data, do
-//
-//     final sellerOrderDetailsModel = sellerOrderDetailsModelFromJson(jsonString);
-
-import 'dart:convert';
-
-List<SellerOrderDetailsModel> sellerOrderDetailsModelFromJson(String str) =>
-    List<SellerOrderDetailsModel>.from(
-        json.decode(str).map((x) => SellerOrderDetailsModel.fromJson(x)));
-
-String sellerOrderDetailsModelToJson(List<SellerOrderDetailsModel> data) =>
-    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+import 'package:af24/Model/ProductlistModel.dart';
 
 class SellerOrderDetailsModel {
   SellerOrderDetailsModel({
@@ -23,6 +12,7 @@ class SellerOrderDetailsModel {
     required this.tax,
     required this.discount,
     required this.deliveryStatus,
+    required this.orderStatus,
     required this.paymentStatus,
     required this.createdAt,
     required this.updatedAt,
@@ -35,6 +25,7 @@ class SellerOrderDetailsModel {
     required this.userEmail,
     required this.userName,
     required this.userContact,
+    required this.paymentMethod,
   });
 
   int id;
@@ -47,18 +38,20 @@ class SellerOrderDetailsModel {
   double tax;
   double discount;
   String deliveryStatus;
+  String orderStatus;
   String paymentStatus;
   DateTime createdAt;
   DateTime updatedAt;
   dynamic shippingMethodId;
   String variant;
-  String variation;
-  String discountType;
-  int isStockDecreased;
-  int refundRequest;
+  String? variation;
+  String? discountType;
+  int? isStockDecreased;
+  int? refundRequest;
   String userEmail;
   String userName;
   String userContact;
+  String paymentMethod;
 
   factory SellerOrderDetailsModel.fromJson(Map<String, dynamic> json) =>
       SellerOrderDetailsModel(
@@ -69,9 +62,11 @@ class SellerOrderDetailsModel {
         productDetails: ProductDetails.fromJson(json["product_details"]),
         qty: json["qty"],
         price: json["price"],
+        paymentMethod: json["payment_method"],
         tax: json["tax"].toDouble(),
         discount: json["discount"].toDouble(),
         deliveryStatus: json["delivery_status"],
+        orderStatus: json["order_status"],
         paymentStatus: json["payment_status"],
         createdAt: DateTime.parse(json["created_at"]),
         updatedAt: DateTime.parse(json["updated_at"]),
@@ -85,31 +80,6 @@ class SellerOrderDetailsModel {
         userName: json["user_name"],
         userContact: json["user_contact"],
       );
-
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "order_id": orderId,
-        "product_id": productId,
-        "seller_id": sellerId,
-        "product_details": productDetails.toJson(),
-        "qty": qty,
-        "price": price,
-        "tax": tax,
-        "discount": discount,
-        "delivery_status": deliveryStatus,
-        "payment_status": paymentStatus,
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
-        "shipping_method_id": shippingMethodId,
-        "variant": variant,
-        "variation": variation,
-        "discount_type": discountType,
-        "is_stock_decreased": isStockDecreased,
-        "refund_request": refundRequest,
-        "user_email": userEmail,
-        "user_name": userName,
-        "user_contact": userContact,
-      };
 }
 
 class ProductDetails {
@@ -184,29 +154,29 @@ class ProductDetails {
   int variantProduct;
   List<dynamic> attributes;
   List<dynamic> choiceOptions;
-  List<dynamic> variation;
+  List<Variation> variation;
   int published;
   int unitPrice;
   double purchasePrice;
   int tax;
-  String taxType;
-  int discount;
-  String discountType;
-  int currentStock;
-  String details;
-  int freeShipping;
+  dynamic taxType;
+  dynamic discount;
+  dynamic discountType;
+  dynamic currentStock;
+  dynamic details;
+  dynamic freeShipping;
   dynamic attachment;
   DateTime createdAt;
   DateTime updatedAt;
   int status;
-  int featuredStatus;
+  dynamic featuredStatus;
   String? metaTitle;
   String? metaDescription;
   String? metaImage;
   int requestStatus;
   dynamic deniedNote;
-  int shippingCost;
-  int multiplyQty;
+  dynamic shippingCost;
+  dynamic multiplyQty;
   dynamic tempShippingCost;
   dynamic isShippingCostUpdated;
   int reviewsCount;
@@ -235,7 +205,8 @@ class ProductDetails {
         variantProduct: json["variant_product"],
         attributes: List<dynamic>.from(json["attributes"].map((x) => x)),
         choiceOptions: List<dynamic>.from(json["choice_options"].map((x) => x)),
-        variation: List<dynamic>.from(json["variation"].map((x) => x)),
+        variation: List<Variation>.from(
+            json["variation"].map((x) => Variation.fromJson(x))),
         published: json["published"],
         unitPrice: json["unit_price"],
         purchasePrice: json["purchase_price"].toDouble(),
@@ -264,57 +235,6 @@ class ProductDetails {
         translations: List<dynamic>.from(json["translations"].map((x) => x)),
         reviews: List<dynamic>.from(json["reviews"].map((x) => x)),
       );
-
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "added_by": addedBy,
-        "user_id": userId,
-        "name": name,
-        "slug": slug,
-        "category_ids": List<dynamic>.from(categoryIds.map((x) => x.toJson())),
-        "brand_id": brandId,
-        "unit": unit,
-        "min_qty": minQty,
-        "refundable": refundable,
-        "images": List<dynamic>.from(images.map((x) => x)),
-        "thumbnail": thumbnail,
-        "featured": featured,
-        "flash_deal": flashDeal,
-        "video_provider": videoProvider,
-        "video_url": videoUrl,
-        "colors": List<dynamic>.from(colors.map((x) => x)),
-        "variant_product": variantProduct,
-        "attributes": List<dynamic>.from(attributes.map((x) => x)),
-        "choice_options": List<dynamic>.from(choiceOptions.map((x) => x)),
-        "variation": List<dynamic>.from(variation.map((x) => x)),
-        "published": published,
-        "unit_price": unitPrice,
-        "purchase_price": purchasePrice,
-        "tax": tax,
-        "tax_type": taxType,
-        "discount": discount,
-        "discount_type": discountType,
-        "current_stock": currentStock,
-        "details": details,
-        "free_shipping": freeShipping,
-        "attachment": attachment,
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
-        "status": status,
-        "featured_status": featuredStatus,
-        "meta_title": metaTitle,
-        "meta_description": metaDescription,
-        "meta_image": metaImage,
-        "request_status": requestStatus,
-        "denied_note": deniedNote,
-        "shipping_cost": shippingCost,
-        "multiply_qty": multiplyQty,
-        "temp_shipping_cost": tempShippingCost,
-        "is_shipping_cost_updated": isShippingCostUpdated,
-        "reviews_count": reviewsCount,
-        "translations": List<dynamic>.from(translations.map((x) => x)),
-        "reviews": List<dynamic>.from(reviews.map((x) => x)),
-      };
 }
 
 class CategoryId {

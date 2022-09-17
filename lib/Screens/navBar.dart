@@ -1,7 +1,7 @@
 import 'package:af24/Screens/chatNotification.dart';
 import 'package:af24/Screens/dashBoard.dart';
-import 'package:af24/Screens/newOrderConfirmed.dart';
-import 'package:af24/Screens/newsFeedMain.dart';
+import 'package:af24/Screens/OrdersList.dart';
+import 'package:af24/Screens/MyProducts.dart';
 import 'package:af24/Screens/uploadProduct.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';

@@ -26,7 +26,9 @@ final CUSTOMER_TOKEN = ValueNotifier("");
 
 late shopinfoModel shopinfoContent;
 List<ListElement> productlistContent = [];
-
+String? product_id = '';
+String? customer_id = '';
+String title = '';
 List<CategoryModel> catergorylist = [];
 List<AllCategoryShippingCost> categorycostlist = [];
 List<GetBrandModel> brandlist = [];
@@ -45,7 +47,7 @@ List<GetSecretUser> secretUserList = [];
 List<GetlinkModel> getlinkuser = [];
 // List<GetDashboardModel> getDashboardContent = [];
 GetDashboardModel? getDashboardContent;
-
+bool dialogUploadproduct = false;
 String imagepath = '';
 String thumbnail = '';
 String imageName = '';
@@ -69,6 +71,9 @@ String? Price_type;
 String StatusCode = '403';
 String SnackMessage = "";
 List<String> myImages = [];
+final LANG_CODE = ValueNotifier("en");
+
+
 
 /* class combination {
   final String color;
@@ -78,7 +83,6 @@ List<String> myImages = [];
 
 List<combination> comb = [];
  */
-
 
 void setUserLoggedIn(bool key) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -95,6 +99,7 @@ void saveUserDataToken({@required token}) async {
   SharedPreferences pref = await SharedPreferences.getInstance();
   await pref.setString("token", token);
 }
+
 Future getUserDataToken() async {
   SharedPreferences pref = await SharedPreferences.getInstance();
   String? result = pref.getString("token");

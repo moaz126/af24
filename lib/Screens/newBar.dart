@@ -1,13 +1,13 @@
 import 'package:af24/Screens/navBar.dart';
-import 'package:af24/Screens/newsFeedMain.dart';
-import 'package:af24/Screens/products.dart';
+import 'package:af24/Screens/MyProducts.dart';
+import 'package:af24/Screens/productDetail.dart';
 import 'package:af24/Screens/uploadProduct.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'chatNotification.dart';
 import 'dashBoard.dart';
-import 'newOrderConfirmed.dart';
-import 'orderConfirmed.dart';
+import 'OrdersList.dart';
+
 
 class newNavBar extends StatefulWidget {
   int index = -1;

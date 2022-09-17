@@ -22,6 +22,7 @@ class shopinfoModel {
     required this.banner,
     required this.rating,
     required this.ratingCount,
+    required this.email,
   });
 
   int id;
@@ -35,10 +36,12 @@ class shopinfoModel {
   String banner;
   int rating;
   int ratingCount;
+  String email;
 
   factory shopinfoModel.fromJson(Map<String, dynamic> json) => shopinfoModel(
         id: json["id"],
         sellerId: json["seller_id"],
+        email: json["email"],
         name: json["name"],
         address: json["address"],
         contact: json["contact"],

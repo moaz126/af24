@@ -24,12 +24,12 @@ class _SplashScreenState extends State<SplashScreen> {
       bool checkSession = await DataApiService.instance.getDashboard();
       if (checkSession) {
         DataApiService.instance.getShippingCost();
-        DataApiService.instance.getCategoryList();
+        DataApiService.instance.getCategoryList(context);
         DataApiService.instance.getBrand();
         DataApiService.instance.getshopinfo();
         DataApiService.instance.getcolorlist();
         DataApiService.instance.getsizelist();
-        DataApiService.instance.getSellerOrderList();
+        DataApiService.instance.getSellerOrderList(context);
         Get.offAll(() => navBar(index: 0, see: 1));
       } else {
         setUserLoggedIn(false);

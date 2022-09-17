@@ -1,14 +1,3 @@
-// To parse this JSON data, do
-//
-//     final categoryCostModel = categoryCostModelFromJson(jsonString);
-
-import 'dart:convert';
-
-CategoryCostModel categoryCostModelFromJson(String str) =>
-    CategoryCostModel.fromJson(json.decode(str));
-
-String categoryCostModelToJson(CategoryCostModel data) =>
-    json.encode(data.toJson());
 
 class CategoryCostModel {
   CategoryCostModel({
@@ -24,10 +13,6 @@ class CategoryCostModel {
                 .map((x) => AllCategoryShippingCost.fromJson(x))),
       );
 
-  Map<String, dynamic> toJson() => {
-        "all_category_shipping_cost":
-            List<dynamic>.from(allCategoryShippingCost.map((x) => x.toJson())),
-      };
 }
 
 class AllCategoryShippingCost {
@@ -65,16 +50,6 @@ class AllCategoryShippingCost {
             : Category.fromJson(json["category"]),
       );
 
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "seller_id": sellerId,
-        "category_id": categoryId,
-        "cost": cost,
-        "multiply_qty": multiplyQty == null ? null : multiplyQty,
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
-        "category": category == null ? null : category!.toJson(),
-      };
 }
 
 class Category {
@@ -117,18 +92,4 @@ class Category {
         priority: json["priority"],
         translations: List<dynamic>.from(json["translations"].map((x) => x)),
       );
-
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": name,
-        "slug": slug,
-        "icon": icon,
-        "parent_id": parentId,
-        "position": position,
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
-        "home_status": homeStatus,
-        "priority": priority,
-        "translations": List<dynamic>.from(translations.map((x) => x)),
-      };
 }

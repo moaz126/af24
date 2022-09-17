@@ -1,31 +1,4 @@
-// To parse this JSON data, do
-//
-//     final productlistModel = productlistModelFromJson(jsonString);
-
 import 'dart:convert';
-
-ProductlistModel productlistModelFromJson(String str) =>
-    ProductlistModel.fromJson(json.decode(str));
-
-class ProductlistModel {
-  ProductlistModel({
-    required this.list,
-    required this.imagesPath,
-    required this.thumbnailPath,
-  });
-
-  List<ListElement> list;
-  String imagesPath;
-  String thumbnailPath;
-
-  factory ProductlistModel.fromJson(Map<String, dynamic> json) =>
-      ProductlistModel(
-        list: List<ListElement>.from(
-            json["list"].map((x) => ListElement.fromJson(x))),
-        imagesPath: json["images_path"],
-        thumbnailPath: json["thumbnail_path"],
-      );
-}
 
 class ListElement {
   ListElement({
@@ -83,6 +56,10 @@ class ListElement {
     required this.translations,
     required this.reviews,
     required this.subCategoryName,
+    required this.likes,
+    required this.comments,
+    required this.colorsList,
+    required this.wholesalePrice,
   });
 
   int id;
@@ -90,7 +67,7 @@ class ListElement {
   int userId;
   String name;
   String slug;
-  String categoryIds;
+  List<CategoryIds> categoryIds;
   int brandId;
   dynamic unit;
   int minQty;
@@ -105,14 +82,14 @@ class ListElement {
   int variantProduct;
   dynamic attributes;
   dynamic choiceOptions;
-  String variation;
+  List<Variation> variation;
   int published;
   int unitPrice;
   double purchasePrice;
   dynamic priceType;
   double tax;
   String? taxType;
-  int discount;
+  double discount;
   String? discountType;
   int? currentStock;
   String? details;
@@ -139,6 +116,10 @@ class ListElement {
   List<dynamic> translations;
   List<Review> reviews;
   String? subCategoryName;
+  int? likes;
+  int? comments;
+  List<ColorsList> colorsList;
+  dynamic wholesalePrice;
 
   factory ListElement.fromJson(Map<String, dynamic> json) => ListElement(
         id: json["id"],
@@ -146,7 +127,8 @@ class ListElement {
         userId: json["user_id"],
         name: json["name"],
         slug: json["slug"],
-        categoryIds: json["category_ids"],
+        categoryIds: List<CategoryIds>.from(
+            json["category_ids"].map((x) => CategoryIds.fromJson(x))),
         brandId: json["brand_id"],
         unit: json["unit"],
         minQty: json["min_qty"],
@@ -157,18 +139,19 @@ class ListElement {
         flashDeal: json["flash_deal"],
         videoProvider: json["video_provider"],
         videoUrl: json["video_url"],
-        colors: json["colors"],
+        colors: jsonDecode(json["colors"]),
         variantProduct: json["variant_product"],
         attributes: json["attributes"],
         choiceOptions: json["choice_options"],
-        variation: json["variation"],
+        variation: List<Variation>.from(
+            json["variation"].map((x) => Variation.fromJson(x))),
         published: json["published"],
         unitPrice: json["unit_price"],
         purchasePrice: json["purchase_price"].toDouble(),
         priceType: json["price_type"],
         tax: json["tax"].toDouble(),
         taxType: json["tax_type"] == null ? null : json["tax_type"],
-        discount: json["discount"],
+        discount: json["discount"].toDouble(),
         discountType:
             json["discount_type"] == null ? null : json["discount_type"],
         currentStock:
@@ -195,12 +178,17 @@ class ListElement {
         reviewsCount: json["reviews_count"],
         categoryName: json["category_name"],
         brandName: json["brand_name"],
+        likes: json["likes"],
+        comments: json["comments"],
         translations: List<dynamic>.from(json["translations"].map((x) => x)),
         reviews:
             List<Review>.from(json["reviews"].map((x) => Review.fromJson(x))),
         subCategoryName: json["sub_category_name"] == null
             ? null
             : json["sub_category_name"],
+        colorsList: List<ColorsList>.from(
+            json["colorsList"].map((x) => ColorsList.fromJson(x))),
+        wholesalePrice: json["wholesale_price"],
       );
 }
 
@@ -238,4 +226,83 @@ class Review {
         createdAt: DateTime.parse(json["created_at"]),
         updatedAt: DateTime.parse(json["updated_at"]),
       );
+}
+
+class Variation {
+  Variation({
+    required this.type,
+    required this.price,
+    required this.sku,
+    required this.qty,
+  });
+
+  String type;
+  int price;
+  dynamic sku;
+  dynamic qty;
+
+  factory Variation.fromJson(Map<String, dynamic> json) => Variation(
+        type: json["type"],
+        price: json["price"],
+        sku: json["sku"] == null ? null : json["sku"],
+        qty: json["qty"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "type": type,
+        "price": price,
+        "sku": sku == null ? null : sku,
+        "qty": qty,
+      };
+}
+
+class CategoryIds {
+  CategoryIds({
+    required this.id,
+    required this.position,
+  });
+
+  dynamic id;
+  dynamic position;
+
+  factory CategoryIds.fromJson(Map<String, dynamic> json) => CategoryIds(
+        id: json["id"],
+        position: json["position"],
+      );
+}
+
+class ColorsList {
+  ColorsList({
+    required this.id,
+    required this.name,
+    required this.code,
+    this.userId,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  int id;
+  String name;
+  String code;
+  dynamic userId;
+  DateTime createdAt;
+  DateTime updatedAt;
+
+  factory ColorsList.fromJson(Map<String, dynamic> json) => ColorsList(
+        id: json["id"],
+        name: json["name"],
+        code: json["code"],
+        userId: json["user_id"],
+        createdAt: DateTime.parse(json["created_at"]),
+        updatedAt: DateTime.parse(json["updated_at"]),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "name": name,
+        "code": code,
+        "user_id": userId,
+        "created_at": createdAt.toIso8601String(),
+        "updated_at": updatedAt.toIso8601String(),
+      };
 }

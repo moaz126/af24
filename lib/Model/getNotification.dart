@@ -4,46 +4,56 @@
 
 import 'dart:convert';
 
-List<GetNotificationModel> getNotificationModelFromJson(String str) => List<GetNotificationModel>.from(json.decode(str).map((x) => GetNotificationModel.fromJson(x)));
+List<GetNotificationModel> getNotificationModelFromJson(String str) =>
+    List<GetNotificationModel>.from(
+        json.decode(str).map((x) => GetNotificationModel.fromJson(x)));
 
-String getNotificationModelToJson(List<GetNotificationModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String getNotificationModelToJson(List<GetNotificationModel> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class GetNotificationModel {
-    GetNotificationModel({
-        required this.id,
-        required this.title,
-        required this.description,
-        required this.image,
-        required this.status,
-        required this.userId,
-        required this.type,
-        required this.createdAt,
-        required this.updatedAt,
-    });
+  GetNotificationModel({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.image,
+    required this.status,
+    required this.userId,
+    required this.type,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.orderId,
+    required this.customerId,
+  });
 
-    int id;
-    String title;
-    String description;
-    dynamic image;
-    int status;
-    int userId;
-    String type;
-    dynamic createdAt;
-    dynamic updatedAt;
+  int id;
+  String title;
+  String description;
+  dynamic image;
+  int status;
+  int userId;
+  String type;
+  String orderId;
+  String customerId;
+  dynamic createdAt;
+  dynamic updatedAt;
 
-    factory GetNotificationModel.fromJson(Map<String, dynamic> json) => GetNotificationModel(
+  factory GetNotificationModel.fromJson(Map<String, dynamic> json) =>
+      GetNotificationModel(
         id: json["id"],
         title: json["title"],
         description: json["description"],
         image: json["image"],
-        status: json["status"],
+        status: json["seen"],
         userId: json["user_id"],
         type: json["type"],
         createdAt: json["created_at"],
         updatedAt: json["updated_at"],
-    );
+        orderId: json["order_id"].toString(),
+        customerId: json["customer_id"].toString(),
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "id": id,
         "title": title,
         "description": description,
@@ -53,5 +63,5 @@ class GetNotificationModel {
         "type": type,
         "created_at": createdAt,
         "updated_at": updatedAt,
-    };
+      };
 }

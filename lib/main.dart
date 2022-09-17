@@ -1,7 +1,11 @@
+import 'package:af24/Screens/chat_Inbox.dart';
 import 'package:af24/Screens/dashBoard.dart';
 import 'package:af24/Screens/login.dart';
 import 'package:af24/Screens/navBar.dart';
+import 'package:af24/Screens/productDetail.dart';
 import 'package:af24/Screens/splashscreen.dart';
+import 'package:af24/api/auth_af24.dart';
+import 'package:af24/api/global_variable.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +24,26 @@ void _handleMessage(RemoteMessage message) {
   print(message.data['winner']);
 }
 
-void onSelectNotification(String? payload) {}
+Future<void> onSelectNotification(String? payload) async {
+  if (title == 'Payment Link Request') {
+    await DataApiService.instance.getmainproductlist();
+    for (var i = 0; i < productlistContent.length; i++) {
+      if (product_id == productlistContent[i].id.toString()) {
+        Get.to(products(i));
+      }
+    }
+  } else if (title == 'New message') {
+    await DataApiService.instance.getmainUserChat();
+    for (int i = 0; i < getUserList.length; i++) {
+      print(getUserList[i].id.toString());
+      print(customer_id);
+      if (getUserList[i].userId.toString() == customer_id) {
+        print('click');
+        Get.to(chatBox(imagePath: 'assets/Bag0.jpg', index: i));
+      }
+    }
+  }
+}
 
 Future<void> _selectNotification(RemoteMessage message) async {
   AndroidNotificationDetails androidPlatformChannelSpecifics =
@@ -33,6 +56,9 @@ Future<void> _selectNotification(RemoteMessage message) async {
       NotificationDetails(android: androidPlatformChannelSpecifics);
   print("message.data");
   print(message.data);
+  title = message.data['title'];
+  product_id = message.data['product_id'];
+  customer_id = message.data['customer_id'];
   await FlutterLocalNotificationsPlugin().show(123, message.notification!.title,
       message.notification!.body, platformChannelSpecifics,
       payload: 'data');

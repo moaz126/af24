@@ -1,13 +1,3 @@
-// To parse this JSON data, do
-//
-//     final stockOutModel = stockOutModelFromJson(jsonString);
-
-import 'dart:convert';
-
-StockOutModel stockOutModelFromJson(String str) =>
-    StockOutModel.fromJson(json.decode(str));
-
-String stockOutModelToJson(StockOutModel data) => json.encode(data.toJson());
 
 class StockOutModel {
   StockOutModel({
@@ -29,10 +19,4 @@ class StockOutModel {
         products: List<dynamic>.from(json["products"].map((x) => x)),
       );
 
-  Map<String, dynamic> toJson() => {
-        "total_size": totalSize,
-        "limit": limit,
-        "offset": offset,
-        "products": List<dynamic>.from(products.map((x) => x)),
-      };
 }

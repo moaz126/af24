@@ -1,30 +1,23 @@
-import 'dart:convert';
 import 'dart:io';
-
+import 'package:af24/Model/GetcategoriesModel.dart';
 import 'package:af24/Model/getColors.dart';
+import 'package:af24/Model/getbrand.dart';
 import 'package:af24/Model/getsizeModel.dart';
 import 'package:af24/Screens/image_crop.dart';
-import 'package:af24/api/urls.dart';
+import 'package:af24/api/auth_af24.dart';
+import 'package:af24/api/global_variable.dart';
+import 'package:af24/constants.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sizer/sizer.dart';
-
-import 'package:af24/Model/GetcategoriesModel.dart';
-import 'package:af24/Model/getbrand.dart';
-import 'package:af24/Screens/dashBoard.dart';
-import 'package:af24/api/auth_af24.dart';
-import 'package:af24/api/global_variable.dart';
-import 'package:af24/constants.dart';
-
 import 'navBar.dart';
-import 'newBar.dart';
 
 class uploadProduct extends StatefulWidget {
   @override
@@ -36,20 +29,25 @@ class _uploadProductState extends State<uploadProduct> {
   final BrandidController = TextEditingController();
   final ShippingcostController = TextEditingController();
   final PurchasePriceController = TextEditingController();
+  final WholesalePriceController = TextEditingController();
   final SubnameController = TextEditingController();
   final DescriptionController = TextEditingController();
   final ColorController = TextEditingController();
   final SizeController = TextEditingController();
+  final skucontro = TextEditingController();
+  final quantitycontrol = TextEditingController();
   List<TextEditingController> _textFieldController = [];
   List<TextEditingController> _textColorController = [];
   // create some values
-  Color pickerColor = Color(0xff443a49);
-  Color currentColor = Color(0xff443a49);
-  bool colorcheck = false;
-  bool sizepicker = false;
-
+  Color pickerColor = const Color(0xff443a49);
+  Color currentColor = const Color(0xff443a49);
+  List<bool> colorcheck = [false];
+  List<bool> sizepicker = [false];
+  String? subcategoryValue;
   String allowRequests = '0';
+  bool showGenerate = false;
   bool getvalue = false;
+  final _formKey = GlobalKey<FormState>();
 // ValueChanged<Color> callback
   void changeColor(Color color) {
     setState(() => pickerColor = color);
@@ -73,9 +71,9 @@ class _uploadProductState extends State<uploadProduct> {
     'Shoes',
   ];
   int check = 0;
+  List<int> colorsSelectedIndex = [];
   int subcheck = 0;
-  List<int> text = [1, 2, 3, 4];
-  int loop = 0;
+  int loop = 1;
   late File file;
   bool showsub = false;
   late int index;
@@ -89,10 +87,15 @@ class _uploadProductState extends State<uploadProduct> {
 
   String? dropdownvalue4;
   var items4 = [
-    'Stock',
-    'Re-Stock',
+    'Active',
+    'In-Active',
   ];
   final spinkit = SpinKitSpinningLines(
+    size: 3.h,
+    color: Colors.white,
+  );
+  bool loaderColor = false;
+  final spinkitColor = SpinKitSpinningLines(
     size: 3.h,
     color: Colors.white,
   );
@@ -122,6 +125,9 @@ class _uploadProductState extends State<uploadProduct> {
 
   generateCombintaion() {
     int count = 0;
+    print(colorVarient);
+    print(sizeVarient);
+    combination = [];
     for (var i = 0; i < colorVarient.length; i++) {
       for (var j = 0; j < sizeVarient.length; j++) {
         combination.add(colorVarient[i] + '-' + sizeVarient[j]);
@@ -154,298 +160,384 @@ class _uploadProductState extends State<uploadProduct> {
     super.initState();
   }
 
+  Future<dynamic> _onBackPressed() async {
+    return AwesomeDialog(
+      context: context,
+      dialogType: DialogType.QUESTION,
+      animType: AnimType.BOTTOMSLIDE,
+      title: 'Exit',
+      desc: 'Are you sure you want to Exit?',
+      btnCancelOnPress: () {},
+      btnCancelText: 'No',
+      btnOkText: 'Yes',
+      btnOkOnPress: () async {
+        SystemNavigator.pop();
+      },
+    ).show();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    images.clear();
+    myImages.clear();
+    imagesfile.clear();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // bottomNavigationBar: newNavBar(
-      //   index: 3,
-      // ),
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        title: Text(
-          'Product Upload',
-          style: TextStyle(color: Colors.black),
+    return WillPopScope(
+      onWillPop: () async {
+        bool? result = await _onBackPressed();
+        if (result == null) {
+          result = false;
+        }
+        return result!;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Colors.white,
+          title: const Text(
+            'Upload Product',
+            style: TextStyle(color: Colors.black),
+          ),
+          leading: InkWell(
+              onTap: () {
+                Get.offAll((navBar(index: 0, see: 1)));
+              },
+              child: const Icon(
+                Icons.arrow_back_ios,
+                color: Colors.black,
+              )),
+          centerTitle: true,
         ),
-        leading: InkWell(
-            onTap: () {
-              Get.offAll((navBar(index: 0, see: 1)));
-            },
-            child: Icon(
-              Icons.arrow_back_ios,
-              color: Colors.black,
-            )),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        child: Container(
-          decoration: BoxDecoration(color: Colors.grey[200]),
-          width: MediaQuery.of(context).size.width,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 50.0, left: 20, bottom: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Product Details',
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 25),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  'Add Images',
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 17.sp),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Container(
-                  padding: EdgeInsets.only(right: 20),
-                  height: 150,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      Row(
-                        children: [
-                          for (int i = 0; i < myImages.length; i++)
-                            Stack(
-                              children: [
-                                InkWell(
-                                  onTap: () async {
-                                    /*  await selectFile();
-                                    Map<String, dynamic> upload = {
-                                      'image': file.toString(),
-                                      'type': 'product',
-                                    }; */
-                                    await _uploadImage();
-                                  },
-                                  child: Container(
-                                    height: 140,
-                                    width: 140,
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(5)),
-                                        border: Border.all(
-                                          color: Colors.grey.withOpacity(0.4),
-                                        ),
-                                        color: Colors.white),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(3.0),
-                                      child: myImages[i].isEmpty
-                                          ? DottedBorder(
-                                              dashPattern: [4, 6],
-                                              strokeWidth: 2,
-                                              color: Colors.grey,
-                                              child: Container(
-                                                alignment: Alignment.center,
-                                                child: Image.asset(
-                                                  'assets/icons/Seller app icon (19).png',
-                                                  height: 5.h,
-                                                  color: Colors.grey[400],
-                                                ),
-                                              ),
-                                            )
-                                          : Image.file(
-                                              File(myImages[i]),
-                                              fit: BoxFit.cover,
-                                              width: double.infinity,
-                                            ),
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                    right: 5,
-                                    top: 5,
-                                    child: InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            /*  images.removeAt(i);
-                                            imagesfile.removeAt(i); */
-                                            myImages.removeAt(i);
-                                          });
-
-                                          print("helooooooooooooo");
-                                        },
-                                        child: Icon(Icons.close)))
-                              ],
-                            ),
-                          SizedBox(
-                            width: 5,
-                          ),
-                          InkWell(
-                            onTap: () async {
-                              /*   await selectFile();
-                              Map<String, dynamic> upload = {
-                                'image': file.toString(),
-                                'type': 'product',
-                              }; */
-                              await _uploadImage();
-                              /*  Get.to(imageCrop()); */
-                            },
-                            child: Container(
-                              height: 140,
-                              width: 140,
-                              decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(5)),
-                                  border: Border.all(
-                                    color: Colors.grey.withOpacity(0.4),
-                                  ),
-                                  color: Colors.white),
-                              child: Padding(
-                                  padding: const EdgeInsets.all(3.0),
-                                  child: DottedBorder(
-                                    dashPattern: [4, 6],
-                                    strokeWidth: 2,
-                                    color: Colors.grey,
+        body: SingleChildScrollView(
+            child: Form(
+          key: _formKey,
+          child: Container(
+            decoration: BoxDecoration(color: Colors.grey[200]),
+            width: MediaQuery.of(context).size.width,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 50.0, left: 20, bottom: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Product Details',
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 25),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    'Add Images',
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17.sp),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    padding: const EdgeInsets.only(right: 20),
+                    height: 150,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        Row(
+                          children: [
+                            for (int i = 0; i < myImages.length; i++)
+                              Stack(
+                                children: [
+                                  InkWell(
+                                    onTap: () async {
+                                      /*  await selectFile();
+                                      Map<String, dynamic> upload = {
+                                        'image': file.toString(),
+                                        'type': 'product',
+                                      }; */
+                                      await _uploadImage();
+                                    },
                                     child: Container(
-                                      alignment: Alignment.center,
-                                      child: Image.asset(
-                                        'assets/icons/Seller app icon (19).png',
-                                        height: 5.h,
-                                        color: Colors.grey[400],
+                                      height: 140,
+                                      width: 140,
+                                      decoration: BoxDecoration(
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(5)),
+                                          border: Border.all(
+                                            color: Colors.grey.withOpacity(0.4),
+                                          ),
+                                          color: Colors.white),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(3.0),
+                                        child: myImages[i].isEmpty
+                                            ? DottedBorder(
+                                                dashPattern: [4, 6],
+                                                strokeWidth: 2,
+                                                color: Colors.grey,
+                                                child: Container(
+                                                  alignment: Alignment.center,
+                                                  child: Image.asset(
+                                                    'assets/icons/Seller app icon (19).png',
+                                                    height: 5.h,
+                                                    color: Colors.grey[400],
+                                                  ),
+                                                ),
+                                              )
+                                            : Image.file(
+                                                File(myImages[i]),
+                                                fit: BoxFit.cover,
+                                                width: double.infinity,
+                                              ),
                                       ),
                                     ),
-                                  )),
+                                  ),
+                                  Positioned(
+                                      right: 5,
+                                      top: 5,
+                                      child: InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              /*  images.removeAt(i);
+                                              imagesfile.removeAt(i); */
+                                              myImages.removeAt(i);
+                                            });
+
+                                            print("helooooooooooooo");
+                                          },
+                                          child: const Icon(Icons.close)))
+                                ],
+                              ),
+                            const SizedBox(
+                              width: 5,
                             ),
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 25,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: Row(
-                    children: [
-                      Container(
-                          width: MediaQuery.of(context).size.width / 2.18,
-                          child: Text(
-                            'Product Name',
-                            style: TextStyle(
-                                fontSize: 15.sp, fontWeight: FontWeight.bold),
-                          )),
-                      Text(
-                        'Sub Name',
-                        style: TextStyle(
-                            fontSize: 15.sp, fontWeight: FontWeight.bold),
-                      )
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Container(
-                          padding: EdgeInsets.only(left: 10, right: 10),
-                          width: MediaQuery.of(context).size.width / 2.3,
-                          height: 40,
-                          decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(5)),
-                              color: Colors.white,
-                              border: Border.all(
-                                  color: Colors.black12, width: 1.8)),
-                          child: TextField(
-                            onTap: () {
-                              setState(() {
-                                ProductName = NmaeController.text;
-                              });
-                            },
-                            controller: NmaeController,
-                            decoration: InputDecoration(
-                                hintText: 'Product Name',
-                                enabledBorder: InputBorder.none),
-                            maxLines: 1,
-                          )),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10),
-                        child: Container(
-                          padding: EdgeInsets.only(left: 10, right: 10),
-                          height: 40,
-                          width: MediaQuery.of(context).size.width / 2.3,
-                          decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(5)),
-                              color: Colors.white,
-                              border: Border.all(
-                                  color: Colors.black12, width: 1.8)),
-                          child: TextField(
-                            onTap: () {
-                              setState(() {
-                                SubName = SubnameController.text;
-                              });
-                            },
-                            controller: SubnameController,
-                            decoration: InputDecoration(
-                                hintText: 'Sub Name',
-                                enabledBorder: InputBorder.none),
-                            maxLines: 1,
-                          ),
+                            InkWell(
+                              onTap: () async {
+                                /*   await selectFile();
+                                Map<String, dynamic> upload = {
+                                  'image': file.toString(),
+                                  'type': 'product',
+                                }; */
+                                await _uploadImage();
+                                /*  Get.to(imageCrop()); */
+                              },
+                              child: Container(
+                                height: 140,
+                                width: 140,
+                                decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(5)),
+                                    border: Border.all(
+                                      color: Colors.grey.withOpacity(0.4),
+                                    ),
+                                    color: Colors.white),
+                                child: Padding(
+                                    padding: const EdgeInsets.all(3.0),
+                                    child: DottedBorder(
+                                      dashPattern: [4, 6],
+                                      strokeWidth: 2,
+                                      color: Colors.grey,
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        child: Image.asset(
+                                          'assets/icons/Seller app icon (19).png',
+                                          height: 5.h,
+                                          color: Colors.grey[400],
+                                        ),
+                                      ),
+                                    )),
+                              ),
+                            )
+                          ],
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: Row(
-                    children: [
-                      Container(
-                          width: MediaQuery.of(context).size.width / 2.18,
-                          child: Text(
-                            'Category',
-                            style: TextStyle(
-                                fontSize: 15.sp, fontWeight: FontWeight.bold),
-                          )),
-                      showsub == true
-                          ? Text(
-                              'Sub Catgory',
+                  const SizedBox(
+                    height: 25,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                            width: MediaQuery.of(context).size.width / 2.18,
+                            child: Text(
+                              'Product Name',
                               style: TextStyle(
                                   fontSize: 15.sp, fontWeight: FontWeight.bold),
-                            )
-                          : SizedBox()
-                    ],
+                            )),
+                        Text(
+                          'Sub Name',
+                          style: TextStyle(
+                              fontSize: 15.sp, fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      /* Container(
-                        padding: EdgeInsets.only(left: 10),
-                        width: MediaQuery.of(context).size.width / 2.3,
-                        height: 40,
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.all(Radius.circular(5)),
-                            border:
-                                Border.all(color: Colors.black12, width: 1.8)),
-                        child: DropdownButtonHideUnderline(
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                            // alignment: Alignment.center,
+                            // padding: EdgeInsets.only(left: 10, right: 10),
+                            width: MediaQuery.of(context).size.width / 2.3,
+
+                            // color: Colors.white,
+                            child: TextFormField(
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return "This field is required";
+                                }
+                              },
+                              onTap: () {
+                                setState(() {
+                                  ProductName = NmaeController.text;
+                                });
+                              },
+                              controller: NmaeController,
+                              decoration: InputDecoration(
+                                filled: true,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 5.0, horizontal: 10.0),
+                                fillColor: Colors.white,
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(6)),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(6)),
+                                border: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(6)),
+                                hintText: 'Product Name',
+                              ),
+                              maxLines: 1,
+                            )),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: SizedBox(
+                            // padding: EdgeInsets.only(left: 10, right: 10),
+                            width: MediaQuery.of(context).size.width / 2.3,
+
+                            child: TextFormField(
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return "This field is required";
+                                }
+                              },
+                              onTap: () {
+                                setState(() {
+                                  SubName = SubnameController.text;
+                                });
+                              },
+                              controller: SubnameController,
+                              decoration: InputDecoration(
+                                filled: true,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 5.0, horizontal: 10.0),
+                                fillColor: Colors.white,
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(6)),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(6)),
+                                border: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(6)),
+                                hintText: 'Sub Name',
+                              ),
+                              maxLines: 1,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                            width: MediaQuery.of(context).size.width / 2.18,
+                            child: Text(
+                              'Category',
+                              style: TextStyle(
+                                  fontSize: 15.sp, fontWeight: FontWeight.bold),
+                            )),
+                        showsub == true
+                            ? Text(
+                                'Sub Catgory',
+                                style: TextStyle(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.bold),
+                              )
+                            : const SizedBox()
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          // padding: EdgeInsets.only(left: 10),
+                          width: MediaQuery.of(context).size.width / 2.3,
+                          alignment: Alignment.center,
+
                           child: Padding(
-                            padding: const EdgeInsets.only(right: 10.0),
-                            child: DropdownButton(
+                            padding: const EdgeInsets.only(right: 3.0),
+                            child: DropdownButtonFormField(
+                              validator: (value) {
+                                if (value == null) {
+                                  return "This field is required";
+                                }
+                              },
+                              decoration: InputDecoration(
+                                  enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Colors.grey.withOpacity(0.2),
+                                      ),
+                                      borderRadius: BorderRadius.circular(6)),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  border: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Colors.grey.withOpacity(0.2),
+                                      ),
+                                      borderRadius: BorderRadius.circular(6)),
+                                  hintText: ' Category'),
+
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(7)),
-                              icon: Icon(Icons.keyboard_arrow_down),
-                              hint: Text('Category'),
-                              value: dropdownvalue,
+                                  const BorderRadius.all(Radius.circular(7)),
+                              icon: const Icon(Icons.keyboard_arrow_down),
+                              hint: const Text('Category'),
+                              // value: dropdownvalue,
                               items: catergorylist.map((CategoryModel item) {
                                 return DropdownMenuItem(
-                                  value: item,
+                                  value: item.id.toString(),
                                   child: Text(
                                     item.name,
                                     style: TextStyle(color: Colors.grey[600]),
@@ -453,499 +545,359 @@ class _uploadProductState extends State<uploadProduct> {
                                 );
                               }).toList(),
                               onChanged: (newValue) {
+                                DataApiService.instance
+                                    .getCategoryList(context);
                                 setState(() {
-                                  showsub = true;
-                                  //dropdownvalue = newValue as String?;
-                                  subcat = newValue as CategoryModel?;
-                                  print('category');
-                                  print(subcat!.id);
-                                  print(subcat!.name);
-                                  value = subcat!.id;
-                                  print(value);
+                                  showsub = false;
+                                  print(newValue);
+                                  //dropdownvalue = newValue;
+                                  for (var model in catergorylist) {
+                                    check++;
+                                    print("hello");
+                                    print(model.id);
+                                    if (model.id.toString() ==
+                                        newValue.toString()) {
+                                      print('in if');
+
+                                      subcheck = check;
+                                      setState(() {
+                                        subcat = model;
+                                        print(subcat!.name);
+                                        showsub = true;
+                                        value = subcat!.id;
+                                        print(value);
+                                      });
+                                    }
+                                  }
+                                  // subcat = newValue;
+                                  // print('category');
+                                  // print(subcat!.id);
+                                  // print(subcat!.name);
+                                  // value = subcat!.id;
+                                  // print(value);
                                 });
                               },
                             ),
                           ),
                         ),
-                      ), */
-                      Container(
-                        padding: EdgeInsets.only(left: 10),
-                        width: MediaQuery.of(context).size.width / 2.3,
-                        height: 40,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.all(Radius.circular(5)),
-                            border:
-                                Border.all(color: Colors.black12, width: 1.8)),
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 10.0),
-                          child: DropdownButtonFormField(
-                            decoration: InputDecoration.collapsed(hintText: ''),
-
-                            borderRadius: BorderRadius.all(Radius.circular(7)),
-                            icon: Icon(Icons.keyboard_arrow_down),
-                            hint: Text('Category'),
-                            // value: dropdownvalue,
-                            items: catergorylist.map((CategoryModel item) {
-                              return DropdownMenuItem(
-                                value: item.id.toString(),
-                                child: Text(
-                                  item.name,
-                                  style: TextStyle(color: Colors.grey[600]),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (newValue) {
-                              setState(() {
-                                showsub = false;
-                                print(newValue);
-                                //dropdownvalue = newValue;
-                                for (var model in catergorylist) {
-                                  check++;
-                                  print("hello");
-                                  print(model.id);
-                                  if (model.id.toString() ==
-                                      newValue.toString()) {
-                                    print('in if');
-
-                                    subcheck = check;
-                                    setState(() {
-                                      subcat = model;
-                                      print(subcat!.name);
-                                      showsub = true;
-                                      value = subcat!.id;
-                                      print(value);
-                                    });
-                                  }
-                                }
-                                // subcat = newValue;
-                                // print('category');
-                                // print(subcat!.id);
-                                // print(subcat!.name);
-                                // value = subcat!.id;
-                                // print(value);
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      showsub == true
-                          ? Padding(
-                              padding: const EdgeInsets.only(left: 10),
-                              child: Container(
-                                padding: EdgeInsets.only(left: 10, right: 10),
-                                height: 40,
-                                width: MediaQuery.of(context).size.width / 2.3,
-                                decoration: BoxDecoration(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(5)),
-                                    color: Colors.white,
-                                    border: Border.all(
-                                        color: Colors.black12, width: 1.8)),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(7)),
-                                    icon: Icon(Icons.keyboard_arrow_down),
-                                    hint: Text('Sub Category'),
-                                    value: dropcat,
-                                    items: subcat!.subCategories
-                                        .map((CategoryModel item) {
-                                      return DropdownMenuItem(
-                                        value: item.name.toString(),
-                                        child: Text(
-                                          item.name,
-                                          style: TextStyle(
-                                              color: Colors.grey[600]),
-                                        ),
-                                      );
-                                    }).toList(),
-                                    onChanged: (String? newValue) {
-                                      setState(() {
-                                        dropcat = newValue!;
-
-                                        /*   subcat = newValue as CategoryModel?;
-                                        print('subcategory');
-                                        subvalue = subcat!.id;
-                                        print(subvalue);
-
-                                        print(subvalue); */
-                                      });
-                                      for (var i = 0;
-                                          i <
-                                              catergorylist[subcheck]
-                                                  .subCategories
-                                                  .length;
-                                          i++) {
-                                        if (catergorylist[subcheck]
-                                                .subCategories[i]
-                                                .name ==
-                                            newValue) {
-                                          print('in if');
-                                          print(catergorylist[subcheck]
-                                              .subCategories[i]
-                                              .name);
-                                          print(catergorylist[subcheck]
-                                              .subCategories[i]
-                                              .id);
-                                          subvalue = catergorylist[subcheck]
-                                              .subCategories[i]
-                                              .id;
+                        showsub == true
+                            ? Padding(
+                                padding: const EdgeInsets.only(left: 10),
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  width:
+                                      MediaQuery.of(context).size.width / 2.3,
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButtonFormField(
+                                      decoration: InputDecoration(
+                                          enabledBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Colors.grey
+                                                    .withOpacity(0.2),
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(6)),
+                                          filled: true,
+                                          fillColor: Colors.white,
+                                          border: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Colors.grey
+                                                    .withOpacity(0.2),
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(6)),
+                                          hintText: 'Sub Category'),
+                                      validator: (value) {
+                                        if (value == null) {
+                                          return "This field is required";
                                         }
-                                      }
-                                    },
-                                  ),
-                                  /*  DropdownButtonFormField(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(7)),
-                                    icon: Icon(Icons.keyboard_arrow_down),
-                                    hint: Text('subCategory'),
-                                    // value: dropdownvalue,
-                                    items: subcat!.subCategories
-                                        .map((CategoryModel item) {
-                                      return DropdownMenuItem(
-                                        value: item.id.toString(),
-                                        child: Text(
-                                          item.name,
-                                          style: TextStyle(
-                                              color: Colors.grey[600]),
-                                        ),
-                                      );
-                                    }).toList(),
-                                    onChanged: (newValue) {
-                                      setState(() {
-                                      
-                                        print(newValue);
-                                        //dropdownvalue = newValue;
-                                        for (var model in catergorylist) {
-                                          print("hello");
-                                          print(model.id);
-                                          if (model.id.toString() ==
-                                              newValue.toString()) {
-                                            print('in if');
-                                            setState(() {
-                                              /*  subcat = model;
-                                         print(subcat!.name); */
-                                              subvalue = model.id;
-                                              print(model.name);
-                                            });
+                                      },
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(7)),
+                                      icon:
+                                          const Icon(Icons.keyboard_arrow_down),
+                                      // hint: Text('Sub Category'),
+                                      value: dropcat,
+                                      items: subcat!.subCategories
+                                          .map((CategoryModel item) {
+                                        return DropdownMenuItem(
+                                          value: item.name.toString(),
+                                          child: Text(
+                                            item.name,
+                                            style: TextStyle(
+                                                color: Colors.grey[600]),
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (String? newValue) {
+                                        print('sdfasdfsadf');
+
+                                        subcategoryValue = newValue;
+                                        setState(() {
+                                          dropcat = newValue!;
+
+                                          /*   subcat = newValue as CategoryModel?;
+                                          print('subcategory');
+                                          subvalue = subcat!.id;
+                                          print(subvalue);
+    
+                                          print(subvalue); */
+                                        });
+                                        for (var model
+                                            in subcat!.subCategories) {
+                                          if (model.name == newValue) {
+                                            print(newValue);
+                                            print(model.id);
+                                            subvalue = model.id;
                                           }
                                         }
-                                        // subcat = newValue;
-                                        // print('category');
-                                        // print(subcat!.id);
-                                        // print(subcat!.name);
-                                        // value = subcat!.id;
-                                        // print(value);
-                                      });
-                                    },
-                                  ), */
+                                      },
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            )
-                          : SizedBox()
-                    ],
+                              )
+                            : const SizedBox()
+                      ],
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: Row(
-                    children: [
-                      Container(
-                          width: MediaQuery.of(context).size.width / 2.18,
-                          child: Text(
-                            'Brand',
-                            style: TextStyle(
-                                fontSize: 15.sp, fontWeight: FontWeight.bold),
-                          )),
-                      Text(
-                        'Status',
-                        style: TextStyle(
-                            fontSize: 15.sp, fontWeight: FontWeight.bold),
-                      )
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                            width: MediaQuery.of(context).size.width / 2.18,
+                            child: Text(
+                              'Brand',
+                              style: TextStyle(
+                                  fontSize: 15.sp, fontWeight: FontWeight.bold),
+                            )),
+                        Text(
+                          'Status',
+                          style: TextStyle(
+                              fontSize: 15.sp, fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: EdgeInsets.only(left: 10, right: 10, top: 6),
-                        width: MediaQuery.of(context).size.width / 2.3,
-                        height: 40,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(5)),
-                            color: Colors.white,
-                            border:
-                                Border.all(color: Colors.black12, width: 1.8)),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButtonFormField(
-                            // value: dropdownvalue4,
-                            decoration: InputDecoration.collapsed(hintText: ''),
-                            hint: Text('Brands'),
-                            borderRadius: BorderRadius.all(Radius.circular(7)),
-                            icon: Icon(
-                              Icons.keyboard_arrow_down,
-                              color: Colors.grey[600],
-                            ),
-                            items: brandlist.map((GetBrandModel items) {
-                              return DropdownMenuItem(
-                                value: items,
-                                child: Text(
-                                  items.name,
-                                  style: TextStyle(color: Colors.grey[600]),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (newValue) {
-                              setState(() {
-                                print(newValue);
-                                // dropdownvalue4 = newValue! as String?;
-                                brands = newValue as GetBrandModel;
-                                //dropdownvalue4 = brands.name;
-                                print(brands.name);
-                                brandvalue = brands.id;
-                                print(brandvalue);
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10),
-                        child: Container(
-                          padding: EdgeInsets.only(left: 10, right: 10),
-                          height: 40,
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          // padding: EdgeInsets.only(left: 10, right: 10, top: 6),
                           width: MediaQuery.of(context).size.width / 2.3,
-                          decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(5)),
-                              color: Colors.white,
-                              border: Border.all(
-                                  color: Colors.black12, width: 1.8)),
+
                           child: DropdownButtonHideUnderline(
-                            child: DropdownButton(
-                              value: dropdownvalue4,
-                              hint: Text('Status'),
+                            child: DropdownButtonFormField(
+                              validator: (value) {
+                                if (value == null) {
+                                  return "This field is required";
+                                }
+                              },
+                              // value: dropdownvalue4,
+                              decoration: InputDecoration(
+                                  enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Colors.grey.withOpacity(0.2),
+                                      ),
+                                      borderRadius: BorderRadius.circular(6)),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  border: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Colors.grey.withOpacity(0.2),
+                                      ),
+                                      borderRadius: BorderRadius.circular(6)),
+                                  hintText: 'Brands'),
+                              hint: const Text('Brands'),
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(7)),
+                                  const BorderRadius.all(Radius.circular(7)),
                               icon: Icon(
                                 Icons.keyboard_arrow_down,
                                 color: Colors.grey[600],
                               ),
-                              items: items4.map((String items) {
+                              items: brandlist.map((GetBrandModel items) {
                                 return DropdownMenuItem(
                                   value: items,
                                   child: Text(
-                                    items,
+                                    items.name,
                                     style: TextStyle(color: Colors.grey[600]),
                                   ),
                                 );
                               }).toList(),
-                              onChanged: (String? newValue) {
+                              onChanged: (newValue) {
                                 setState(() {
-                                  dropdownvalue4 = newValue!;
+                                  print(newValue);
+                                  // dropdownvalue4 = newValue! as String?;
+                                  brands = newValue as GetBrandModel;
+                                  //dropdownvalue4 = brands.name;
+                                  print(brands.name);
+                                  brandvalue = brands.id;
+                                  print(brandvalue);
                                 });
                               },
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                for (int i = 0; i < loop; i++)
-                  Column(children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 5),
-                      child: Row(
-                        children: [
-                          Container(
-                              width: MediaQuery.of(context).size.width / 2.18,
-                              child: Text(
-                                'Size',
-                                style: TextStyle(
-                                    fontSize: 15.sp,
-                                    fontWeight: FontWeight.bold),
-                              )),
-                          Text(
-                            'Color',
-                            style: TextStyle(
-                                fontSize: 15.sp, fontWeight: FontWeight.bold),
-                          )
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 5),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding:
-                                EdgeInsets.only(left: 10, right: 10, top: 6),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: SizedBox(
+                            // padding: EdgeInsets.only(left: 10, right: 10, top: 6),
                             width: MediaQuery.of(context).size.width / 2.3,
-                            height: 40,
-                            decoration: BoxDecoration(
+
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButtonFormField(
+                                validator: (value) {
+                                  if (value == null) {
+                                    return "This field is required";
+                                  }
+                                },
+                                // value: dropdownvalue4,
+                                decoration: InputDecoration(
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.grey.withOpacity(0.2),
+                                        ),
+                                        borderRadius: BorderRadius.circular(6)),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.grey.withOpacity(0.2),
+                                        ),
+                                        borderRadius: BorderRadius.circular(6)),
+                                    hintText: 'Status'),
+                                hint: const Text('Status'),
                                 borderRadius:
-                                    BorderRadius.all(Radius.circular(5)),
-                                color: Colors.white,
-                                border: Border.all(
-                                    color: Colors.black12, width: 1.8)),
-                            child: sizepicker
-                                ? Center(
-                                    child: TextField(
-                                      onTap: () {
-                                        setState(() {
-                                          sizepicker = false;
-                                        });
-                                      },
-                                      readOnly: true,
-                                      controller: _textFieldController[i],
-                                      decoration: InputDecoration(
-                                          border: InputBorder.none,
-                                          enabledBorder: InputBorder.none,
-                                          focusedBorder: InputBorder.none),
+                                    const BorderRadius.all(Radius.circular(7)),
+                                icon: Icon(
+                                  Icons.keyboard_arrow_down,
+                                  color: Colors.grey[600],
+                                ),
+                                items: items4.map((String items) {
+                                  return DropdownMenuItem(
+                                    value: items,
+                                    child: Text(
+                                      items,
+                                      style: TextStyle(color: Colors.grey[600]),
                                     ),
-                                  )
-                                : DropdownButtonHideUnderline(
-                                    child: DropdownButtonFormField(
-                                      // value: dropdownvalue4,
-                                      decoration: InputDecoration.collapsed(
-                                          hintText: ''),
-                                      hint: Text('Size'),
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(7)),
-                                      icon: Icon(
-                                        Icons.keyboard_arrow_down,
-                                        color: Colors.grey[600],
-                                      ),
-                                      items: sizeList.map((SizeModel items) {
-                                        return DropdownMenuItem(
-                                          value: items,
-                                          child: Container(
-                                            width: 30.w,
-                                            child: Text(
-                                              items.label,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                  color: Colors.grey[600]),
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
-                                      onChanged: (newValue) {
-                                        setState(() {
-                                          SizeModel getsize;
-                                          getsize = newValue as SizeModel;
-                                          if (getsize.label == 'add more') {
-                                            _textFieldController
-                                                .add(TextEditingController());
-                                            showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return Expanded(
-                                                  child: AlertDialog(
-                                                    title: Text('Add new size'),
-                                                    content: TextField(
-                                                      onChanged: (value) {},
-                                                      controller:
-                                                          _textFieldController[
-                                                              index],
-                                                      decoration:
-                                                          InputDecoration(
-                                                        hintText: "Size",
-                                                      ),
-                                                    ),
-                                                    actions: [
-                                                      FlatButton(
-                                                        textColor: Colors.black,
-                                                        onPressed: () async {
-                                                          await DataApiService
-                                                              .instance
-                                                              .addSize(
-                                                                  _textFieldController[
-                                                                          i]
-                                                                      .text,
-                                                                  context);
-
-                                                          await DataApiService
-                                                              .instance
-                                                              .getsizelist();
-                                                          setState(() {
-                                                            sizepicker = true;
-                                                          });
-                                                          Navigator.of(context,
-                                                                  rootNavigator:
-                                                                      true)
-                                                              .pop();
-                                                        },
-                                                        child: Text('ADD'),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              },
-                                            );
-                                          }
-                                          print(newValue);
-
-                                          sizeVarient.add(getsize.label);
-                                          print(sizeVarient[i]);
-                                          generateVarient = false;
-
-                                          // dropdownvalue4 = newValue! as String?;
-                                        });
-                                      },
-                                    ),
-                                  ),
+                                  );
+                                }).toList(),
+                                onChanged: (newValue) {},
+                              ),
+                            ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10),
-                            child: Container(
-                              padding:
-                                  EdgeInsets.only(left: 10, right: 10, top: 6),
+                        ),
+                      ],
+                    ),
+                  ),
+                  for (int i = 0; i < loop; i++)
+                    Column(children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                                width: MediaQuery.of(context).size.width / 2.18,
+                                child: Text(
+                                  'Size',
+                                  style: TextStyle(
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.bold),
+                                )),
+                            Text(
+                              'Color',
+                              style: TextStyle(
+                                  fontSize: 15.sp, fontWeight: FontWeight.bold),
+                            )
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              /*   padding:
+                                  EdgeInsets.only(left: 10, right: 10, top: 6), */
                               width: MediaQuery.of(context).size.width / 2.3,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(5)),
-                                  color: Colors.white,
-                                  border: Border.all(
-                                      color: Colors.black12, width: 1.8)),
-                              child: colorcheck
-                                  ? TextField(
-                                      onTap: () {
-                                        setState(() {
-                                          colorcheck = false;
-                                        });
-                                      },
-                                      readOnly: true,
-                                      controller: _textColorController[i],
+                              child: sizepicker[i]
+                                  ? Center(
+                                      child: TextFormField(
+                                        validator: (value) {
+                                          if (value!.isEmpty) {
+                                            return "This field is required";
+                                          }
+                                        },
+                                        onTap: () {
+                                          setState(() {
+                                            sizepicker[i] = false;
+                                          });
+                                        },
+                                        readOnly: true,
+                                        controller: _textFieldController[i],
+                                        decoration: InputDecoration(
+                                            enabledBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: Colors.grey
+                                                      .withOpacity(0.2),
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(6)),
+                                            filled: true,
+                                            fillColor: Colors.white,
+                                            border: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: Colors.grey
+                                                      .withOpacity(0.2),
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(6)),
+                                            hintText: 'Size'),
+                                      ),
                                     )
                                   : DropdownButtonHideUnderline(
                                       child: DropdownButtonFormField(
+                                        /*   validator: (value) {
+                                          if (value == null) {
+                                            return "This field is required";
+                                          }
+                                        }, */
                                         // value: dropdownvalue4,
-                                        decoration: InputDecoration.collapsed(
-                                            hintText: ''),
-                                        hint: Text('Color'),
-                                        borderRadius: BorderRadius.all(
+                                        decoration: InputDecoration(
+                                            enabledBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: Colors.grey
+                                                      .withOpacity(0.2),
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(6)),
+                                            filled: true,
+                                            fillColor: Colors.white,
+                                            border: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: Colors.grey
+                                                      .withOpacity(0.2),
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(6)),
+                                            hintText: 'Size'),
+                                        hint: const Text('Size'),
+                                        borderRadius: const BorderRadius.all(
                                             Radius.circular(7)),
                                         icon: Icon(
                                           Icons.keyboard_arrow_down,
                                           color: Colors.grey[600],
                                         ),
-                                        items:
-                                            colorList.map((ColorsModel items) {
+                                        items: sizeList.map((SizeModel items) {
                                           return DropdownMenuItem(
                                             value: items,
-                                            child: Container(
+                                            child: SizedBox(
                                               width: 30.w,
                                               child: Text(
-                                                items.name,
+                                                items.label,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
                                                     color: Colors.grey[600]),
@@ -955,267 +907,489 @@ class _uploadProductState extends State<uploadProduct> {
                                         }).toList(),
                                         onChanged: (newValue) {
                                           setState(() {
-                                            print(newValue);
-                                            generateVarient = false;
-                                            ColorsModel getcolor;
-                                            getcolor = newValue as ColorsModel;
-                                            if (getcolor.name == 'add more') {
-                                              _textColorController
+                                            SizeModel getsize;
+                                            getsize = newValue as SizeModel;
+                                            if (getsize.label == 'Add More') {
+                                              _textFieldController
                                                   .add(TextEditingController());
                                               showDialog(
-                                                  context: context,
-                                                  builder:
-                                                      (BuildContext context) {
-                                                    return AlertDialog(
-                                                      title: const Text(
-                                                          'Pick a color!'),
-                                                      content:
-                                                          SingleChildScrollView(
-                                                        child: Column(
-                                                          children: [
-                                                            ColorPicker(
-                                                              pickerColor:
-                                                                  pickerColor,
-                                                              onColorChanged:
-                                                                  changeColor,
-                                                            ),
-                                                            TextField(
-                                                              onChanged:
-                                                                  (value) {},
-                                                              controller:
-                                                                  _textColorController[
-                                                                      i],
-                                                              decoration:
-                                                                  InputDecoration(
-                                                                      hintText:
-                                                                          "Color Name"),
-                                                            ),
-                                                          ],
-                                                        ),
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return AlertDialog(
+                                                    title: const Text(
+                                                        'Add new size'),
+                                                    content: TextFormField(
+                                                      validator: (value) {
+                                                        if (value!.isEmpty) {
+                                                          return "This field is required";
+                                                        }
+                                                      },
+                                                      onChanged: (value) {},
+                                                      controller:
+                                                          _textFieldController[
+                                                              i],
+                                                      decoration:
+                                                          const InputDecoration(
+                                                        hintText: "Size",
                                                       ),
-                                                      actions: <Widget>[
-                                                        ElevatedButton(
-                                                          child: const Text(
-                                                              'Got it'),
-                                                          onPressed: () async {
-                                                            setState(() =>
-                                                                currentColor =
-                                                                    pickerColor);
-
-                                                            print(currentColor);
-                                                            Map<String, dynamic>
-                                                                addcolor = {
-                                                              'code': currentColor
-                                                                  .toString(),
-                                                              'name':
-                                                                  _textColorController[
-                                                                          i]
-                                                                      .text,
-                                                            };
+                                                    ),
+                                                    actions: [
+                                                      FlatButton(
+                                                        textColor: Colors.black,
+                                                        onPressed: () async {
+                                                          bool exist = false;
+                                                          for (var model
+                                                              in sizeList) {
+                                                            if (model.label ==
+                                                                _textFieldController[
+                                                                        i]
+                                                                    .text) {
+                                                              exist = true;
+                                                            }
+                                                          }
+                                                          if (exist) {
+                                                            AwesomeDialog(
+                                                              context: context,
+                                                              dialogType:
+                                                                  DialogType
+                                                                      .INFO,
+                                                              animType: AnimType
+                                                                  .BOTTOMSLIDE,
+                                                              title:
+                                                                  'Match Found',
+                                                              desc:
+                                                                  'Size Already Exist!',
+                                                              btnOkOnPress:
+                                                                  () {},
+                                                            ).show();
+                                                          } else {
+                                                            print(
+                                                                'asfgsdagsfdg');
+                                                            print(
+                                                                _textFieldController[
+                                                                        i]
+                                                                    .text);
                                                             await DataApiService
                                                                 .instance
-                                                                .addColor(
-                                                                    addcolor,
+                                                                .addSize(
+                                                                    _textFieldController[
+                                                                            i]
+                                                                        .text,
                                                                     context);
+
+                                                            await DataApiService
+                                                                .instance
+                                                                .getsizelist();
                                                             setState(() {
-                                                              colorcheck = true;
+                                                              sizepicker[i] =
+                                                                  true;
                                                             });
+                                                            sizeVarient.add(
+                                                                _textFieldController[
+                                                                        i]
+                                                                    .text);
 
+                                                            print(
+                                                                sizeVarient[i]);
+                                                            generateVarient =
+                                                                false;
                                                             Navigator.of(
-                                                                    context)
+                                                                    context,
+                                                                    rootNavigator:
+                                                                        true)
                                                                 .pop();
-                                                          },
-                                                        ),
-                                                      ],
-                                                    );
-                                                  });
+                                                          }
+                                                        },
+                                                        child:
+                                                            const Text('ADD'),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
                                             }
-                                            colorVarient.add(getcolor.name);
-                                            colorCode.add(getcolor.code);
+                                            bool alreadySize = false;
+                                            for (var model in sizeVarient) {
+                                              if (getsize.label == model) {
+                                                alreadySize = true;
+                                              }
+                                            }
+                                            if (alreadySize) {
+                                            } else {
+                                              if (getsize.label != 'Add More') {
+                                                print(newValue);
+                                                if (i + 1 >
+                                                    sizeVarient.length) {
+                                                  skuController.clear();
+                                                  quantityController.clear();
+                                                  sizeVarient
+                                                      .add(getsize.label);
+                                                  print(sizeVarient[i]);
+                                                } else {
+                                                  sizeVarient[i] =
+                                                      getsize.label;
+                                                }
+                                                /*  sizeVarient.add(getsize.label);
+                                              print(sizeVarient[i]); */
+                                                generateVarient = false;
+                                              }
+                                            }
 
-                                            print(colorVarient[i]);
-                                            print(colorCode[i]);
                                             // dropdownvalue4 = newValue! as String?;
                                           });
                                         },
                                       ),
                                     ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    /* Padding(
-                      padding: const EdgeInsets.only(top: 10.0),
-                      child: Row(
-                        children: [
-                          Container(
-                              width: MediaQuery.of(context).size.width / 2.18,
-                              child: Text(
-                                'SKU',
-                                style: TextStyle(
-                                    fontSize: 15.sp,
-                                    fontWeight: FontWeight.bold),
-                              )),
-                          Text(
-                            'Price',
-                            style: TextStyle(
-                                fontSize: 15.sp, fontWeight: FontWeight.bold),
-                          )
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 5),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                              padding: EdgeInsets.only(left: 10, right: 10),
-                              width: MediaQuery.of(context).size.width / 2.3,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(5)),
-                                  color: Colors.white,
-                                  border: Border.all(
-                                      color: Colors.black12, width: 1.8)),
-                              child: TextField(
-                                controller: skuController[i],
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                    hintText: 'SKU',
-                                    enabledBorder: InputBorder.none),
-                                maxLines: 1,
-                              )),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10),
-                            child: Container(
-                                padding: EdgeInsets.only(left: 10, right: 10),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 10),
+                              child: SizedBox(
                                 width: MediaQuery.of(context).size.width / 2.3,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(5)),
-                                    color: Colors.white,
-                                    border: Border.all(
-                                        color: Colors.black12, width: 1.8)),
-                                child: TextField(
-                                  /*  onTap: () {
-                                    Shipping_Cost = ShippingcostController.text;
-                                  }, */
-                                  controller: priceController[i],
-                                  keyboardType: TextInputType.number,
-                                  // focusNode: myFocusNode,
-                                  decoration: InputDecoration(
-                                      prefix: Text(
-                                          '' /*  + categorycostlist[0].cost.toString() */),
-                                      hintText: '\$ 0.00',
-                                      hintStyle: TextStyle(color: Colors.grey),
-                                      /*   hintText:
-                                    '\$ ' + categorycostlist[0].cost.toString(), */
-                                      border: InputBorder.none,
-                                      enabledBorder: InputBorder.none),
-                                  maxLines: 1,
-                                )),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 5),
-                      child: Row(
-                        children: [
-                          Container(
-                              width: MediaQuery.of(context).size.width / 2.18,
-                              child: Text(
-                                'Quantity',
-                                style: TextStyle(
-                                    fontSize: 15.sp,
-                                    fontWeight: FontWeight.bold),
-                              )),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 5),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                              padding: EdgeInsets.only(left: 10, right: 10),
-                              width: MediaQuery.of(context).size.width / 2.3,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(5)),
-                                  color: Colors.white,
-                                  border: Border.all(
-                                      color: Colors.black12, width: 1.8)),
-                              child: TextField(
-                                controller: quantityController[i],
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                    hintText: 'Quantity',
-                                    enabledBorder: InputBorder.none),
-                                maxLines: 1,
-                              )),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 15.0),
-                      child: Divider(),
-                    ), */
-                  ]),
-                SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          loop++;
-                          generateVarient = false;
-                          /*   priceController.add(TextEditingController());
-                          skuController.add(TextEditingController());
-                          quantityController.add(TextEditingController()); */
-                        });
-                      },
-                      child: Container(
-                          alignment: Alignment.center,
-                          height: 5.h,
-                          width: 10.w,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              color: Colors.black),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.add,
-                                size: 30,
-                                color: Colors.white,
+                                child: colorcheck[i]
+                                    ? Container(
+                                        padding: EdgeInsets.all(7),
+                                        decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(5)),
+                                        child: TextFormField(
+                                            validator: (value) {
+                                              if (value!.isEmpty) {
+                                                return "This field is required";
+                                              }
+                                            },
+                                            onTap: () {
+                                              setState(() {
+                                                colorcheck[i] = false;
+                                              });
+                                            },
+                                            decoration: const InputDecoration(
+                                                fillColor: Colors.white,
+                                                filled: true,
+                                                border: InputBorder.none,
+                                                focusedBorder: InputBorder.none,
+                                                enabledBorder:
+                                                    InputBorder.none),
+                                            readOnly: true,
+                                            controller:
+                                                _textColorController[i]),
+                                      )
+                                    : DropdownButtonHideUnderline(
+                                        child: DropdownButtonFormField(
+                                          /*  validator: (value) {
+                                            if (value == null) {
+                                              return "This field is required";
+                                            }
+                                          }, */
+                                          // value: dropdownvalue4,
+                                          decoration: InputDecoration(
+                                              enabledBorder: OutlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                    color: Colors.grey
+                                                        .withOpacity(0.2),
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(6)),
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              border: OutlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                    color: Colors.grey
+                                                        .withOpacity(0.2),
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(6)),
+                                              hintText: ''),
+                                          hint: const Text('Color'),
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(7)),
+                                          icon: Icon(
+                                            Icons.keyboard_arrow_down,
+                                            color: Colors.grey[600],
+                                          ),
+                                          items: colorList
+                                              .map((ColorsModel items) {
+                                            return DropdownMenuItem(
+                                              value: items,
+                                              child: SizedBox(
+                                                width: 30.w,
+                                                child: Text(
+                                                  items.name,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                      color: Colors.grey[600]),
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
+                                          onChanged: (newValue) {
+                                            setState(() {
+                                              print(newValue);
+                                              generateVarient = false;
+                                              ColorsModel getcolor;
+                                              getcolor =
+                                                  newValue as ColorsModel;
+                                              if (getcolor.name == 'Add More') {
+                                                _textColorController.add(
+                                                    TextEditingController());
+                                                showDialog(
+                                                    context: context,
+                                                    builder:
+                                                        (BuildContext context) {
+                                                      return AlertDialog(
+                                                        title: const Text(
+                                                            'Pick a color!'),
+                                                        content:
+                                                            SingleChildScrollView(
+                                                          child: Column(
+                                                            children: [
+                                                              ColorPicker(
+                                                                pickerColor:
+                                                                    pickerColor,
+                                                                onColorChanged:
+                                                                    changeColor,
+                                                              ),
+                                                              TextFormField(
+                                                                validator:
+                                                                    (value) {
+                                                                  if (value!
+                                                                      .isEmpty) {
+                                                                    return "This field is required";
+                                                                  }
+                                                                },
+                                                                onChanged:
+                                                                    (value) {},
+                                                                controller:
+                                                                    _textColorController[
+                                                                        i],
+                                                                decoration:
+                                                                    const InputDecoration(
+                                                                        hintText:
+                                                                            "Color Name"),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        actions: <Widget>[
+                                                          SizedBox(
+                                                            width: 100,
+                                                            child:
+                                                                ElevatedButton(
+                                                              child: loaderColor
+                                                                  ? spinkitColor
+                                                                  : Text('Add'),
+                                                              onPressed:
+                                                                  () async {
+                                                                setState(() {
+                                                                  currentColor =
+                                                                      pickerColor;
+                                                                  colorsSelectedIndex
+                                                                      .add(i);
+                                                                  loaderColor =
+                                                                      true;
+                                                                });
+                                                                String selectedColor = '#' +
+                                                                    currentColor
+                                                                        .toString()
+                                                                        .substring(
+                                                                            10,
+                                                                            16);
+                                                                bool exist =
+                                                                    false;
+                                                                for (var model
+                                                                    in colorList) {
+                                                                  if (selectedColor ==
+                                                                      model
+                                                                          .code) {
+                                                                    exist =
+                                                                        true;
+                                                                  }
+                                                                }
+                                                                if (exist) {
+                                                                  loaderColor =
+                                                                      false;
+                                                                  AwesomeDialog(
+                                                                    context:
+                                                                        context,
+                                                                    dialogType:
+                                                                        DialogType
+                                                                            .INFO,
+                                                                    animType:
+                                                                        AnimType
+                                                                            .BOTTOMSLIDE,
+                                                                    title:
+                                                                        'Match Found',
+                                                                    desc:
+                                                                        'Color Already Exist!',
+                                                                    btnOkOnPress:
+                                                                        () {},
+                                                                  ).show();
+                                                                } else {
+                                                                  print(
+                                                                      currentColor);
+
+                                                                  print('#' +
+                                                                      currentColor
+                                                                          .toString()
+                                                                          .substring(
+                                                                              10,
+                                                                              16));
+
+                                                                  Map<String,
+                                                                          dynamic>
+                                                                      addcolor =
+                                                                      {
+                                                                    'code':
+                                                                        selectedColor,
+                                                                    'name':
+                                                                        _textColorController[i]
+                                                                            .text,
+                                                                  };
+                                                                  await DataApiService
+                                                                      .instance
+                                                                      .addColor(
+                                                                          addcolor,
+                                                                          context);
+                                                                  setState(() {
+                                                                    colorcheck[
+                                                                            i] =
+                                                                        true;
+                                                                  });
+
+                                                                  colorVarient.add(
+                                                                      _textColorController[
+                                                                              i]
+                                                                          .text);
+                                                                  colorCode.add(
+                                                                      selectedColor);
+                                                                  colorList.insert(
+                                                                      1,
+                                                                      ColorsModel(
+                                                                          id:
+                                                                              5196,
+                                                                          name: _textColorController[i]
+                                                                              .text,
+                                                                          code:
+                                                                              selectedColor.toString()));
+                                                                  setState(() {
+                                                                    loaderColor =
+                                                                        false;
+                                                                  });
+
+                                                                  Navigator.of(
+                                                                          context)
+                                                                      .pop();
+                                                                }
+                                                              },
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    });
+                                              }
+                                              bool alreadyColor = false;
+                                              for (var model in colorVarient) {
+                                                if (getcolor.name == model) {
+                                                  alreadyColor = true;
+                                                }
+                                              }
+                                              if (alreadyColor) {
+                                              } else {
+                                                if (getcolor.name !=
+                                                    'Add More') {
+                                                  /*  colorVarient.add(getcolor.name);
+                                                colorCode.add(getcolor.code); */
+                                                  if (i + 1 >
+                                                      colorVarient.length) {
+                                                    skuController.clear();
+                                                    quantityController.clear();
+                                                    colorVarient
+                                                        .add(getcolor.name);
+                                                    colorCode
+                                                        .add(getcolor.code);
+                                                    // print(colorVarient[i]);
+                                                    print(colorCode);
+                                                  } else {
+                                                    colorVarient[i] =
+                                                        getcolor.name;
+                                                    colorCode[i] =
+                                                        getcolor.code;
+                                                  }
+
+                                                  print(colorVarient[i]);
+                                                  print(colorCode[i]);
+                                                  generateVarient = false;
+                                                }
+                                              }
+
+                                              // dropdownvalue4 = newValue! as String?;
+                                            });
+                                          },
+                                        ),
+                                      ),
                               ),
-                            ],
-                          )),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          loop--;
-                          generateVarient = false;
-                          /*    priceController.removeLast();
-                          skuController.removeLast();
-                          quantityController.removeLast(); */
-                          /*  sizeVarient.removeLast();
-                          colorVarient.removeLast();
-                          colorCode.removeLast(); */
-                        });
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 13),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ]),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    children: [
+                      (colorVarient.length < 2 && sizeVarient.length < 2) ||
+                              colorVarient.isEmpty
+                          ? const SizedBox()
+                          : InkWell(
+                              onTap: () async {
+                                await genrateTextController();
+                                await generateCombintaion();
+                                print(combination);
+                                if (combination.isEmpty) {
+                                  GlobalSnackBar.show(
+                                      context, 'Please Add Color and Size');
+                                }
+                                setState(() {
+                                  generateVarient = true;
+                                });
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 3),
+                                child: Container(
+                                    alignment: Alignment.center,
+                                    height: 5.h,
+                                    width: 35.w,
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(5),
+                                        color: Colors.black),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Text(
+                                          'Generate Variants',
+                                          style: TextStyle(color: Colors.white),
+                                        )
+                                      ],
+                                    )),
+                              ),
+                            ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            loop++;
+                            colorcheck.add(false);
+                            sizepicker.add(false);
+                            print(loop);
+                            generateVarient = false;
+                          });
+                        },
                         child: Container(
                             alignment: Alignment.center,
                             height: 5.h,
@@ -1226,65 +1400,250 @@ class _uploadProductState extends State<uploadProduct> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.remove,
+                                const Icon(
+                                  Icons.add,
                                   size: 30,
                                   color: Colors.white,
                                 ),
                               ],
                             )),
                       ),
-                    ),
-                    InkWell(
-                      onTap: () async {
-                        await genrateTextController();
-                        await generateCombintaion();
-                        setState(() {
-                          generateVarient = true;
-                        });
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 13),
-                        child: Container(
-                            alignment: Alignment.center,
-                            height: 5.h,
-                            width: 35.w,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5),
-                                color: Colors.black),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                /* Icon(
-                                  Icons.arrow_downward,
-                                  size: 30,
-                                  color: Colors.white,
-                                ), */
-                                Text(
-                                  'Generate Varients',
-                                  style: TextStyle(color: Colors.white),
-                                )
-                              ],
-                            )),
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            --loop;
+                            colorcheck.removeLast();
+                            sizepicker.removeLast();
+                            generateVarient = false;
+                            if (colorVarient.length == sizeVarient.length &&
+                                colorVarient.isNotEmpty &&
+                                sizeVarient.isNotEmpty) {
+                              colorVarient.removeLast();
+                              sizeVarient.removeLast();
+                            } else if (colorVarient.length >
+                                sizeVarient.length) {
+                              colorVarient.removeLast();
+                            } else if (sizeVarient.length >
+                                colorVarient.length) {
+                              sizeVarient.removeLast();
+                            }
+                          });
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 13),
+                          child: Container(
+                              alignment: Alignment.center,
+                              height: 5.h,
+                              width: 10.w,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  color: Colors.black),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.remove,
+                                    size: 30,
+                                    color: Colors.white,
+                                  ),
+                                ],
+                              )),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                for (int i = 0;
-                    i < sizeVarient.length * colorVarient.length;
-                    i++)
-                  generateVarient
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  for (int i = 0;
+                      i < sizeVarient.length * colorVarient.length;
+                      i++)
+                    generateVarient
+                        ? Column(
+                            children: [
+                              Text(combination[i]),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10.0),
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width /
+                                                2.18,
+                                        child: Text(
+                                          'SKU',
+                                          style: TextStyle(
+                                              fontSize: 15.sp,
+                                              fontWeight: FontWeight.bold),
+                                        )),
+                                    Text(
+                                      'Quantity',
+                                      style: TextStyle(
+                                          fontSize: 15.sp,
+                                          fontWeight: FontWeight.bold),
+                                    )
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 5),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                        /*  padding:
+                                            EdgeInsets.only(left: 10, right: 10), */
+                                        width:
+                                            MediaQuery.of(context).size.width /
+                                                2.3,
+                                        child: TextFormField(
+                                          validator: (value) {
+                                            if (value!.isEmpty) {
+                                              return "This field is required";
+                                            }
+                                          },
+                                          controller: skuController[i],
+                                          keyboardType: TextInputType.number,
+                                          decoration: InputDecoration(
+                                            hintText: 'SKU',
+                                            filled: true,
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                    vertical: 5.0,
+                                                    horizontal: 10.0),
+                                            fillColor: Colors.white,
+                                            enabledBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: Colors.grey
+                                                      .withOpacity(0.2),
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(6)),
+                                            focusedBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: Colors.grey
+                                                      .withOpacity(0.2),
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(6)),
+                                            border: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: Colors.grey
+                                                      .withOpacity(0.2),
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(6)),
+                                          ),
+                                          maxLines: 1,
+                                        )),
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 0, left: 10),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          SizedBox(
+                                              /* padding: EdgeInsets.only(
+                                                  left: 10, right: 10), */
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  2.3,
+                                              child: TextFormField(
+                                                validator: (value) {
+                                                  if (value!.isEmpty) {
+                                                    return "This field is required";
+                                                  }
+                                                },
+                                                controller:
+                                                    quantityController[i],
+                                                inputFormatters: <
+                                                    TextInputFormatter>[
+                                                  FilteringTextInputFormatter
+                                                      .digitsOnly
+                                                ],
+                                                keyboardType:
+                                                    TextInputType.number,
+                                                decoration: InputDecoration(
+                                                  hintText: 'Quantity',
+                                                  filled: true,
+                                                  contentPadding:
+                                                      const EdgeInsets
+                                                              .symmetric(
+                                                          vertical: 5.0,
+                                                          horizontal: 10.0),
+                                                  fillColor: Colors.white,
+                                                  enabledBorder:
+                                                      OutlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(
+                                                            color: Colors.grey
+                                                                .withOpacity(
+                                                                    0.2),
+                                                          ),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(6)),
+                                                  focusedBorder:
+                                                      OutlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(
+                                                            color: Colors.grey
+                                                                .withOpacity(
+                                                                    0.2),
+                                                          ),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(6)),
+                                                  border: OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: Colors.grey
+                                                            .withOpacity(0.2),
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              6)),
+                                                ),
+                                                maxLines: 1,
+                                              )),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              /*  Padding(
+                                padding: const EdgeInsets.only(top: 5),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                        width: MediaQuery.of(context).size.width /
+                                            2.18,
+                                        child: Text(
+                                          'Quantity',
+                                          style: TextStyle(
+                                              fontSize: 15.sp,
+                                              fontWeight: FontWeight.bold),
+                                        )),
+                                  ],
+                                ),
+                              ), */
+                              const Padding(
+                                padding: EdgeInsets.only(right: 15.0),
+                                child: Divider(),
+                              ),
+                            ],
+                          )
+                        : const SizedBox(),
+                  colorVarient.length + sizeVarient.length < 3
                       ? Column(
                           children: [
-                            Text(combination[i]),
                             Padding(
                               padding: const EdgeInsets.only(top: 10.0),
                               child: Row(
                                 children: [
-                                  Container(
+                                  SizedBox(
                                       width: MediaQuery.of(context).size.width /
                                           2.18,
                                       child: Text(
@@ -1294,7 +1653,7 @@ class _uploadProductState extends State<uploadProduct> {
                                             fontWeight: FontWeight.bold),
                                       )),
                                   Text(
-                                    'Price',
+                                    'Quantity',
                                     style: TextStyle(
                                         fontSize: 15.sp,
                                         fontWeight: FontWeight.bold),
@@ -1307,557 +1666,536 @@ class _uploadProductState extends State<uploadProduct> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  Container(
-                                      padding:
-                                          EdgeInsets.only(left: 10, right: 10),
+                                  SizedBox(
+                                      /*  padding:
+                                          EdgeInsets.only(left: 10, right: 10), */
                                       width: MediaQuery.of(context).size.width /
                                           2.3,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(5)),
-                                          color: Colors.white,
-                                          border: Border.all(
-                                              color: Colors.black12,
-                                              width: 1.8)),
-                                      child: TextField(
-                                        controller: skuController[i],
+                                      child: TextFormField(
+                                        validator: (value) {
+                                          if (value!.isEmpty) {
+                                            return "This field is required";
+                                          }
+                                        },
+                                        controller: skucontro,
                                         keyboardType: TextInputType.number,
                                         decoration: InputDecoration(
-                                            hintText: 'SKU',
-                                            enabledBorder: InputBorder.none),
+                                          hintText: 'SKU',
+                                          filled: true,
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                  vertical: 5.0,
+                                                  horizontal: 10.0),
+                                          fillColor: Colors.white,
+                                          enabledBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Colors.grey
+                                                    .withOpacity(0.2),
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(6)),
+                                          focusedBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Colors.grey
+                                                    .withOpacity(0.2),
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(6)),
+                                          border: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Colors.grey
+                                                    .withOpacity(0.2),
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(6)),
+                                        ),
                                         maxLines: 1,
                                       )),
                                   Padding(
-                                    padding: const EdgeInsets.only(left: 10),
-                                    child: Container(
-                                        padding: EdgeInsets.only(
-                                            left: 10, right: 10),
-                                        width:
-                                            MediaQuery.of(context).size.width /
+                                    padding:
+                                        const EdgeInsets.only(top: 0, left: 10),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        SizedBox(
+                                            /*  padding: EdgeInsets.only(
+                                                left: 10, right: 10), */
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width /
                                                 2.3,
-                                        height: 40,
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(5)),
-                                            color: Colors.white,
-                                            border: Border.all(
-                                                color: Colors.black12,
-                                                width: 1.8)),
-                                        child: TextField(
-                                          /*  onTap: () {
-                                    Shipping_Cost = ShippingcostController.text;
-                                  }, */
-                                          controller: priceController[i],
-                                          keyboardType: TextInputType.number,
-                                          // focusNode: myFocusNode,
-                                          decoration: InputDecoration(
-                                              prefix: Text(
-                                                  '' /*  + categorycostlist[0].cost.toString() */),
-                                              hintText: '\$ 0.00',
-                                              hintStyle:
-                                                  TextStyle(color: Colors.grey),
-                                              /*   hintText:
-                                    '\$ ' + categorycostlist[0].cost.toString(), */
-                                              border: InputBorder.none,
-                                              enabledBorder: InputBorder.none),
-                                          maxLines: 1,
-                                        )),
+                                            child: TextFormField(
+                                              validator: (value) {
+                                                if (value!.isEmpty) {
+                                                  return "This field is required";
+                                                }
+                                              },
+                                              controller: quantitycontrol,
+                                              inputFormatters: <
+                                                  TextInputFormatter>[
+                                                FilteringTextInputFormatter
+                                                    .digitsOnly
+                                              ],
+                                              keyboardType:
+                                                  TextInputType.number,
+                                              decoration: InputDecoration(
+                                                hintText: 'Quantity',
+                                                filled: true,
+                                                contentPadding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 5.0,
+                                                        horizontal: 10.0),
+                                                fillColor: Colors.white,
+                                                enabledBorder:
+                                                    OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color: Colors.grey
+                                                              .withOpacity(0.2),
+                                                        ),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(6)),
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color: Colors.grey
+                                                              .withOpacity(0.2),
+                                                        ),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(6)),
+                                                border: OutlineInputBorder(
+                                                    borderSide: BorderSide(
+                                                      color: Colors.grey
+                                                          .withOpacity(0.2),
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            6)),
+                                              ),
+                                              maxLines: 1,
+                                            )),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 5),
-                              child: Row(
-                                children: [
-                                  Container(
-                                      width: MediaQuery.of(context).size.width /
-                                          2.18,
-                                      child: Text(
-                                        'Quantity',
-                                        style: TextStyle(
-                                            fontSize: 15.sp,
-                                            fontWeight: FontWeight.bold),
-                                      )),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 5),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Container(
-                                      padding:
-                                          EdgeInsets.only(left: 10, right: 10),
-                                      width: MediaQuery.of(context).size.width /
-                                          2.3,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(5)),
-                                          color: Colors.white,
-                                          border: Border.all(
-                                              color: Colors.black12,
-                                              width: 1.8)),
-                                      child: TextField(
-                                        controller: quantityController[i],
-                                        keyboardType: TextInputType.number,
-                                        decoration: InputDecoration(
-                                            hintText: 'Quantity',
-                                            enabledBorder: InputBorder.none),
-                                        maxLines: 1,
-                                      )),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 15.0),
+                            const Padding(
+                              padding: EdgeInsets.only(right: 15.0),
                               child: Divider(),
                             ),
                           ],
                         )
-                      : SizedBox(),
-                Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: Row(
-                    children: [
-                      Container(
-                          width: MediaQuery.of(context).size.width / 2.18,
-                          child: Text(
-                            'Shipping Cost',
-                            style: TextStyle(
-                                fontSize: 15.sp, fontWeight: FontWeight.bold),
-                          )),
-                      Text(
-                        'Company',
-                        style: TextStyle(
-                            fontSize: 15.sp, fontWeight: FontWeight.bold),
-                      )
-                    ],
+                      : const SizedBox(),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                            width: MediaQuery.of(context).size.width / 2.18,
+                            child: Text(
+                              'Shipping Cost',
+                              style: TextStyle(
+                                  fontSize: 15.sp, fontWeight: FontWeight.bold),
+                            )),
+                        Text(
+                          'Company',
+                          style: TextStyle(
+                              fontSize: 15.sp, fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Container(
-                          padding: EdgeInsets.only(left: 10, right: 10),
-                          height: 40,
-                          width: MediaQuery.of(context).size.width / 2.3,
-                          decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(5)),
-                              color: Colors.white,
-                              border: Border.all(
-                                  color: Colors.black12, width: 1.8)),
-                          child: TextField(
-                            onTap: () {
-                              Shipping_Cost = ShippingcostController.text;
-                            },
-                            controller: ShippingcostController,
-                            keyboardType: TextInputType.number,
-                            focusNode: myFocusNode,
-                            decoration: InputDecoration(
-                                prefix: Text(
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                            width: MediaQuery.of(context).size.width / 2.3,
+                            child: TextFormField(
+                              onTap: () {
+                                Shipping_Cost = ShippingcostController.text;
+                              },
+                              controller: ShippingcostController,
+                              keyboardType: TextInputType.number,
+                              focusNode: myFocusNode,
+                              decoration: InputDecoration(
+                                prefix: const Text(
                                     '\$' /*  + categorycostlist[0].cost.toString() */),
                                 hintText: myFocusNode.hasFocus ? '' : '\$ 0.00',
-                                hintStyle: TextStyle(color: Colors.grey),
+                                hintStyle: const TextStyle(color: Colors.grey),
                                 /*   hintText:
-                                    '\$ ' + categorycostlist[0].cost.toString(), */
-                                border: InputBorder.none,
-                                enabledBorder: InputBorder.none),
-                            maxLines: 1,
-                          )),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10),
-                        child: Container(
-                          padding: EdgeInsets.only(left: 10, right: 10),
-                          height: 40,
-                          width: MediaQuery.of(context).size.width / 2.3,
-                          decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(5)),
-                              color: Colors.white,
-                              border: Border.all(
-                                  color: Colors.black12, width: 1.8)),
-                          child: TextField(
-                            decoration: InputDecoration(
+                                      '\$ ' + categorycostlist[0].cost.toString(), */
+                                filled: true,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 5.0, horizontal: 10.0),
+                                fillColor: Colors.white,
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(6)),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(6)),
+                                border: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(6)),
+                              ),
+                              maxLines: 1,
+                            )),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width / 2.3,
+                            child: TextFormField(
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return "This field is required";
+                                }
+                              },
+                              decoration: InputDecoration(
                                 hintText: 'Company',
-                                enabledBorder: InputBorder.none),
-                            maxLines: 1,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: Row(
-                    children: [
-                      Container(
-                          width: MediaQuery.of(context).size.width / 2.18,
-                          child: Text(
-                            'Price',
-                            style: TextStyle(
-                                fontSize: 15.sp, fontWeight: FontWeight.bold),
-                          )),
-                      dropdownvalue3 == 'Consumer price' ||
-                              dropdownvalue3 == 'Wholesale price'
-                          ? dropdownvalue3 == 'Consumer price'
-                              ? Text(
-                                  'Consumer Price',
-                                  style: TextStyle(
-                                      fontSize: 15.sp,
-                                      fontWeight: FontWeight.bold),
-                                )
-                              : Text(
-                                  'Wholesale Price',
-                                  style: TextStyle(
-                                      fontSize: 15.sp,
-                                      fontWeight: FontWeight.bold),
-                                )
-                          : Container(),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: EdgeInsets.only(left: 10, right: 10),
-                        width: MediaQuery.of(context).size.width / 2.3,
-                        height: 40,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(5)),
-                            color: Colors.white,
-                            border:
-                                Border.all(color: Colors.black12, width: 1.8)),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton(
-                            value: dropdownvalue3,
-                            hint: Text('Price'),
-                            borderRadius: BorderRadius.all(Radius.circular(7)),
-                            icon: Icon(
-                              Icons.keyboard_arrow_down,
-                              color: Colors.grey[600],
+                                filled: true,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 5.0, horizontal: 10.0),
+                                fillColor: Colors.white,
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(6)),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(6)),
+                                border: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(6)),
+                              ),
+                              maxLines: 1,
                             ),
-                            items: items3.map((String items) {
-                              return DropdownMenuItem(
-                                value: items,
-                                child: Text(
-                                  items,
-                                  style: TextStyle(color: Colors.grey[600]),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                dropdownvalue3 = newValue!;
-                              });
-                            },
                           ),
                         ),
-                      ),
-                      dropdownvalue3 == 'Consumer price' ||
-                              dropdownvalue3 == 'Wholesale price'
-                          ? Padding(
-                              padding: const EdgeInsets.only(
-                                left: 10,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  dropdownvalue3 == 'Wholesale price'
-                                      ? Container(
-                                          padding: EdgeInsets.only(
-                                              left: 10, right: 10),
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width /
-                                              2.3,
-                                          height: 40,
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(5)),
-                                              color: Colors.white,
-                                              border: Border.all(
-                                                  color: Colors.black12,
-                                                  width: 1.8)),
-                                          child: TextField(
-                                            onTap: () {
-                                              setState(() {
-                                                Price_type = 'Wholesale';
-                                                Purchase_price =
-                                                    PurchasePriceController
-                                                        .text;
-                                              });
-                                            },
-                                            controller: PurchasePriceController,
-                                            keyboardType: TextInputType.number,
-                                            focusNode: myFocusNodeWhole,
-                                            decoration: InputDecoration(
-                                                enabled: true,
-                                                prefix: Text('\$'),
-                                                hintText:
-                                                    myFocusNodeWhole.hasFocus
-                                                        ? ''
-                                                        : '\$ 0.00',
-                                                border: InputBorder.none,
-                                                enabledBorder:
-                                                    InputBorder.none),
-                                            maxLines: 1,
-                                          ))
-                                      : Container(
-                                          padding: EdgeInsets.only(
-                                              left: 10, right: 10),
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width /
-                                              2.3,
-                                          height: 40,
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(5)),
-                                              color: Colors.white,
-                                              border: Border.all(
-                                                  color: Colors.black12,
-                                                  width: 1.8)),
-                                          child: TextField(
-                                            onTap: () {
-                                              setState(() {
-                                                Price_type = 'Consumer';
-                                                Purchase_price =
-                                                    PurchasePriceController
-                                                        .text;
-                                              });
-                                            },
-                                            controller: PurchasePriceController,
-                                            keyboardType: TextInputType.number,
-                                            focusNode: myFocusNodeConsumer,
-                                            decoration: InputDecoration(
-                                                enabled: true,
-                                                prefix: Text('\$'),
-                                                hintText:
-                                                    myFocusNodeConsumer.hasFocus
-                                                        ? ''
-                                                        : '\$ 0.00',
-                                                border: InputBorder.none,
-                                                enabledBorder:
-                                                    InputBorder.none),
-                                            maxLines: 1,
-                                          ),
-                                        ),
-                                ],
-                              ),
-                            )
-                          : Container(),
-                      // Padding(
-                      //   padding: const EdgeInsets.only(left: 10),
-                      //   child: Container(
-                      //     padding: EdgeInsets.only(left: 10, right: 10),
-                      //     height: 40,
-                      //     width: MediaQuery.of(context).size.width / 2.3,
-                      //     decoration: BoxDecoration(
-                      //         borderRadius:
-                      //         BorderRadius.all(Radius.circular(5)),
-                      //         color: Colors.white,
-                      //         border: Border.all(
-                      //             color: Colors.black12, width: 1.8)),
-                      //     child: TextField(
-                      //       keyboardType: TextInputType.number,
-                      //       focusNode: myFocusNode,
-                      //       decoration: InputDecoration(
-                      //           prefix: Text('\$'),
-                      //           hintText: myFocusNode.hasFocus ? '' : '\$ 0.00',
-                      //           border: InputBorder.none,
-                      //           enabledBorder: InputBorder.none),
-                      //       maxLines: 1,
-                      //     )
-                      //   ),
-                      // ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                _isCancelable(),
-                Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: Row(
-                    children: [
-                      Container(
-                          width: MediaQuery.of(context).size.width / 2.18,
-                          child: Text(
-                            'Description',
-                            style: TextStyle(
-                                fontSize: 15.sp, fontWeight: FontWeight.bold),
-                          )),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                            width: MediaQuery.of(context).size.width / 2.18,
+                            child: Text(
+                              'Wholesale Price',
+                              style: TextStyle(
+                                  fontSize: 15.sp, fontWeight: FontWeight.bold),
+                            )),
+                        Text(
+                          'Consumer Price',
+                          style: TextStyle(
+                              fontSize: 15.sp, fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 5.0),
-                  child: Container(
-                    height: 150,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(5)),
-                        color: Colors.white,
-                        border: Border.all(color: Colors.black12, width: 1.8)),
-                    width: MediaQuery.of(context).size.width / 1.12,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 18.0, left: 18.0),
-                      child: TextField(
-                        controller: DescriptionController,
-                        decoration: new InputDecoration.collapsed(
-                            hintText: 'Enter Description'),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                            width: MediaQuery.of(context).size.width / 2.3,
+                            child: TextFormField(
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return "This field is required";
+                                }
+                              },
+                              onTap: () {},
+                              controller: WholesalePriceController,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                enabled: true,
+                                prefix: const Text(''),
+                                hintText:
+                                    myFocusNodeWhole.hasFocus ? '' : '\$ 0.00',
+                                filled: true,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 5.0, horizontal: 10.0),
+                                fillColor: Colors.white,
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(6)),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(6)),
+                                border: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(6)),
+                              ),
+                              maxLines: 1,
+                            )),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: SizedBox(
+                              width: MediaQuery.of(context).size.width / 2.3,
+                              child: TextFormField(
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return "This field is required";
+                                  }
+                                },
+                                onTap: () {},
+                                controller: PurchasePriceController,
+                                keyboardType: TextInputType.number,
+                                decoration: InputDecoration(
+                                  enabled: true,
+                                  prefix: const Text(''),
+                                  hintText: myFocusNodeWhole.hasFocus
+                                      ? ''
+                                      : '\$ 0.00',
+                                  filled: true,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 5.0, horizontal: 10.0),
+                                  fillColor: Colors.white,
+                                  enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Colors.grey.withOpacity(0.2),
+                                      ),
+                                      borderRadius: BorderRadius.circular(6)),
+                                  focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Colors.grey.withOpacity(0.2),
+                                      ),
+                                      borderRadius: BorderRadius.circular(6)),
+                                  border: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Colors.grey.withOpacity(0.2),
+                                      ),
+                                      borderRadius: BorderRadius.circular(6)),
+                                ),
+                                maxLines: 1,
+                              )),
+                        )
+                      ],
+                    ),
+                  ),
+                  _isCancelable(),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                            width: MediaQuery.of(context).size.width / 2.18,
+                            child: Text(
+                              'Description',
+                              style: TextStyle(
+                                  fontSize: 15.sp, fontWeight: FontWeight.bold),
+                            )),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5.0),
+                    child: Container(
+                      height: 150,
+                      decoration: BoxDecoration(
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(5)),
+                          color: Colors.white,
+                          border:
+                              Border.all(color: Colors.black12, width: 1.8)),
+                      width: MediaQuery.of(context).size.width / 1.12,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 18.0, left: 18.0),
+                        child: TextFormField(
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return "This field is required";
+                            }
+                          },
+                          controller: DescriptionController,
+                          decoration: const InputDecoration.collapsed(
+                              hintText: 'Enter Description'),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width / 1.12,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      setState(() {
-                        loader = true;
-                        imaglist = [];
-                      });
-                      print(colorCode);
-                      setState(() {
-                        colors = ColorController.text.split(',');
-                        size = SizeController.text.split(',');
-                      });
-                      String product = 'product';
-                      String thumbnail = 'thumbnail';
-                      await DataApiService.instance
-                          .updateProfileContent(myImages[0], thumbnail);
-                      for (int i = 0; i < myImages.length; i++) {
-                        Map<String, dynamic> upload = {
-                          'image': myImages[i],
-                          'type': 'product',
-                        };
-                        print('for');
-                        await DataApiService.instance
-                            .updateProfileContent(myImages[i], product);
-                      }
-                      Map<String, dynamic> upload = {
-                        'image': myImages[0],
-                        'type': 'product',
-                      };
-
-                      Map<String, dynamic> addproductmap = {
-                        /*  'name': NmaeController.text,
-                        'sub_name': SubnameController.text,
-                        'category_id': subvalue.toString(),
-                        'brand_id': brandvalue.toString(),
-                        'unit': 'pc',
-                        for (int i = 0; i < imaglist.length; i++)
-                          'images[$i]': imaglist[i],
-                        'thumbnail': thumbnaiImage,
-                        'tax': '10',
-                        'lang[]': 'en',
-                        'unit_price': '60',
-                        'shipping_cost': ShippingcostController.text,
-                        'description': DescriptionController.text,
-                        'price_type': 'wholesale',
-                        for (int i = 0; i < colors.length; i++)
-                          'colors': colors[i],
-                        for (int i = 0; i < size.length; i++) 'size': size[i],
-                        'size': 'l', */
-
-                        //new
-                        'name': NmaeController.text,
-                        'sub_name': SubnameController.text,
-                        'category_id': subvalue.toString(),
-                        'brand_id': brandvalue.toString(),
-                        'unit': 'pc',
-                        for (int i = 0; i < imaglist.length; i++)
-                          'images[$i]': imaglist[i],
-                        'thumbnail': thumbnaiImage,
-                        'tax': '10',
-                        'lang[]': 'en',
-                        'unit_price': '60',
-                        'shipping_cost': ShippingcostController.text,
-                        'description': DescriptionController.text,
-                        'price_type': 'wholesale',
-                        'colors_active': 'true',
-                        'size_active': 'true',
-                        'secret_payment': allowRequests.toString(),
-
-                        //  'colors[]': colorCode,
-                        /*  'colors': [
-                          for (int i = 0; i < colorVarient.length; i++)
-                            colorCode[i],
-                        ],
-                        'size':[
-                            for (int i = 0; i < sizeVarient.length; i++)
-                            jsonEncode(sizeVarient[i]),
-                        ], */
-                        'colors': colorCode.join(','),
-                        'size': sizeVarient.join(','),
-                        for (int i = 0; i < combination.length; i++)
-                          'price_${combination[i]}': priceController[i].text,
-                        for (int i = 0; i < combination.length; i++)
-                          'qty_${combination[i]}': quantityController[i].text,
-                        for (int i = 0; i < combination.length; i++)
-                          'sku_${combination[i]}': skuController[i].text,
-
-                        /*  for (int i = 0, countCv = 0;
-                            i < priceController.length;
-                            i++, countCv++)
-                          'price_${colorVarient[countCv]}-${sizeVarient[countCv]}':
-                              priceController[i].text,
-
-                        for (int i = 0, countCv = 0;
-                            i < quantityController.length;
-                            i++, countCv++)
-                          'qty_${colorVarient[countCv]}-${sizeVarient[countCv]}':
-                              quantityController[i].text,
-
-                        for (int i = 0, countCv = 0;
-                            i < skuController.length;
-                            i++, countCv++)
-                          'sku_${colorVarient[countCv]}-${sizeVarient[countCv]}':
-                              skuController[i].text, */
-                      };
-                      print(addproductmap);
-
-                      await DataApiService.instance
-                          .addProduct(addproductmap, context);
-                      setState(() {
-                        loader = false;
-                      });
-                      GlobalSnackBar.show(context, snackmessage);
-                      /*  for (var i = 0; i < loop; i++) {
-                        print('price_${colorVarient[i]}_${sizeVarient[i]}=' +
-                            priceController[i].text);
-                        print('qty_${colorVarient[i]}_${sizeVarient[i]}=' +
-                            quantityController[i].text);
-                        print('sku_${colorVarient[i]}_${sizeVarient[i]}=' +
-                            skuController[i].text);
-                      } */
-                    },
-                    child: loader
-                        ? spinkit
-                        : Text(
-                            'Upload Now',
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 15.sp),
-                          ),
-                    style: ElevatedButton.styleFrom(primary: Colors.black),
+                  const SizedBox(
+                    height: 10,
                   ),
-                ),
-              ],
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width / 1.12,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        if (loader == false) {
+                          if (_formKey.currentState!.validate()) {
+                            if (myImages.isEmpty) {
+                              GlobalSnackBar.show(
+                                  context, 'Please Upload Images');
+                            } else {
+                              setState(() {
+                                loader = true;
+                                imaglist = [];
+                              });
+                              print(colorCode);
+                              setState(() {
+                                colors = ColorController.text.split(',');
+                                size = SizeController.text.split(',');
+                              });
+                              String product = 'product';
+                              String thumbnail = 'thumbnail';
+                              await DataApiService.instance
+                                  .updateProfileContent(myImages[0], thumbnail);
+                              for (int i = 0; i < myImages.length; i++) {
+                                Map<String, dynamic> upload = {
+                                  'image': myImages[i],
+                                  'type': 'product',
+                                };
+                                print('for');
+                                await DataApiService.instance
+                                    .updateProfileContent(myImages[i], product);
+                              }
+                              Map<String, dynamic> upload = {
+                                'image': myImages[0],
+                                'type': 'product',
+                              };
+
+                              var addproductmap;
+                              if (combination.isNotEmpty) {
+                                addproductmap = {
+                                  //new
+                                  'name': NmaeController.text,
+                                  'sub_name': SubnameController.text,
+                                  'category_id': value.toString(),
+                                  'sub_category_id': subvalue.toString(),
+                                  'brand_id': brandvalue.toString(),
+                                  'unit': 'pc',
+                                  for (int i = 0; i < imaglist.length; i++)
+                                    'images[$i]': imaglist[i],
+                                  'thumbnail': thumbnaiImage,
+                                  'tax': '10',
+                                  'lang[]': 'en',
+                                  'unit_price': PurchasePriceController.text,
+                                  'shipping_cost': ShippingcostController.text,
+                                  'description': DescriptionController.text,
+                                  'price_type': 'wholesale',
+                                  'colors_active': 'true',
+                                  'size_active': 'true',
+                                  'wholesale_price':
+                                      PurchasePriceController.text,
+                                  'secret_payment': allowRequests.toString(),
+
+                                  'colors': colorCode.join(','),
+                                  'size': sizeVarient.join(','),
+
+                                  for (int i = 0; i < combination.length; i++)
+                                    'price_${combination[i]}':
+                                        PurchasePriceController.text,
+                                  for (int i = 0; i < combination.length; i++)
+                                    'qty_${combination[i]}':
+                                        quantityController[i].text,
+                                  for (int i = 0; i < combination.length; i++)
+                                    'sku_${combination[i]}':
+                                        skuController[i].text,
+                                };
+                              } else {
+                                addproductmap = {
+                                  //new
+                                  'name': NmaeController.text,
+                                  'sub_name': SubnameController.text,
+                                  'category_id': value.toString(),
+                                  'sub_category_id': subvalue.toString(),
+
+                                  'brand_id': brandvalue.toString(),
+                                  'unit': 'pc',
+                                  for (int i = 0; i < imaglist.length; i++)
+                                    'images[$i]': imaglist[i],
+                                  'thumbnail': thumbnaiImage,
+                                  'tax': '10',
+                                  'lang[]': 'en',
+                                  'unit_price': PurchasePriceController.text,
+                                  'shipping_cost': ShippingcostController.text,
+                                  'description': DescriptionController.text,
+                                  'price_type': 'wholesale',
+                                  'colors_active': 'true',
+                                  'size_active': 'true',
+                                  'secret_payment': allowRequests.toString(),
+                                  'wholesale_price':
+                                      WholesalePriceController.text,
+                                  'colors': colorCode.join(','),
+                                  'size': sizeVarient.join(','),
+
+                                  'price_${colorVarient[0]}-${sizeVarient[0]}':
+                                      PurchasePriceController.text,
+                                  'qty_${colorVarient[0]}-${sizeVarient[0]}':
+                                      quantitycontrol.text,
+                                  'sku_${colorVarient[0]}-${sizeVarient[0]}':
+                                      skucontro.text,
+                                };
+                              }
+
+                              print(addproductmap);
+
+                              await DataApiService.instance
+                                  .addProduct(addproductmap, context);
+                              setState(() {
+                                loader = false;
+                              });
+                              dialogUploadproduct == false
+                                  ? GlobalSnackBar.show(context, snackmessage)
+                                  : AwesomeDialog(
+                                      context: context,
+                                      dialogType: DialogType.SUCCES,
+                                      animType: AnimType.BOTTOMSLIDE,
+                                      title: 'Success',
+                                      desc: 'Product Added Successfully',
+                                      btnOkOnPress: () {
+                                        images.clear();
+                                        myImages.clear();
+                                        imagesfile.clear();
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    navBar(index: 1, see: 0)));
+                                      },
+                                    ).show();
+                            }
+                          }
+                        }
+                      },
+                      child: loader
+                          ? spinkit
+                          : Text(
+                              'Upload Now',
+                              style: TextStyle(
+                                  color: Colors.white, fontSize: 15.sp),
+                            ),
+                      style: ElevatedButton.styleFrom(primary: Colors.black),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
+        )),
       ),
     );
   }
@@ -1871,7 +2209,8 @@ class _uploadProductState extends State<uploadProduct> {
         _picked = pickedFile;
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => imageCrop()),
+          MaterialPageRoute(
+              builder: (context) => const imageCropperAddProduct()),
         );
       });
     }
