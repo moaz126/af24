@@ -26,6 +26,7 @@ class SellerOrderDetailsModel {
     required this.userName,
     required this.userContact,
     required this.paymentMethod,
+    required this.shippingData,
   });
 
   int id;
@@ -52,6 +53,7 @@ class SellerOrderDetailsModel {
   String userName;
   String userContact;
   String paymentMethod;
+  ShippingAddressData shippingData;
 
   factory SellerOrderDetailsModel.fromJson(Map<String, dynamic> json) =>
       SellerOrderDetailsModel(
@@ -79,6 +81,8 @@ class SellerOrderDetailsModel {
         userEmail: json["user_email"],
         userName: json["user_name"],
         userContact: json["user_contact"],
+        shippingData:
+            ShippingAddressData.fromJson(json["shipping_address_data"]),
       );
 }
 
@@ -254,5 +258,78 @@ class CategoryId {
   Map<String, dynamic> toJson() => {
         "id": id,
         "position": position,
+      };
+}
+
+class ShippingAddressData {
+  ShippingAddressData({
+    required this.id,
+    required this.customerId,
+    required this.contactPersonName,
+    required this.addressType,
+    required this.address,
+    required this.city,
+    required this.zip,
+    required this.phone,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.state,
+    required this.country,
+    required this.latitude,
+    required this.longitude,
+    required this.isBilling,
+  });
+
+  int id;
+  int customerId;
+  String contactPersonName;
+  String addressType;
+  String address;
+  String city;
+  String zip;
+  String phone;
+  DateTime createdAt;
+  DateTime updatedAt;
+  dynamic state;
+  dynamic country;
+  String latitude;
+  String longitude;
+  int isBilling;
+
+  factory ShippingAddressData.fromJson(Map<String, dynamic> json) =>
+      ShippingAddressData(
+        id: json["id"],
+        customerId: json["customer_id"],
+        contactPersonName: json["contact_person_name"],
+        addressType: json["address_type"],
+        address: json["address"],
+        city: json["city"],
+        zip: json["zip"],
+        phone: json["phone"],
+        createdAt: DateTime.parse(json["created_at"]),
+        updatedAt: DateTime.parse(json["updated_at"]),
+        state: json["state"],
+        country: json["country"],
+        latitude: json["latitude"],
+        longitude: json["longitude"],
+        isBilling: json["is_billing"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "customer_id": customerId,
+        "contact_person_name": contactPersonName,
+        "address_type": addressType,
+        "address": address,
+        "city": city,
+        "zip": zip,
+        "phone": phone,
+        "created_at": createdAt.toIso8601String(),
+        "updated_at": updatedAt.toIso8601String(),
+        "state": state,
+        "country": country,
+        "latitude": latitude,
+        "longitude": longitude,
+        "is_billing": isBilling,
       };
 }

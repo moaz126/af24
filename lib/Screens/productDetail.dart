@@ -104,6 +104,8 @@ class _productsState extends State<products> {
   void initState() {
     // TODO: implement initState
     callApi();
+    _textFieldController.text =
+        productlistContent[widget.index].unitPrice.toString();
     super.initState();
   }
 
@@ -114,6 +116,11 @@ class _productsState extends State<products> {
   bool loader2 = true;
   final spinkit2 = SpinKitSpinningLines(
     size: 3.h,
+    color: Colors.black,
+  );
+  bool loaderAlert = false;
+  final spinkitAlert = SpinKitSpinningLines(
+    size: 2.h,
     color: Colors.black,
   );
 
@@ -172,6 +179,20 @@ class _productsState extends State<products> {
                       child: Column(
                         children: [
                           Container(
+                            alignment: Alignment.centerLeft,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+                              child: Text(
+                                  productlistContent[widget.index]
+                                      .brandName
+                                      .toUpperCase(),
+                                  style: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w400),
+                                  textDirection: TextDirection.ltr),
+                            ),
+                          ),
+                          Container(
                             child: Column(
                               children: [
                                 CarouselSlider(
@@ -214,7 +235,13 @@ class _productsState extends State<products> {
                                     autoPlay: false,
                                     aspectRatio: 16 / 9,
                                     autoPlayCurve: Curves.fastOutSlowIn,
-                                    enableInfiniteScroll: true,
+                                    enableInfiniteScroll:
+                                        productlistContent[widget.index]
+                                                    .images
+                                                    .length ==
+                                                1
+                                            ? false
+                                            : true,
                                     autoPlayAnimationDuration:
                                         Duration(milliseconds: 800),
                                     viewportFraction: 1.0,
@@ -235,7 +262,10 @@ class _productsState extends State<products> {
                                             padding: const EdgeInsets.only(
                                                 right: 2.0),
                                             child: Text(
-                                              secretUserList.length.toString(),
+                                              /*   secretUserList.length.toString(), */
+                                              productlistContent[widget.index]
+                                                  .comments
+                                                  .toString(),
                                               style: TextStyle(
                                                 color: Colors.black
                                                     .withOpacity(0.4),
@@ -251,7 +281,7 @@ class _productsState extends State<products> {
                                         ],
                                       ),
                                     ),
-                                    Row(
+                                    /*   Row(
                                       children: [
                                         Text(
                                           productlistContent[widget.index]
@@ -273,7 +303,7 @@ class _productsState extends State<products> {
                                           ),
                                         ),
                                       ],
-                                    ),
+                                    ), */
                                   ],
                                 ),
                                 AnimatedSmoothIndicator(
@@ -308,7 +338,7 @@ class _productsState extends State<products> {
                                   textDirection: TextDirection.ltr),
                             ),
                           ),
-                          Container(
+                          /*   Container(
                             alignment: AlignmentDirectional.topStart,
                             child: Padding(
                               padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
@@ -321,10 +351,10 @@ class _productsState extends State<products> {
                                       fontWeight: FontWeight.w400),
                                   textDirection: TextDirection.ltr),
                             ),
-                          ),
-                          const SizedBox(
+                          ), */
+                          /*  const SizedBox(
                             height: 10,
-                          ),
+                          ), */
                           Container(
                             alignment: AlignmentDirectional.topStart,
                             child: Padding(
@@ -344,7 +374,7 @@ class _productsState extends State<products> {
                                     width: 2,
                                   ),
                                   Text(
-                                    "\$",
+                                    "€",
                                     style: TextStyle(
                                       fontSize: 18.sp,
                                       fontWeight: FontWeight.w300,
@@ -368,7 +398,7 @@ class _productsState extends State<products> {
                               scrollPhysics:
                                   const NeverScrollableScrollPhysics(),
                               leftHandSideColumnWidth: 60,
-                              rightHandSideColumnWidth: 320,
+                              rightHandSideColumnWidth: 250,
                               isFixedHeader: true,
                               headerWidgets: _getTitleWidget(),
                               leftSideItemBuilder: _generateFirstColumnRow,
@@ -402,7 +432,7 @@ class _productsState extends State<products> {
                                           fontWeight: FontWeight.w400),
                                       textDirection: TextDirection.ltr),
                                   Text(
-                                      '${productlistContent[widget.index].shippingCost.toString()}\$',
+                                      '${productlistContent[widget.index].shippingCost.toString()} €',
                                       style: TextStyle(
                                           fontSize: 16.sp,
                                           fontWeight: FontWeight.w400),
@@ -460,7 +490,7 @@ class _productsState extends State<products> {
                                       productlistContent[widget.index]
                                               .wholesalePrice
                                               .toString() +
-                                          '\$',
+                                          '€',
                                       style: TextStyle(
                                           fontSize: 16.sp,
                                           fontWeight: FontWeight.w400),
@@ -489,7 +519,7 @@ class _productsState extends State<products> {
                                       productlistContent[widget.index]
                                               .unitPrice
                                               .toString() +
-                                          '\$',
+                                          '€',
                                       style: TextStyle(
                                           fontSize: 16.sp,
                                           fontWeight: FontWeight.w400),
@@ -737,12 +767,13 @@ class _productsState extends State<products> {
                                                                     Container(
                                                                       height:
                                                                           20,
-                                                                      width: 8,
+                                                                      /*  width: 8, */
                                                                       child:
                                                                           Text(
-                                                                        secretUserList[index]
-                                                                            .messagesCount
-                                                                            .toString(),
+                                                                        secretUserList[index].messagesCount >
+                                                                                99
+                                                                            ? '99+'
+                                                                            : secretUserList[index].messagesCount.toString(),
                                                                         style: const TextStyle(
                                                                             color:
                                                                                 Colors.white),
@@ -867,12 +898,13 @@ class _productsState extends State<products> {
                                                                               'message': sendcommentController.text,
                                                                               'sender_name': shopinfoContent.name
                                                                             };
+                                                                            sendcommentController.clear();
                                                                             await DataApiService.instance.sendSecretMessage(sendcommnt,
                                                                                 context);
                                                                             setState(() {
                                                                               secretUserList[index].messagesCount++;
+                                                                              productlistContent[widget.index].comments++;
                                                                             });
-                                                                            sendcommentController.clear();
                                                                           },
                                                                           child:
                                                                               const Icon(Icons.send)),
@@ -901,116 +933,138 @@ class _productsState extends State<products> {
                                             );
                                           },
                                         )
-                              : getlinkuser.isEmpty
-                                  ? const Center(child: Text('No Requests'))
-                                  : ListView.builder(
-                                      shrinkWrap: true,
-                                      itemCount: getlinkuser.length,
-                                      itemBuilder:
-                                          (BuildContext context, int index) {
-                                        return Column(
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                              : loader
+                                  ? spinkit
+                                  : getlinkuser.isEmpty
+                                      ? const Center(child: Text('No Requests'))
+                                      : ListView.builder(
+                                          shrinkWrap: true,
+                                          itemCount: getlinkuser.length,
+                                          itemBuilder: (BuildContext context,
+                                              int index) {
+                                            return Column(
                                               children: [
-                                                Text(
-                                                    getlinkuser[index]
-                                                        .userName
-                                                        .toString(),
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        fontSize: 17.sp),
-                                                    textDirection:
-                                                        TextDirection.ltr),
-                                                ElevatedButton(
-                                                  onPressed: () {
-                                                    showDialog(
-                                                      context: context,
-                                                      builder: (BuildContext
-                                                          context) {
-                                                        return AlertDialog(
-                                                          title: const Text(
-                                                              'Enter Price in \$'),
-                                                          content: TextField(
-                                                            keyboardType:
-                                                                TextInputType
-                                                                    .number,
-                                                            onChanged:
-                                                                (value) {},
-                                                            controller:
-                                                                _textFieldController,
-                                                            decoration:
-                                                                const InputDecoration(
-                                                              hintText:
-                                                                  "\$ 0.00",
-                                                            ),
-                                                          ),
-                                                          actions: [
-                                                            FlatButton(
-                                                              textColor:
-                                                                  Colors.black,
-                                                              onPressed:
-                                                                  () async {
-                                                                Map<String,
-                                                                        dynamic>
-                                                                    sendlink = {
-                                                                  'price':
-                                                                      _textFieldController
-                                                                          .text,
-                                                                  'request_id':
-                                                                      getlinkuser[
-                                                                              index]
-                                                                          .id
-                                                                          .toString()
-                                                                };
-                                                                await DataApiService
-                                                                    .instance
-                                                                    .sendLink(
-                                                                        sendlink,
-                                                                        context);
-                                                                setState(() {
-                                                                  // sizepicker = true;
-                                                                });
-                                                                GlobalSnackBar.show(
-                                                                    context,
-                                                                    snackmessage);
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Text(
+                                                        getlinkuser[index]
+                                                            .userName
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                            fontSize: 17.sp),
+                                                        textDirection:
+                                                            TextDirection.ltr),
+                                                    ElevatedButton(
+                                                      onPressed: () {
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (BuildContext
+                                                              context) {
+                                                            return StatefulBuilder(
+                                                                builder: (context,
+                                                                    setState) {
+                                                              return AlertDialog(
+                                                                title: const Text(
+                                                                    'Enter Price in €  '),
+                                                                content:
+                                                                    TextField(
+                                                                  keyboardType:
+                                                                      TextInputType
+                                                                          .number,
+                                                                  onChanged:
+                                                                      (value) {},
+                                                                  controller:
+                                                                      _textFieldController,
+                                                                  decoration:
+                                                                      const InputDecoration(
+                                                                    hintText:
+                                                                        "0.00 €",
+                                                                  ),
+                                                                ),
+                                                                actions: [
+                                                                  FlatButton(
+                                                                    textColor:
+                                                                        Colors
+                                                                            .black,
+                                                                    onPressed:
+                                                                        () async {
+                                                                      setState(
+                                                                          () {
+                                                                        loaderAlert =
+                                                                            true;
+                                                                      });
+                                                                      Map<String,
+                                                                              dynamic>
+                                                                          sendlink =
+                                                                          {
+                                                                        'price':
+                                                                            _textFieldController.text,
+                                                                        'request_id': getlinkuser[index]
+                                                                            .id
+                                                                            .toString()
+                                                                      };
+                                                                      await DataApiService
+                                                                          .instance
+                                                                          .sendLink(
+                                                                              sendlink,
+                                                                              context);
+                                                                      setState(
+                                                                          () {
+                                                                        loaderAlert =
+                                                                            false;
+                                                                        // sizepicker = true;
+                                                                      });
+                                                                      GlobalSnackBar.show(
+                                                                          context,
+                                                                          snackmessage);
 
-                                                                Navigator.of(
-                                                                        context,
-                                                                        rootNavigator:
-                                                                            true)
-                                                                    .pop();
-                                                              },
-                                                              child: const Text(
-                                                                  'Send'),
-                                                            ),
-                                                          ],
+                                                                      Navigator.of(
+                                                                              context,
+                                                                              rootNavigator: true)
+                                                                          .pop();
+                                                                    },
+                                                                    child:
+                                                                        Container(
+                                                                      height:
+                                                                          20,
+                                                                      width: 50,
+                                                                      child: loaderAlert
+                                                                          ? spinkitAlert
+                                                                          : Text(
+                                                                              'Send'),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              );
+                                                            });
+                                                          },
                                                         );
                                                       },
-                                                    );
-                                                  },
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                          primary:
-                                                              Colors.black),
-                                                  child: const Text(
-                                                    'Send Link',
-                                                    style: TextStyle(
-                                                        color: Colors.white),
-                                                  ),
+                                                      style: ElevatedButton
+                                                          .styleFrom(
+                                                              primary:
+                                                                  Colors.black),
+                                                      child: const Text(
+                                                        'Send Link',
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.white),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(
+                                                  height: 5,
                                                 ),
                                               ],
-                                            ),
-                                            const SizedBox(
-                                              height: 5,
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    )
+                                            );
+                                          },
+                                        )
                         ],
                       ),
                     ),
@@ -1070,10 +1124,19 @@ class _productsState extends State<products> {
           alignment: Alignment.centerLeft,
           child: Center(
               child: Text(productlistContent[widget.index]
-                  .variation[index]
-                  .type
-                  .toString()
-                  .split('-')[0])),
+                      .variation[index]
+                      .type
+                      .toString()
+                      .contains('-')
+                  ? productlistContent[widget.index]
+                      .variation[index]
+                      .type
+                      .toString()
+                      .split('-')[0]
+                  : productlistContent[widget.index]
+                      .variation[index]
+                      .type
+                      .toString())),
         ),
         Container(
           width: 80,
@@ -1082,10 +1145,16 @@ class _productsState extends State<products> {
           alignment: Alignment.centerLeft,
           child: Center(
               child: Text(productlistContent[widget.index]
-                  .variation[index]
-                  .type
-                  .toString()
-                  .split('-')[1])),
+                      .variation[index]
+                      .type
+                      .toString()
+                      .contains('-')
+                  ? productlistContent[widget.index]
+                      .variation[index]
+                      .type
+                      .toString()
+                      .split('-')[1]
+                  : '-')),
         ),
         Container(
           width: 80,

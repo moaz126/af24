@@ -4,9 +4,9 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     
    <application
-        android:label="AF24"
+        android:label="af24Seller"
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/app_icon">
         <activity
     android:name="com.yalantis.ucrop.UCropActivity"
     android:screenOrientation="portrait"

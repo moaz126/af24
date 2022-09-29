@@ -1,6 +1,7 @@
 import 'package:af24/Model/GetcategoriesModel.dart';
 import 'package:af24/Model/ProductlistModel.dart';
 import 'package:af24/Model/SellerOrderDetailsModel.dart';
+import 'package:af24/Model/getAllLinks.dart';
 import 'package:af24/Model/getChatModel.dart';
 import 'package:af24/Model/getColors.dart';
 import 'package:af24/Model/getDashboard.dart';
@@ -12,7 +13,7 @@ import 'package:af24/Model/getUserChat.dart';
 import 'package:af24/Model/getbrand.dart';
 import 'package:af24/Model/getsizeModel.dart';
 
-import 'package:af24/Model/productinfoModel.dart';
+import 'package:af24/Model/ShopInfoModel.dart';
 import 'package:af24/Model/stockoutModel.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -26,8 +27,10 @@ final CUSTOMER_TOKEN = ValueNotifier("");
 
 late shopinfoModel shopinfoContent;
 List<ListElement> productlistContent = [];
+List<ListElement> productLinks = [];
 String? product_id = '';
 String? customer_id = '';
+String? order_id = '';
 String title = '';
 List<CategoryModel> catergorylist = [];
 List<AllCategoryShippingCost> categorycostlist = [];
@@ -45,9 +48,11 @@ List<GetUserChatModel> getUserList = [];
 List<GetSecretModel> getSecretList = [];
 List<GetSecretUser> secretUserList = [];
 List<GetlinkModel> getlinkuser = [];
+List<GetAllLinks> getlinkContent = [];
 // List<GetDashboardModel> getDashboardContent = [];
 GetDashboardModel? getDashboardContent;
 bool dialogUploadproduct = false;
+int orderPressed = 0;
 String imagepath = '';
 String thumbnail = '';
 String imageName = '';
@@ -72,8 +77,7 @@ String StatusCode = '403';
 String SnackMessage = "";
 List<String> myImages = [];
 final LANG_CODE = ValueNotifier("en");
-
-
+bool chatNavigate = false;
 
 /* class combination {
   final String color;

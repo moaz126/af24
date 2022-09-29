@@ -67,7 +67,6 @@ class GetUserChatModel {
         customer: json["customer"] != null
             ? Customer.fromJson(json["customer"])
             : null,
-
       );
 }
 
@@ -123,7 +122,7 @@ class Customer {
   dynamic zip;
   dynamic houseNo;
   dynamic apartmentNo;
-  String cmFirebaseToken;
+  String? cmFirebaseToken;
   int isActive;
   dynamic paymentCardLastFour;
   dynamic paymentCardBrand;
@@ -136,8 +135,8 @@ class Customer {
   dynamic walletBalance;
   dynamic loyaltyPoint;
   String title;
-  String dOB;
-  String newsletter;
+  String? dOB;
+  String? newsletter;
   String? folowed;
 
   factory Customer.fromJson(Map<String, dynamic> json) => Customer(
@@ -175,5 +174,4 @@ class Customer {
         newsletter: json["newsletter"],
         folowed: json["folowed"] == null ? null : json["folowed"],
       );
-
 }

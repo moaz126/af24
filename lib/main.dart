@@ -2,6 +2,7 @@ import 'package:af24/Screens/chat_Inbox.dart';
 import 'package:af24/Screens/dashBoard.dart';
 import 'package:af24/Screens/login.dart';
 import 'package:af24/Screens/navBar.dart';
+import 'package:af24/Screens/orderDetail.dart';
 import 'package:af24/Screens/productDetail.dart';
 import 'package:af24/Screens/splashscreen.dart';
 import 'package:af24/api/auth_af24.dart';
@@ -19,13 +20,13 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("Handling a background message: ${message.data}");
 }
 
-void _handleMessage(RemoteMessage message) {
+Future<void> _handleMessage(RemoteMessage message) async {
   print("in app open");
-  print(message.data['winner']);
-}
-
-Future<void> onSelectNotification(String? payload) async {
-  if (title == 'Payment Link Request') {
+  title = message.data['title'];
+  product_id = message.data['product_id'];
+  customer_id = message.data['customer_id'];
+  order_id = message.data['order_id'];
+  if (title == 'Payment Request Link') {
     await DataApiService.instance.getmainproductlist();
     for (var i = 0; i < productlistContent.length; i++) {
       if (product_id == productlistContent[i].id.toString()) {
@@ -39,7 +40,54 @@ Future<void> onSelectNotification(String? payload) async {
       print(customer_id);
       if (getUserList[i].userId.toString() == customer_id) {
         print('click');
-        Get.to(chatBox(imagePath: 'assets/Bag0.jpg', index: i));
+        Get.to(chatBox(imagePath: getUserList[i].customer.image, index: i));
+      }
+    }
+  } else if (title == 'Order Cancelled') {
+    Get.to(orderDetail(order_id!));
+  } else if (title == 'Order Placed') {
+    Get.to(orderDetail(order_id!));
+  } else if (title == 'Payment Completed') {
+    Get.to(orderDetail(order_id!));
+  } else if (title == 'Secret comment posted') {
+    await DataApiService.instance.getmainproductlist();
+    for (var i = 0; i < productlistContent.length; i++) {
+      if (product_id == productlistContent[i].id.toString()) {
+        Get.to(products(i));
+      }
+    }
+  }
+}
+
+Future<void> onSelectNotification(String? payload) async {
+  if (title == 'Payment Request Link') {
+    await DataApiService.instance.getmainproductlist();
+    for (var i = 0; i < productlistContent.length; i++) {
+      if (product_id == productlistContent[i].id.toString()) {
+        Get.to(products(i));
+      }
+    }
+  } else if (title == 'New message') {
+    await DataApiService.instance.getmainUserChat();
+    for (int i = 0; i < getUserList.length; i++) {
+      print(getUserList[i].id.toString());
+      print(customer_id);
+      if (getUserList[i].userId.toString() == customer_id) {
+        print('click');
+        Get.to(chatBox(imagePath: getUserList[i].customer.image, index: i));
+      }
+    }
+  } else if (title == 'Order Cancelled') {
+    Get.to(orderDetail(order_id!));
+  } else if (title == 'Order Placed') {
+    Get.to(orderDetail(order_id!));
+  } else if (title == 'Payment Completed') {
+    Get.to(orderDetail(order_id!));
+  } else if (title == 'Secret comment posted') {
+    await DataApiService.instance.getmainproductlist();
+    for (var i = 0; i < productlistContent.length; i++) {
+      if (product_id == productlistContent[i].id.toString()) {
+        Get.to(products(i));
       }
     }
   }
@@ -59,6 +107,8 @@ Future<void> _selectNotification(RemoteMessage message) async {
   title = message.data['title'];
   product_id = message.data['product_id'];
   customer_id = message.data['customer_id'];
+  order_id = message.data['order_id'];
+
   await FlutterLocalNotificationsPlugin().show(123, message.notification!.title,
       message.notification!.body, platformChannelSpecifics,
       payload: 'data');

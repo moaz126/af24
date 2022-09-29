@@ -1,17 +1,17 @@
 // To parse required this JSON data, do
 //
-//     final getlinkModel = getlinkModelFromJson(jsonString);
+//     final getAllLinks = getAllLinksFromJson(jsonString);
 
 import 'dart:convert';
 
-List<GetlinkModel> getlinkModelFromJson(String str) => List<GetlinkModel>.from(
-    json.decode(str).map((x) => GetlinkModel.fromJson(x)));
+List<GetAllLinks> getAllLinksFromJson(String str) => List<GetAllLinks>.from(
+    json.decode(str).map((x) => GetAllLinks.fromJson(x)));
 
-String getlinkModelToJson(List<GetlinkModel> data) =>
+String getAllLinksToJson(List<GetAllLinks> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
-class GetlinkModel {
-  GetlinkModel({
+class GetAllLinks {
+  GetAllLinks({
     required this.id,
     required this.productId,
     required this.userId,
@@ -36,16 +36,16 @@ class GetlinkModel {
   int quantity;
   dynamic price;
   String color;
-  String? size;
-  dynamic priceSetBySeller;
+  String size;
+  int? priceSetBySeller;
   int seenBySeller;
-  dynamic generatedLink;
+  String? generatedLink;
   int status;
   DateTime createdAt;
   DateTime updatedAt;
-  String? userName;
+  String userName;
 
-  factory GetlinkModel.fromJson(Map<String, dynamic> json) => GetlinkModel(
+  factory GetAllLinks.fromJson(Map<String, dynamic> json) => GetAllLinks(
         id: json["id"],
         productId: json["product_id"],
         userId: json["user_id"],
@@ -78,5 +78,6 @@ class GetlinkModel {
         "status": status,
         "created_at": createdAt.toIso8601String(),
         "updated_at": updatedAt.toIso8601String(),
+        "user_name": userName,
       };
 }

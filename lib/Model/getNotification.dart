@@ -24,6 +24,7 @@ class GetNotificationModel {
     required this.updatedAt,
     required this.orderId,
     required this.customerId,
+    required this.productId,
   });
 
   int id;
@@ -35,6 +36,7 @@ class GetNotificationModel {
   String type;
   String orderId;
   String customerId;
+  String? productId;
   dynamic createdAt;
   dynamic updatedAt;
 
@@ -48,6 +50,7 @@ class GetNotificationModel {
         userId: json["user_id"],
         type: json["type"],
         createdAt: json["created_at"],
+        productId: json["product_id"],
         updatedAt: json["updated_at"],
         orderId: json["order_id"].toString(),
         customerId: json["customer_id"].toString(),
@@ -63,5 +66,6 @@ class GetNotificationModel {
         "type": type,
         "created_at": createdAt,
         "updated_at": updatedAt,
+        "product_id": productId,
       };
 }

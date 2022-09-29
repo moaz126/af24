@@ -292,7 +292,7 @@ class _signupState extends State<signup> {
                             },
                             controller: EmailController,
                             decoration: InputDecoration(
-                                hintText: "Email address",
+                                hintText: "Email Address",
                                 enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                       color: Colors.grey.withOpacity(0.2),
@@ -342,8 +342,8 @@ class _signupState extends State<signup> {
                                       });
                                     },
                                     child: Icon(view1
-                                        ? Icons.visibility
-                                        : Icons.visibility_off)),
+                                        ? Icons.visibility_off
+                                        : Icons.visibility)),
                                 hintText: "Password",
                                 enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
@@ -404,8 +404,8 @@ class _signupState extends State<signup> {
                                       });
                                     },
                                     child: Icon(view2
-                                        ? Icons.visibility
-                                        : Icons.visibility_off)),
+                                        ? Icons.visibility_off
+                                        : Icons.visibility)),
                                 hintText: 'Confirm Password',
                                 enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(

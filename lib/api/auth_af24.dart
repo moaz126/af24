@@ -3,6 +3,7 @@ import 'package:af24/Model/GetcategoriesModel.dart';
 import 'package:af24/Model/ProductlistModel.dart';
 import 'package:af24/Model/SellerOrderDetailsModel.dart';
 import 'package:af24/Model/SellerOrderListModel.dart';
+import 'package:af24/Model/getAllLinks.dart';
 import 'package:af24/Model/getChatModel.dart';
 import 'package:af24/Model/getLinkModel.dart';
 import 'package:af24/Model/getNotification.dart';
@@ -17,7 +18,7 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 
-import 'package:af24/Model/productinfoModel.dart';
+import 'package:af24/Model/ShopInfoModel.dart';
 import 'package:af24/Model/shippingCostModel.dart';
 import 'package:af24/Model/stockoutModel.dart';
 import 'package:af24/api/global_variable.dart';
@@ -254,15 +255,40 @@ class DataApiService {
         print('Success');
         productlistContent = List<ListElement>.from(
             result['list'].map((x) => ListElement.fromJson(x)));
-        /*  thumbnail = List<ProductlistModel>.from(
-            result.map((x) => ProductlistModel.fromJson(x))); */
+
         thumbnail = result['thumbnail_path'];
         imagepath = result['images_path'];
-        print('1010101010');
+      } else if (response.statusCode == 401) {
+        GlobalSnackBar.show(context, 'Session Expired!');
+        Get.offAll(Login());
 
-        print(thumbnail);
-        print(imagepath);
-        //print(result[0]['images_path']);
+        print("unsuccess");
+      }
+    } on Exception {
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future getLinksProduct(context) async {
+    String url = baseUrl + productlist_url + '?for_links=true';
+
+    print(url);
+
+    try {
+      http.Response response = await http.get(Uri.parse(url), headers: {
+        "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
+      });
+      print(response.body);
+      final result = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        print('Success');
+        productLinks = List<ListElement>.from(
+            result['list'].map((x) => ListElement.fromJson(x)));
+
+        thumbnail = result['thumbnail_path'];
+        imagepath = result['images_path'];
       } else if (response.statusCode == 401) {
         GlobalSnackBar.show(context, 'Session Expired!');
         Get.offAll(Login());
@@ -358,8 +384,8 @@ class DataApiService {
         colorList = List<ColorsModel>.from(
             result['data'].map((x) => ColorsModel.fromJson(x)));
         print(colorList[0].name);
-        colorList.insert(
-            0, ColorsModel(id: 555, name: 'Add More', code: 'code'));
+        /*  colorList.insert(
+            0, ColorsModel(id: 555, name: 'Add More', code: 'code')); */
       } else if (response.statusCode == 401) {
         Get.offAll(Login());
 
@@ -391,7 +417,7 @@ class DataApiService {
         sizeList = List<SizeModel>.from(
             result['data'].map((x) => SizeModel.fromJson(x)));
         print(sizeList[0].label);
-        sizeList.insert(0, SizeModel(label: 'Add More'));
+        /*  sizeList.insert(0, SizeModel(label: 'Add More')); */
       } else if (response.statusCode == 401) {
         Get.offAll(Login());
 
@@ -539,6 +565,42 @@ class DataApiService {
     }
   }
 
+  Future sendOrderDetail(Map<String, dynamic> save, context) async {
+    String url = baseUrl + saveOrderDetail;
+    print(url);
+
+    try {
+      http.Response response = await http.post(Uri.parse(url),
+          body: save,
+          headers: {
+            "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
+            "Accept": "application/json"
+          });
+
+      print(response.body);
+      final result = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        print('Success3');
+      } else if (response.statusCode == 401) {
+        dialogUploadproduct = false;
+        GlobalSnackBar.show(context, 'Session Expired!');
+        Get.offAll(Login());
+
+        print("unsuccess");
+      } else {
+        dialogUploadproduct = false;
+        StatusCode == '403';
+        snackmessage = result['message'];
+        print("unsucess3");
+      }
+    } on Exception {
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future sendLink(Map<String, dynamic> sendlink, context) async {
     String url = baseUrl + sendLink_url;
     print(url);
@@ -573,6 +635,23 @@ class DataApiService {
     }
   }
 
+  Future logout(int id) async {
+    String url = baseUrl + 'v2/seller/' + id.toString() + logout_url;
+    print(url);
+
+    try {
+      http.Response response = await http.post(Uri.parse(url), headers: {
+        "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
+        "Accept": "application/json"
+      });
+      print(response.body);
+    } on Exception {
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future addSize(String size, context) async {
     String url = baseUrl + addSize_url;
     print(url);
@@ -589,7 +668,12 @@ class DataApiService {
       final result = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        print('Success3');
+        if (result['success'] == false) {
+          return false;
+        } else {
+          return true;
+        }
+
         // snackmessage = result['message'];
       } else if (response.statusCode == 401) {
         GlobalSnackBar.show(context, 'Session Expired!');
@@ -622,7 +706,12 @@ class DataApiService {
       final result = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        print('Success3');
+        if (result['success'] == false) {
+          return false;
+        } else {
+          return true;
+        }
+
         // snackmessage = result['message'];
       } else if (response.statusCode == 401) {
         GlobalSnackBar.show(context, 'Session Expired!');
@@ -847,6 +936,67 @@ class DataApiService {
         getlinkuser = List<GetlinkModel>.from(
             result["list"].map((x) => GetlinkModel.fromJson(x)));
         print(getSecretList.length);
+      } else if (response.statusCode == 401) {
+        Get.offAll(Login());
+
+        print("unsuccess");
+      } else {
+        print("unsuccess");
+      }
+    } on Exception {
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future getAllLinks(String id, context) async {
+    String url = baseUrl + allLink_url;
+    print(url);
+
+    try {
+      http.Response response = await http.post(Uri.parse(url), body: {
+        'product_id': id
+      }, headers: {
+        "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
+      });
+      print(response.body);
+      final result = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        getlinkContent = List<GetAllLinks>.from(
+            result["list"].map((x) => GetAllLinks.fromJson(x)));
+        print(getlinkContent.length);
+      } else if (response.statusCode == 401) {
+        Get.offAll(Login());
+
+        print("unsuccess");
+      } else {
+        print("unsuccess");
+      }
+    } on Exception {
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future updateLink(String id, String price, context) async {
+    String url = baseUrl + updateLink_url;
+    print(url);
+
+    try {
+      http.Response response = await http.post(Uri.parse(url), body: {
+        'id': id,
+        'price': price
+      }, headers: {
+        "Authorization": "Bearer ${CUSTOMER_TOKEN.value}",
+      });
+      print(response.body);
+      final result = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        print(response.body);
+        print(getlinkContent.length);
+        snackmessage = result['message'];
       } else if (response.statusCode == 401) {
         Get.offAll(Login());
 
@@ -1251,7 +1401,7 @@ class DataApiService {
       print("fsmToken");
       print(fsmToken);
     });
-    print('what the Hell');
+
     print(url);
     try {
       print('Hello');

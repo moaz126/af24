@@ -85,7 +85,7 @@ class _newsFeedMainState extends State<newsFeedMain> {
           ? spinkit
           : productlistContent.isEmpty
               ? const Center(
-                  child: Text('List is Empty'),
+                  child: Text('No products are added'),
                 )
               : SmartRefresher(
                   enablePullDown: true,
@@ -98,7 +98,7 @@ class _newsFeedMainState extends State<newsFeedMain> {
                               crossAxisCount: 2,
                               crossAxisSpacing: 7,
                               mainAxisSpacing: 10.0,
-                              childAspectRatio: 0.64),
+                              childAspectRatio: 0.54),
                       padding:
                           const EdgeInsets.only(top: 15, left: 10, right: 10),
                       itemCount: productlistContent.length,
@@ -157,6 +157,19 @@ class _newsFeedMainState extends State<newsFeedMain> {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       productlistContent[index].name,
+                                      style: TextStyle(
+                                        height: 1.5,
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 13.sp,
+                                      ),
+                                    ),
+                                    Text(
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      productlistContent[index]
+                                              .unitPrice
+                                              .toString() +
+                                          ' €',
                                       style: TextStyle(
                                         height: 1.5,
                                         fontWeight: FontWeight.w900,
@@ -261,6 +274,65 @@ class _newsFeedMainState extends State<newsFeedMain> {
                                         )
                                       ],
                                     )
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 10.0),
+                                      child: Row(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 2.0, top: 2),
+                                            child: Text(
+                                              productlistContent[index]
+                                                  .comments
+                                                  .toString(),
+                                              style: TextStyle(
+                                                color: Colors.black
+                                                    .withOpacity(0.4),
+                                                fontSize: 14.sp,
+                                              ),
+                                            ),
+                                          ),
+                                          Image.asset(
+                                            "assets/icons/Seller app icon (12).png",
+                                            height: 15.sp,
+                                            color: Colors.green[500],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 2.0),
+                                          child: Text(
+                                            productlistContent[index]
+                                                .likes
+                                                .toString(),
+                                            style: TextStyle(
+                                              color:
+                                                  Colors.black.withOpacity(0.4),
+                                              fontSize: 14.sp,
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(left: 2.0),
+                                          child: Image.asset(
+                                            "assets/icons/Seller app icon (13).png",
+                                            height: 15.sp,
+                                            color: Colors.red[500],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ],
                                 ),
                               ],

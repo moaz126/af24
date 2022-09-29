@@ -1,13 +1,19 @@
 import 'dart:io';
 
+import 'package:af24/Screens/navBar.dart';
 import 'package:af24/api/global_variable.dart';
 import 'package:af24/constants.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:country_pickers/country.dart';
+import 'package:country_pickers/country_pickers.dart';
+import 'package:country_pickers/country_picker_dropdown.dart';
+import 'package:country_pickers/utils/utils.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:sizer/sizer.dart';
 import 'package:flutter/services.dart';
 
@@ -25,7 +31,7 @@ class _shopInfoState extends State<shopInfo> {
   final Contactcontroller = TextEditingController();
   final Addresscontroller = TextEditingController();
   final emailController = TextEditingController();
-
+  String cntry = '86';
   String imagepath = '';
   File? file;
   final spinkit = SpinKitSpinningLines(
@@ -106,11 +112,18 @@ class _shopInfoState extends State<shopInfo> {
                                   child: CachedNetworkImage(
                                     imageUrl:
                                         'https://becknowledge.com/af24/public/storage/shop/${shopinfoContent.image}',
-                                    fit: BoxFit.fill,
                                     placeholder: (context, url) => Image.asset(
                                       'assets/icons/Seller app icon (8).png',
-                                      height: 20.h,
-                                      width: 20.h,
+                                      height: 100,
+                                      width: 100,
+                                      fit: BoxFit.fill,
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        Image.asset(
+                                      'assets/icons/Seller app icon (8).png',
+                                      height: 100,
+                                      width: 100,
+                                      fit: BoxFit.contain,
                                     ),
                                   ),
                                 )
@@ -242,6 +255,22 @@ class _shopInfoState extends State<shopInfo> {
                                         hintStyle: TextStyle(fontSize: 15)),
                                   ),
                                 ),
+                                /*  Padding(
+                                  padding: const EdgeInsets.only(top: 45),
+                                  child: Container(
+                                    //height: 6.5.h,
+                                    width: 85.w,
+                                    decoration: BoxDecoration(
+                                        color: HexColor('#F2F2F4'),
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 10),
+                                      child:
+                                          _buildCountryPickerDropdownSoloExpanded(),
+                                    ),
+                                  ),
+                                ), */
                                 SizedBox(
                                   height: 5.h,
                                 ),
@@ -294,12 +323,22 @@ class _shopInfoState extends State<shopInfo> {
                                                 Addresscontroller.text,
                                                 imagepath,
                                                 context);
+                                        await DataApiService.instance
+                                            .getshopinfo();
 
                                         setState(() {
                                           loader2 = false;
                                         });
-                                        GlobalSnackBar.show(
-                                            context, snackmessage);
+                                        AwesomeDialog(
+                                          context: context,
+                                          dialogType: DialogType.SUCCES,
+                                          animType: AnimType.BOTTOMSLIDE,
+                                          title: 'Update',
+                                          desc: snackmessage,
+                                          btnOkOnPress: () {
+                                            Get.to(navBar(index: 0, see: 1));
+                                          },
+                                        ).show();
                                         /*  if (_formKey.currentState!.validate()) {
                                     setState(() {
                                       loader = true;
@@ -371,5 +410,57 @@ class _shopInfoState extends State<shopInfo> {
     final path = result.files.single.path!;
     imagepath = path;
     setState(() => file = File(path));
+  }
+
+  _buildCountryPickerDropdownSoloExpanded() {
+    return CountryPickerDropdown(
+      /* underline: Container(
+        height: 2,
+        color: HexColor('#F2F2F4'),
+      ), */
+      //show'em (the text fields) you're in charge now
+      /* onTap: () => FocusScope.of(context).requestFocus(FocusNode()), */
+      //if you want your dropdown button's selected item UI to be different
+      //than itemBuilder's(dropdown menu item UI), then provide this selectedItemBuilder.
+      onValuePicked: (Country country) {
+        setState(() {
+          cntry = country.phoneCode;
+        });
+        print("${country.phoneCode}");
+      },
+      itemBuilder: (Country country) {
+        return Row(
+          children: <Widget>[
+            SizedBox(width: 15.0),
+            Transform.scale(
+                child: CountryPickerUtils.getDefaultFlagImage(country),
+                scale: 0.8),
+            SizedBox(width: 8.0),
+            Expanded(
+                child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                country.name,
+                style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                    color: HexColor('#616161')),
+              ),
+            )),
+          ],
+        );
+      },
+      itemHeight: null,
+      isExpanded: true,
+      //initialValue: 'TR',
+      icon: Padding(
+        padding: const EdgeInsets.only(right: 20.0),
+        child: Image.asset(
+          'assets/down.png',
+          scale: 4,
+          color: HexColor('#616161'),
+        ),
+      ),
+    );
   }
 }

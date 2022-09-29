@@ -42,11 +42,13 @@ class _orderDetailState extends State<orderDetail> {
     super.initState();
   }
 
+  bool paymentstatus = false;
+  bool orderstatus = false;
   final spinkit = SpinKitSpinningLines(
     size: 5.h,
     color: Colors.black,
   );
-
+  double grandTotal = 0;
   Widget _getTitleItemWidget(String label, double width) {
     return Container(
       width: width,
@@ -144,7 +146,13 @@ class _orderDetailState extends State<orderDetail> {
     );
   }
 
-  List<String> status = ['pending', 'processing', 'confirmed', 'delivered'];
+  List<String> status = [
+    'pending',
+    'processing',
+    'confirmed',
+    'delivered',
+    'canceled'
+  ];
   List<String> payment_status = ['paid', 'unpaid'];
 
   @override
@@ -183,6 +191,18 @@ class _orderDetailState extends State<orderDetail> {
                       scrollDirection: Axis.vertical,
                       itemCount: sellerOrderDetails.length,
                       itemBuilder: (context, index) {
+                        grandTotal = grandTotal +
+                            (sellerOrderDetails[index].qty.toDouble() *
+                                sellerOrderDetails[index].price.toDouble()) +
+                            sellerOrderDetails[index].tax.toDouble() +
+                            sellerOrderDetails[index]
+                                .productDetails
+                                .shippingCost
+                                .toDouble() -
+                            sellerOrderDetails[index]
+                                .productDetails
+                                .discount
+                                .toDouble();
                         return Container(
                           decoration: const BoxDecoration(color: Colors.white),
                           child: Padding(
@@ -194,294 +214,492 @@ class _orderDetailState extends State<orderDetail> {
                                 const SizedBox(
                                   height: 15,
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 8.0),
-                                  child: Text(
-                                    "Order_No: ${sellerOrderDetails[index].orderId}",
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold),
-                                  ),
+                                index != 0
+                                    ? SizedBox()
+                                    : Column(
+                                        children: <Widget>[
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 8.0),
+                                            child: Text(
+                                              "Order_No: ${sellerOrderDetails[index].orderId}",
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 8.0),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  children: [
+                                                    const Text(
+                                                      "Method: ",
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
+                                                    Text(
+                                                      sellerOrderDetails[index]
+                                                          .paymentMethod
+                                                          .toString(),
+                                                      style: TextStyle(),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      sellerOrderDetails[index]
+                                                          .createdAt
+                                                          .toString()
+                                                          .substring(0, 10),
+                                                    ),
+                                                  ],
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 12.0),
+                                            child: Row(
+                                              children: [
+                                                const Text(
+                                                  "Order status",
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                SizedBox(
+                                                  width: 30.w,
+                                                ),
+                                                sellerOrderDetails[index]
+                                                                .orderStatus !=
+                                                            'delivered' &&
+                                                        sellerOrderDetails[
+                                                                    index]
+                                                                .orderStatus !=
+                                                            'canceled'
+                                                    ? Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(top: 5),
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Container(
+                                                              padding: EdgeInsets
+                                                                  .only(
+                                                                      left: 10,
+                                                                      right: 10,
+                                                                      top: 1),
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width /
+                                                                  2.7,
+                                                              height: 30,
+                                                              decoration: BoxDecoration(
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              5)),
+                                                                  color: Colors
+                                                                      .white,
+                                                                  border: Border.all(
+                                                                      color: Colors
+                                                                          .black12,
+                                                                      width:
+                                                                          1.8)),
+                                                              child:
+                                                                  DropdownButtonHideUnderline(
+                                                                child:
+                                                                    DropdownButtonFormField(
+                                                                  // value: dropdownvalue4,
+                                                                  decoration: InputDecoration
+                                                                      .collapsed(
+                                                                          hintText:
+                                                                              ''),
+                                                                  hint: Text(sellerOrderDetails[
+                                                                          index]
+                                                                      .orderStatus),
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              7)),
+                                                                  icon: Icon(
+                                                                    Icons
+                                                                        .keyboard_arrow_down,
+                                                                    color: Colors
+                                                                            .grey[
+                                                                        600],
+                                                                  ),
+                                                                  items: status
+                                                                      .map((String
+                                                                          items) {
+                                                                    return DropdownMenuItem(
+                                                                      value:
+                                                                          items,
+                                                                      child:
+                                                                          Text(
+                                                                        items,
+                                                                        style: TextStyle(
+                                                                            color:
+                                                                                Colors.grey[600]),
+                                                                      ),
+                                                                    );
+                                                                  }).toList(),
+                                                                  onChanged:
+                                                                      (newValue) async {
+                                                                    AwesomeDialog(
+                                                                      context:
+                                                                          context,
+                                                                      dialogType:
+                                                                          DialogType
+                                                                              .QUESTION,
+                                                                      animType:
+                                                                          AnimType
+                                                                              .BOTTOMSLIDE,
+                                                                      title:
+                                                                          'Change Status',
+                                                                      desc:
+                                                                          'Are you sure you want to Change Status?',
+                                                                      btnCancelOnPress:
+                                                                          () {},
+                                                                      btnCancelText:
+                                                                          'No',
+                                                                      btnOkText:
+                                                                          'Yes',
+                                                                      btnOkOnPress:
+                                                                          () async {
+                                                                        print(sellerOrderDetails[index]
+                                                                            .orderId
+                                                                            .toString());
+                                                                        print(newValue
+                                                                            .toString());
+                                                                        await DataApiService.instance.changeStatus(
+                                                                            sellerOrderDetails[index].orderId.toString(),
+                                                                            newValue.toString(),
+                                                                            context);
+                                                                        Navigator.pushReplacement(
+                                                                            context,
+                                                                            MaterialPageRoute(builder: (BuildContext context) => orderDetail(sellerOrderDetails[index].orderId.toString())));
+                                                                        setState(
+                                                                            () {
+                                                                          orderstatus ==
+                                                                              true;
+                                                                        });
+                                                                      },
+                                                                    ).show();
+                                                                  },
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      )
+                                                    : Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 17.w),
+                                                        child: Container(
+                                                          width: 18.w,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color:
+                                                                Colors.red[700],
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10),
+                                                          ),
+                                                          child: Center(
+                                                              child: Text(
+                                                            sellerOrderDetails[
+                                                                    index]
+                                                                .orderStatus
+                                                                .toString(),
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white),
+                                                          )),
+                                                        ),
+                                                      )
+                                              ],
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 12.0),
+                                            child: Row(
+                                              children: [
+                                                const Text(
+                                                  "Payment status",
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                SizedBox(
+                                                  width: 25.w,
+                                                ),
+                                                sellerOrderDetails[index]
+                                                                .paymentStatus
+                                                                .toLowerCase() ==
+                                                            'paid' ||
+                                                        paymentstatus
+                                                    ? Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 17.w),
+                                                        child: Container(
+                                                          width: 18.w,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color:
+                                                                Colors.red[700],
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10),
+                                                          ),
+                                                          child: Center(
+                                                              child: Text(
+                                                            'paid',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white),
+                                                          )),
+                                                        ),
+                                                      )
+                                                    : Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(top: 5),
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Container(
+                                                              padding: EdgeInsets
+                                                                  .only(
+                                                                      left: 10,
+                                                                      right: 10,
+                                                                      top: 1),
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width /
+                                                                  2.7,
+                                                              height: 30,
+                                                              decoration: BoxDecoration(
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              5)),
+                                                                  color: Colors
+                                                                      .white,
+                                                                  border: Border.all(
+                                                                      color: Colors
+                                                                          .black12,
+                                                                      width:
+                                                                          1.8)),
+                                                              child:
+                                                                  DropdownButtonHideUnderline(
+                                                                child:
+                                                                    DropdownButtonFormField(
+                                                                  // value: dropdownvalue4,
+                                                                  decoration: InputDecoration
+                                                                      .collapsed(
+                                                                          hintText:
+                                                                              ''),
+                                                                  hint: Text(sellerOrderDetails[
+                                                                          index]
+                                                                      .paymentStatus),
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              7)),
+                                                                  icon: Icon(
+                                                                    Icons
+                                                                        .keyboard_arrow_down,
+                                                                    color: Colors
+                                                                            .grey[
+                                                                        600],
+                                                                  ),
+                                                                  items: payment_status
+                                                                      .map((String
+                                                                          items) {
+                                                                    return DropdownMenuItem(
+                                                                      value:
+                                                                          items,
+                                                                      child:
+                                                                          Text(
+                                                                        items,
+                                                                        style: TextStyle(
+                                                                            color:
+                                                                                Colors.grey[600]),
+                                                                      ),
+                                                                    );
+                                                                  }).toList(),
+                                                                  onChanged:
+                                                                      (newValue) async {
+                                                                    AwesomeDialog(
+                                                                      context:
+                                                                          context,
+                                                                      dialogType:
+                                                                          DialogType
+                                                                              .QUESTION,
+                                                                      animType:
+                                                                          AnimType
+                                                                              .BOTTOMSLIDE,
+                                                                      title:
+                                                                          'Change Status',
+                                                                      desc:
+                                                                          'Are you sure you want to Change Status?',
+                                                                      btnCancelOnPress:
+                                                                          () {},
+                                                                      btnCancelText:
+                                                                          'No',
+                                                                      btnOkText:
+                                                                          'Yes',
+                                                                      btnOkOnPress:
+                                                                          () async {
+                                                                        await DataApiService.instance.changePymentStatus(
+                                                                            sellerOrderDetails[index].orderId.toString(),
+                                                                            newValue.toString(),
+                                                                            context);
+                                                                        setState(
+                                                                            () {
+                                                                          paymentstatus =
+                                                                              true;
+                                                                        });
+                                                                      },
+                                                                    ).show();
+                                                                  },
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                SizedBox(
+                                  height: 20,
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 8.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
+                                index != 0
+                                    ? SizedBox()
+                                    : Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           const Text(
-                                            "Method: ",
+                                            "Customer Contact Details",
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold),
                                           ),
-                                          Text(
-                                            sellerOrderDetails[index]
-                                                .paymentMethod
-                                                .toString(),
-                                            style: TextStyle(),
+                                          const SizedBox(
+                                            height: 7,
                                           ),
+                                          Row(
+                                            children: [
+                                              const Text(
+                                                "Name :",
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              SizedBox(
+                                                width: 1.w,
+                                              ),
+                                              Text(sellerOrderDetails[index]
+                                                  .userName),
+                                            ],
+                                          ),
+                                          const SizedBox(
+                                            height: 7,
+                                          ),
+                                          Row(
+                                            children: [
+                                              const Text(
+                                                "Email :",
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              SizedBox(
+                                                width: 1.w,
+                                              ),
+                                              Text(sellerOrderDetails[index]
+                                                  .userEmail),
+                                            ],
+                                          ),
+                                          const SizedBox(
+                                            height: 7,
+                                          ),
+                                          Row(
+                                            children: [
+                                              const Text(
+                                                "contact :",
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              SizedBox(
+                                                width: 1.w,
+                                              ),
+                                              Text(sellerOrderDetails[index]
+                                                  .shippingData
+                                                  .phone),
+                                            ],
+                                          ),
+                                          const SizedBox(
+                                            height: 7,
+                                          ),
+                                          Row(
+                                            children: [
+                                              const Text(
+                                                "Address : ",
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              Text(
+                                                sellerOrderDetails[index]
+                                                        .shippingData
+                                                        .address +
+                                                    ' ' +
+                                                    sellerOrderDetails[index]
+                                                        .shippingData
+                                                        .city,
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.normal),
+                                              ),
+                                            ],
+                                          ),
+                                          Divider(
+                                            color: Colors.black,
+                                            height: 3.h,
+                                            thickness: 0.3.h,
+                                          )
                                         ],
                                       ),
-                                      Row(
-                                        children: [
-                                          Text(
-                                            sellerOrderDetails[index]
-                                                .createdAt
-                                                .toString()
-                                                .substring(0, 10),
-                                          ),
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 12.0),
-                                  child: Row(
-                                    children: [
-                                      const Text(
-                                        "Order status",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      SizedBox(
-                                        width: 30.w,
-                                      ),
-                                      sellerOrderDetails[index].orderStatus ==
-                                              'delivered'
-                                          ? Padding(
-                                              padding:
-                                                  EdgeInsets.only(left: 17.w),
-                                              child: Container(
-                                                width: 18.w,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.red[700],
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                ),
-                                                child: Center(
-                                                    child: Text(
-                                                  sellerOrderDetails[index]
-                                                      .orderStatus
-                                                      .toString(),
-                                                  style: TextStyle(
-                                                      color: Colors.white),
-                                                )),
-                                              ),
-                                            )
-                                          : Padding(
-                                              padding:
-                                                  const EdgeInsets.only(top: 5),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                children: [
-                                                  Container(
-                                                    padding: EdgeInsets.only(
-                                                        left: 10,
-                                                        right: 10,
-                                                        top: 1),
-                                                    width:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width /
-                                                            2.7,
-                                                    height: 30,
-                                                    decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    5)),
-                                                        color: Colors.white,
-                                                        border: Border.all(
-                                                            color:
-                                                                Colors.black12,
-                                                            width: 1.8)),
-                                                    child:
-                                                        DropdownButtonHideUnderline(
-                                                      child:
-                                                          DropdownButtonFormField(
-                                                        // value: dropdownvalue4,
-                                                        decoration:
-                                                            InputDecoration
-                                                                .collapsed(
-                                                                    hintText:
-                                                                        ''),
-                                                        hint: Text(
-                                                            sellerOrderDetails[
-                                                                    index]
-                                                                .orderStatus),
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    7)),
-                                                        icon: Icon(
-                                                          Icons
-                                                              .keyboard_arrow_down,
-                                                          color:
-                                                              Colors.grey[600],
-                                                        ),
-                                                        items: status.map(
-                                                            (String items) {
-                                                          return DropdownMenuItem(
-                                                            value: items,
-                                                            child: Text(
-                                                              items,
-                                                              style: TextStyle(
-                                                                  color: Colors
-                                                                          .grey[
-                                                                      600]),
-                                                            ),
-                                                          );
-                                                        }).toList(),
-                                                        onChanged:
-                                                            (newValue) async {
-                                                          AwesomeDialog(
-                                                            context: context,
-                                                            dialogType:
-                                                                DialogType
-                                                                    .QUESTION,
-                                                            animType: AnimType
-                                                                .BOTTOMSLIDE,
-                                                            title:
-                                                                'Change Status',
-                                                            desc:
-                                                                'Are you sure you want to Change Status?',
-                                                            btnCancelOnPress:
-                                                                () {},
-                                                            btnCancelText: 'No',
-                                                            btnOkText: 'Yes',
-                                                            btnOkOnPress:
-                                                                () async {
-                                                              print(sellerOrderDetails[
-                                                                      index]
-                                                                  .orderId
-                                                                  .toString());
-                                                              print(newValue
-                                                                  .toString());
-                                                              await DataApiService
-                                                                  .instance
-                                                                  .changeStatus(
-                                                                      sellerOrderDetails[
-                                                                              index]
-                                                                          .orderId
-                                                                          .toString(),
-                                                                      newValue
-                                                                          .toString(),
-                                                                      context);
-                                                            },
-                                                          ).show();
-                                                        },
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                    ],
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 12.0),
-                                  child: Row(
-                                    children: [
-                                      const Text(
-                                        "Payment status",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      SizedBox(
-                                        width: 25.w,
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 5),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Container(
-                                              padding: EdgeInsets.only(
-                                                  left: 10, right: 10, top: 1),
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width /
-                                                  2.7,
-                                              height: 30,
-                                              decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(5)),
-                                                  color: Colors.white,
-                                                  border: Border.all(
-                                                      color: Colors.black12,
-                                                      width: 1.8)),
-                                              child:
-                                                  DropdownButtonHideUnderline(
-                                                child: DropdownButtonFormField(
-                                                  // value: dropdownvalue4,
-                                                  decoration:
-                                                      InputDecoration.collapsed(
-                                                          hintText: ''),
-                                                  hint: Text(
-                                                      sellerOrderDetails[index]
-                                                          .paymentStatus),
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(7)),
-                                                  icon: Icon(
-                                                    Icons.keyboard_arrow_down,
-                                                    color: Colors.grey[600],
-                                                  ),
-                                                  items: payment_status
-                                                      .map((String items) {
-                                                    return DropdownMenuItem(
-                                                      value: items,
-                                                      child: Text(
-                                                        items,
-                                                        style: TextStyle(
-                                                            color: Colors
-                                                                .grey[600]),
-                                                      ),
-                                                    );
-                                                  }).toList(),
-                                                  onChanged: (newValue) async {
-                                                    AwesomeDialog(
-                                                      context: context,
-                                                      dialogType:
-                                                          DialogType.QUESTION,
-                                                      animType:
-                                                          AnimType.BOTTOMSLIDE,
-                                                      title: 'Change Status',
-                                                      desc:
-                                                          'Are you sure you want to Change Status?',
-                                                      btnCancelOnPress: () {},
-                                                      btnCancelText: 'No',
-                                                      btnOkText: 'Yes',
-                                                      btnOkOnPress: () async {
-                                                        await DataApiService
-                                                            .instance
-                                                            .changePymentStatus(
-                                                                sellerOrderDetails[
-                                                                        index]
-                                                                    .orderId
-                                                                    .toString(),
-                                                                newValue
-                                                                    .toString(),
-                                                                context);
-                                                      },
-                                                    ).show();
-                                                  },
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                SizedBox(
+                                  height: 20,
                                 ),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
@@ -534,8 +752,16 @@ class _orderDetailState extends State<orderDetail> {
                                             const SizedBox(
                                               height: 5,
                                             ),
-                                            const Text(
-                                              "Size",
+                                            Text(
+                                              sellerOrderDetails[index]
+                                                      .variant
+                                                      .toString()
+                                                      .contains('-')
+                                                  ? sellerOrderDetails[index]
+                                                      .variant
+                                                      .toString()
+                                                      .split('-')[1]
+                                                  : '-',
                                               style: TextStyle(
                                                   fontWeight: FontWeight.bold),
                                             ),
@@ -543,7 +769,17 @@ class _orderDetailState extends State<orderDetail> {
                                               height: 5,
                                             ),
                                             Text(
-                                              "HsCode".toUpperCase(),
+                                              sellerOrderDetails[index]
+                                                      .variant
+                                                      .toString()
+                                                      .contains('-')
+                                                  ? sellerOrderDetails[index]
+                                                      .variant
+                                                      .toString()
+                                                      .split('-')[0]
+                                                  : sellerOrderDetails[index]
+                                                      .variant
+                                                      .toString(),
                                               style: const TextStyle(
                                                   fontWeight: FontWeight.bold),
                                             ),
@@ -551,7 +787,7 @@ class _orderDetailState extends State<orderDetail> {
                                               height: 5,
                                             ),
                                             Text(
-                                              "${sellerOrderDetails[index].price} \$  x ${sellerOrderDetails[index].qty}",
+                                              "${sellerOrderDetails[index].price} €  x ${sellerOrderDetails[index].qty}",
                                               style: const TextStyle(
                                                   fontWeight: FontWeight.bold),
                                             ),
@@ -567,7 +803,7 @@ class _orderDetailState extends State<orderDetail> {
                                 const SizedBox(
                                   height: 30,
                                 ),
-                                SizedBox(
+                                /*   SizedBox(
                                   height: 110,
                                   child: HorizontalDataTable(
                                     scrollPhysics:
@@ -591,7 +827,7 @@ class _orderDetailState extends State<orderDetail> {
                                     rightHandSideColBackgroundColor:
                                         const Color(0xFFFFFFFF),
                                   ),
-                                ),
+                                ), */
                                 const SizedBox(
                                   height: 30,
                                 ),
@@ -625,7 +861,7 @@ class _orderDetailState extends State<orderDetail> {
                                               SizedBox(
                                                 width: 20.w,
                                                 child: Text(
-                                                  "(+)\$${(sellerOrderDetails[index].price.toDouble() * sellerOrderDetails[index].qty)}",
+                                                  "(+)${(sellerOrderDetails[index].price.toDouble() * sellerOrderDetails[index].qty)} €",
                                                 ),
                                               )
                                             ],
@@ -644,7 +880,7 @@ class _orderDetailState extends State<orderDetail> {
                                               SizedBox(
                                                 width: 20.w,
                                                 child: Text(
-                                                  "(+)\$${sellerOrderDetails[index].tax}",
+                                                  "(+)${sellerOrderDetails[index].tax} €",
                                                 ),
                                               )
                                             ],
@@ -663,7 +899,7 @@ class _orderDetailState extends State<orderDetail> {
                                               SizedBox(
                                                 width: 20.w,
                                                 child: Text(
-                                                  "(-)\$${sellerOrderDetails[index].productDetails.discount}",
+                                                  "(-)${sellerOrderDetails[index].productDetails.discount} €",
                                                 ),
                                               )
                                             ],
@@ -682,7 +918,7 @@ class _orderDetailState extends State<orderDetail> {
                                               SizedBox(
                                                 width: 20.w,
                                                 child: const Text(
-                                                  "(-)\$0.00",
+                                                  "(-)0.00 €",
                                                 ),
                                               )
                                             ],
@@ -702,7 +938,7 @@ class _orderDetailState extends State<orderDetail> {
                                               SizedBox(
                                                 width: 20.w,
                                                 child: Text(
-                                                  "(+)\$${sellerOrderDetails[index].productDetails.shippingCost}",
+                                                  "(+)${sellerOrderDetails[index].productDetails.shippingCost} €",
                                                 ),
                                               )
                                             ],
@@ -731,7 +967,7 @@ class _orderDetailState extends State<orderDetail> {
                                               SizedBox(
                                                 width: 20.w,
                                                 child: Text(
-                                                  "\$${(sellerOrderDetails[index].qty.toDouble() * sellerOrderDetails[index].productDetails.unitPrice.toDouble()) + sellerOrderDetails[index].tax.toDouble() + sellerOrderDetails[index].productDetails.shippingCost.toDouble() - sellerOrderDetails[index].productDetails.discount.toDouble()}",
+                                                  "${(sellerOrderDetails[index].qty.toDouble() * sellerOrderDetails[index].price.toDouble()) + sellerOrderDetails[index].tax.toDouble() + sellerOrderDetails[index].productDetails.shippingCost.toDouble() - sellerOrderDetails[index].productDetails.discount.toDouble()} €",
                                                   style: const TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold),
@@ -742,83 +978,163 @@ class _orderDetailState extends State<orderDetail> {
                                         ]),
                                   ),
                                 ),
-                                const SizedBox(
+                                /*  const SizedBox(
                                   height: 20,
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      "Customer Contact Details",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    const SizedBox(
-                                      height: 7,
-                                    ),
-                                    Row(
-                                      children: [
-                                        const Text(
-                                          "Name :",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold),
+                                ), */
+                                index == sellerOrderDetails.length - 1
+                                    ? Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[100],
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(5)),
                                         ),
-                                        SizedBox(
-                                          width: 1.w,
+                                        height: 50,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                              top: 10, left: 16, right: 8),
+                                          child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                /*    Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    SizedBox(
+                                                      width: 30.w,
+                                                      child: const Text(
+                                                          "Sub Total"),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 30.w,
+                                                    ),
+                                                    SizedBox(
+                                                      width: 20.w,
+                                                      child: Text(
+                                                        "(+)\$${(sellerOrderDetails[index].price.toDouble() * sellerOrderDetails[index].qty)}",
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    SizedBox(
+                                                      width: 30.w,
+                                                      child: const Text("Tax"),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 30.w,
+                                                    ),
+                                                    SizedBox(
+                                                      width: 20.w,
+                                                      child: Text(
+                                                        "(+)\$${sellerOrderDetails[index].tax}",
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    SizedBox(
+                                                      width: 30.w,
+                                                      child: const Text(
+                                                          "Discount"),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 30.w,
+                                                    ),
+                                                    SizedBox(
+                                                      width: 20.w,
+                                                      child: Text(
+                                                        "(-)\$${sellerOrderDetails[index].productDetails.discount}",
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    SizedBox(
+                                                      width: 30.w,
+                                                      child:
+                                                          const Text("Coupon"),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 30.w,
+                                                    ),
+                                                    SizedBox(
+                                                      width: 20.w,
+                                                      child: const Text(
+                                                        "(-)\$0.00",
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    SizedBox(
+                                                      width: 30.w,
+                                                      child: const Text(
+                                                          "Shipping Fee"),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 30.w,
+                                                    ),
+                                                    SizedBox(
+                                                      width: 20.w,
+                                                      child: Text(
+                                                        "(+)\$${sellerOrderDetails[index].productDetails.shippingCost}",
+                                                      ),
+                                                    )
+                                                  ],
+                                                ), */
+                                                const Divider(
+                                                  thickness: 1,
+                                                  height: 1,
+                                                  color: Colors.grey,
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    SizedBox(
+                                                      width: 30.w,
+                                                      child: const Text(
+                                                        "Grand Total",
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 30.w,
+                                                    ),
+                                                    SizedBox(
+                                                      width: 20.w,
+                                                      child: Text(
+                                                        "${grandTotal} €",
+                                                        style: const TextStyle(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                              ]),
                                         ),
-                                        Text(
-                                            sellerOrderDetails[index].userName),
-                                      ],
-                                    ),
-                                    const SizedBox(
-                                      height: 7,
-                                    ),
-                                    Row(
-                                      children: [
-                                        const Text(
-                                          "Email :",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                        SizedBox(
-                                          width: 1.w,
-                                        ),
-                                        Text(sellerOrderDetails[index]
-                                            .userEmail),
-                                      ],
-                                    ),
-                                    const SizedBox(
-                                      height: 7,
-                                    ),
-                                    Row(
-                                      children: [
-                                        const Text(
-                                          "contact :",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                        SizedBox(
-                                          width: 1.w,
-                                        ),
-                                        Text(sellerOrderDetails[index]
-                                            .userContact),
-                                      ],
-                                    ),
-                                    const SizedBox(
-                                      height: 7,
-                                    ),
-                                    const Text(
-                                      "Address :",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    Divider(
-                                      color: Colors.black,
-                                      height: 3.h,
-                                      thickness: 0.3.h,
-                                    )
-                                  ],
-                                ),
+                                      )
+                                    : SizedBox()
                               ],
                             ),
                           ),

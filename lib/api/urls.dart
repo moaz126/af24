@@ -36,3 +36,7 @@ String sendLink_url = 'v2/seller/send/product/request/payment/link';
 String updateToken_url = 'v2/seller/cm-firebase-token';
 String changeStatus_url = 'v2/seller/orders/order-detail-status';
 String paymentStatus_url = 'v2/seller/orders/update-payment-status';
+String allLink_url = 'v2/seller/get/product/links';
+String updateLink_url = 'v2/seller/update/product/link/price';
+String saveOrderDetail = 'v2/seller/orders/add/tracking';
+String logout_url = '/logout';

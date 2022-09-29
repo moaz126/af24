@@ -8,7 +8,6 @@ import 'chatNotification.dart';
 import 'dashBoard.dart';
 import 'OrdersList.dart';
 
-
 class newNavBar extends StatefulWidget {
   int index = -1;
 
@@ -32,15 +31,18 @@ class _newNavBarState extends State<newNavBar> {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
         onTap: (index) {
-          Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => navBar(index: index,see: 0,)));
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) => navBar(
+                    index: index,
+                    see: 0,
+                  )));
         },
         type: BottomNavigationBarType.fixed,
         backgroundColor: Color.fromARGB(255, 255, 255, 255),
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black.withOpacity(.60),
-        selectedFontSize: 12,
-        unselectedFontSize: 12,
+        selectedFontSize: 7,
+        unselectedFontSize: 7,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
               icon: Column(
@@ -59,7 +61,10 @@ class _newNavBarState extends State<newNavBar> {
                                 height: 3.h),
                           ),
                   ),
-                  Text('Home')
+                  Text(
+                    'Home',
+                    style: TextStyle(fontSize: 10),
+                  )
                 ],
               ),
               label: ''),
@@ -80,7 +85,10 @@ class _newNavBarState extends State<newNavBar> {
                                 height: 3.h),
                           ),
                   ),
-                  Text('Newsfeed')
+                  Text(
+                    'Products',
+                    style: TextStyle(fontSize: 10),
+                  )
                 ],
               ),
               label: ''),
@@ -101,7 +109,10 @@ class _newNavBarState extends State<newNavBar> {
                                 height: 3.h),
                           ),
                   ),
-                  Text('Sell')
+                  Text(
+                    'Sell',
+                    style: TextStyle(fontSize: 10),
+                  )
                 ],
               ),
               label: ''),
@@ -123,7 +134,10 @@ class _newNavBarState extends State<newNavBar> {
                                   'assets/icons/Notification-1.png',
                                   height: 3.h),
                             )),
-                  Text('Notification')
+                  Text(
+                    'Notification',
+                    style: TextStyle(fontSize: 10),
+                  )
                 ],
               ),
               label: ''),
@@ -143,7 +157,10 @@ class _newNavBarState extends State<newNavBar> {
                               child: Image.asset('assets/icons/My Page-1.png',
                                   height: 3.h),
                             )),
-                  Text('My page')
+                  Text(
+                    'My Orders',
+                    style: TextStyle(fontSize: 10),
+                  )
                 ],
               ),
               label: ''),

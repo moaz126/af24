@@ -73,7 +73,10 @@ class _navBarState extends State<navBar> {
                                 height: 3.h),
                           ),
                   ),
-                  Text('Home')
+                  Text(
+                    'Home',
+                    style: TextStyle(fontSize: 10),
+                  )
                 ],
               ),
               label: ''),
@@ -94,7 +97,10 @@ class _navBarState extends State<navBar> {
                                 height: 3.h),
                           ),
                   ),
-                  Text('Products')
+                  Text(
+                    'Products',
+                    style: TextStyle(fontSize: 10),
+                  )
                 ],
               ),
               label: ''),
@@ -115,7 +121,10 @@ class _navBarState extends State<navBar> {
                                 height: 3.h),
                           ),
                   ),
-                  Text('Sell')
+                  Text(
+                    'Sell',
+                    style: TextStyle(fontSize: 10),
+                  )
                 ],
               ),
               label: ''),
@@ -137,7 +146,10 @@ class _navBarState extends State<navBar> {
                                   'assets/icons/Notification-1.png',
                                   height: 3.h),
                             )),
-                  Text('Notification')
+                  Text(
+                    'Notification',
+                    style: TextStyle(fontSize: 10),
+                  )
                 ],
               ),
               label: ''),
@@ -157,7 +169,10 @@ class _navBarState extends State<navBar> {
                               child: Image.asset('assets/icons/My Page-1.png',
                                   height: 3.h),
                             )),
-                  Text('My page')
+                  Text(
+                    'My Orders',
+                    style: TextStyle(fontSize: 10),
+                  )
                 ],
               ),
               label: ''),

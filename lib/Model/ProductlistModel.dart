@@ -30,6 +30,7 @@ class ListElement {
     required this.tax,
     required this.taxType,
     required this.discount,
+    required this.secret_payment,
     required this.discountType,
     required this.currentStock,
     required this.details,
@@ -60,6 +61,7 @@ class ListElement {
     required this.comments,
     required this.colorsList,
     required this.wholesalePrice,
+    required this.linksCount,
   });
 
   int id;
@@ -88,6 +90,7 @@ class ListElement {
   double purchasePrice;
   dynamic priceType;
   double tax;
+  int secret_payment;
   String? taxType;
   double discount;
   String? discountType;
@@ -110,6 +113,7 @@ class ListElement {
   dynamic isShippingCostUpdated;
   dynamic size;
   String subName;
+  int linksCount;
   int reviewsCount;
   dynamic categoryName;
   String brandName;
@@ -117,7 +121,7 @@ class ListElement {
   List<Review> reviews;
   String? subCategoryName;
   int? likes;
-  int? comments;
+  int comments;
   List<ColorsList> colorsList;
   dynamic wholesalePrice;
 
@@ -138,6 +142,7 @@ class ListElement {
         featured: json["featured"] == null ? null : json["featured"],
         flashDeal: json["flash_deal"],
         videoProvider: json["video_provider"],
+        linksCount: json["links_count"],
         videoUrl: json["video_url"],
         colors: jsonDecode(json["colors"]),
         variantProduct: json["variant_product"],
@@ -150,6 +155,7 @@ class ListElement {
         purchasePrice: json["purchase_price"].toDouble(),
         priceType: json["price_type"],
         tax: json["tax"].toDouble(),
+        secret_payment: json["secret_payment"],
         taxType: json["tax_type"] == null ? null : json["tax_type"],
         discount: json["discount"].toDouble(),
         discountType:

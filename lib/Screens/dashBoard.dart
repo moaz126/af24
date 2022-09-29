@@ -1,7 +1,9 @@
+import 'package:af24/Screens/chatNotification.dart';
 import 'package:af24/Screens/image_crop.dart';
 import 'package:af24/Screens/login.dart';
 import 'package:af24/Screens/navBar.dart';
 import 'package:af24/Screens/MyProducts.dart';
+import 'package:af24/Screens/paymentLinks.dart';
 import 'package:af24/Screens/shopInfo.dart';
 import 'package:af24/api/auth_af24.dart';
 import 'package:af24/api/global_variable.dart';
@@ -74,13 +76,21 @@ class _dashBoardState extends State<dashBoard> {
     size: 5.h,
     color: Colors.black,
   );
-  List<String> status = ['Delivered', 'Cancelled', 'Return'];
-  List<String> counter = [
-    getDashboardContent!.delieved == null
-        ? '0'
-        : getDashboardContent!.delieved.toString(),
-    getDashboardContent!.cancelledOrder.toString(),
-    getDashboardContent!.returnedOrder.toString()
+  String dropdownvalue = 'Item 1';
+
+  // List of items in our dropdown menu
+  var items = [
+    'Item 1',
+    'Item 2',
+    'Item 3',
+    'Item 4',
+    'Item 5',
+  ];
+  List<String> status = ['Pending', 'Processing', 'Cancelled'];
+  List<int> counter = [
+    getDashboardContent!.pending == null ? 0 : getDashboardContent!.pending,
+    getDashboardContent!.processing_count,
+    getDashboardContent!.cancelledOrder,
   ];
 
   @override
@@ -91,7 +101,7 @@ class _dashBoardState extends State<dashBoard> {
         if (result == null) {
           result = false;
         }
-        return result!;
+        return result;
       },
       child: Scaffold(
         //bottomNavigationBar: newNavBar(index: 1,),
@@ -124,45 +134,91 @@ class _dashBoardState extends State<dashBoard> {
                                 ),
                                 Row(
                                   children: [
-                                    InkWell(
-                                      onTap: () {
-                                        Get.to(shopInfo());
-                                      },
-                                      child: Container(
-                                        width: 10.w,
-                                        child: Icon(
-                                          Icons.edit,
-                                          color: Colors.white,
-                                        ),
+                                    Container(
+                                      child: Text(
+                                        shopinfoContent.name,
+                                        style: TextStyle(color: Colors.white),
                                       ),
                                     ),
-                                    InkWell(
-                                      onTap: () {
-                                        AwesomeDialog(
-                                          context: context,
-                                          dialogType: DialogType.QUESTION,
-                                          animType: AnimType.TOPSLIDE,
-                                          title: 'Logout',
-                                          desc:
-                                              'Are you sure you want to Logout?',
-                                          btnCancelOnPress: () {},
-                                          btnCancelText: 'No',
-                                          btnOkText: 'Yes',
-                                          btnOkOnPress: () async {
-                                            setUserLoggedIn(false);
-                                            GlobalSnackBar.show(
-                                                context, 'Logout Successfully');
-                                            Get.offAll(Login());
-                                          },
-                                        ).show();
-                                      },
-                                      child: Container(
-                                        width: 10.w,
-                                        child: Icon(
-                                          Icons.logout,
-                                          color: Colors.white,
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    PopupMenuButton<int>(
+                                      // ignore: sort_child_properties_last
+                                      child: ClipOval(
+                                        child: CachedNetworkImage(
+                                          height: 40,
+                                          imageUrl:
+                                              'https://becknowledge.com/af24/public/storage/shop/${shopinfoContent.image}',
+                                          fit: BoxFit.fill,
+                                          placeholder: (context, url) =>
+                                              Image.asset(
+                                            'assets/icons/Seller app icon (8).png',
+                                          ),
+                                          errorWidget: (context, url, error) =>
+                                              Image.asset(
+                                            'assets/icons/Seller app icon (8).png',
+                                          ),
                                         ),
                                       ),
+                                      itemBuilder: (context) => [
+                                        PopupMenuItem(
+                                          value: 1,
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.edit),
+                                              SizedBox(
+                                                width: 10,
+                                              ),
+                                              Text("Edit Profile")
+                                            ],
+                                          ),
+                                        ),
+                                        PopupMenuItem(
+                                          value: 2,
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.logout),
+                                              SizedBox(
+                                                width: 10,
+                                              ),
+                                              Text("Logout")
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                      offset: Offset(0, 40),
+                                      color: Colors.white,
+                                      elevation: 0,
+
+                                      onSelected: (value) {
+                                        if (value == 1) {
+                                          Get.to(shopInfo());
+                                        } else if (value == 2) {
+                                          AwesomeDialog(
+                                            context: context,
+                                            dialogType: DialogType.QUESTION,
+                                            animType: AnimType.TOPSLIDE,
+                                            title: 'Logout',
+                                            desc:
+                                                'Are you sure you want to Logout?',
+                                            btnCancelOnPress: () {},
+                                            btnCancelText: 'No',
+                                            btnOkText: 'Yes',
+                                            btnOkOnPress: () async {
+                                              DataApiService.instance.logout(
+                                                  shopinfoContent.sellerId);
+                                              setUserLoggedIn(false);
+                                              GlobalSnackBar.show(context,
+                                                  'Logout Successfully');
+                                              Get.offAll(Login());
+                                            },
+                                          ).show();
+                                        }
+                                      },
+                                    ),
+                                    SizedBox(
+                                      width: 15,
                                     )
                                   ],
                                 ),
@@ -185,88 +241,118 @@ class _dashBoardState extends State<dashBoard> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceEvenly,
                                       children: [
-                                        Container(
-                                          height: 100.w / 3.3,
-                                          width: 100.w / 3.3,
-                                          decoration: BoxDecoration(
-                                            color: Colors.blue,
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(10)),
-                                          ),
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                getDashboardContent!
-                                                    .issued_payment_count
-                                                    .toString(),
-                                                style: TextStyle(
-                                                    fontSize: 40,
-                                                    color: Colors.white,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                              Text("Issued",
+                                        InkWell(
+                                          onTap: () {
+                                            Get.to(paymentLink());
+                                          },
+                                          child: Container(
+                                            height: 100.w / 3.3,
+                                            width: 100.w / 3.3,
+                                            decoration: BoxDecoration(
+                                              color: Colors.blue,
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(10)),
+                                            ),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  getDashboardContent!
+                                                              .issued_payment_count >
+                                                          99
+                                                      ? '99+'
+                                                      : getDashboardContent!
+                                                          .issued_payment_count
+                                                          .toString(),
                                                   style: TextStyle(
+                                                      fontSize: 40,
                                                       color: Colors.white,
                                                       fontWeight:
-                                                          FontWeight.bold)),
-                                              Text(
-                                                "Payment Page",
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
+                                                          FontWeight.bold),
                                                 ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          height: 100.w / 3.3,
-                                          width: 100.w / 3.3,
-                                          decoration: BoxDecoration(
-                                            color: Colors.purple,
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(10)),
-                                          ),
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                getDashboardContent!
-                                                    .confirmOrder
-                                                    .toString(),
-                                                style: TextStyle(
-                                                    fontSize: 40,
+                                                Text("Issued",
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                                Text(
+                                                  "Payment Page",
+                                                  style: TextStyle(
                                                     color: Colors.white,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                              Text("Order",
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.bold)),
-                                              Text("Confirmed",
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.bold)),
-                                            ],
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                         InkWell(
-                                          onTap: () async {
-                                            /*  await DataApiService.instance
-                                                .getDashboard(); */
+                                          onTap: () {
+                                            orderPressed = 4;
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      navBar(index: 4, see: 0)),
+                                            );
+                                          },
+                                          child: Container(
+                                            height: 100.w / 3.3,
+                                            width: 100.w / 3.3,
+                                            decoration: BoxDecoration(
+                                              color: Colors.purple,
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(10)),
+                                            ),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  getDashboardContent!
+                                                              .confirmOrder >
+                                                          99
+                                                      ? '99+'
+                                                      : getDashboardContent!
+                                                          .confirmOrder
+                                                          .toString(),
+                                                  style: TextStyle(
+                                                      fontSize: 40,
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                Text("Order",
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                                Text("Confirmed",
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        InkWell(
+                                           onTap: () {
+                                            orderPressed = 5;
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      navBar(index: 4, see: 0)),
+                                            );
                                           },
                                           child: Container(
                                             height: 100.w / 3.3,
@@ -277,16 +363,22 @@ class _dashBoardState extends State<dashBoard> {
                                                   Radius.circular(10)),
                                             ),
                                             child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.center,
                                               children: [
                                                 Padding(
                                                   padding: EdgeInsets.only(
-                                                      bottom: 3.0, top: 12),
+                                                      bottom: 7.0, top: 12),
                                                   child: Text(
                                                     getDashboardContent!
-                                                        .outForDelivery
-                                                        .toString(),
+                                                                .delieved >
+                                                            99
+                                                        ? '99+'
+                                                        : getDashboardContent!
+                                                            .delieved
+                                                            .toString(),
                                                     style: TextStyle(
                                                         fontSize: 40,
                                                         color: Colors.white,
@@ -294,18 +386,21 @@ class _dashBoardState extends State<dashBoard> {
                                                             FontWeight.bold),
                                                   ),
                                                 ),
-                                                SizedBox(height: 5),
-
-                                                /*  Text("",
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontWeight:
-                                                            FontWeight.bold)), */
                                                 Text("Delivered",
                                                     style: TextStyle(
                                                         color: Colors.white,
                                                         fontWeight:
                                                             FontWeight.bold)),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          bottom: 5.0),
+                                                  child: Text("",
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.bold)),
+                                                ),
                                               ],
                                             ),
                                           ),
@@ -323,35 +418,52 @@ class _dashBoardState extends State<dashBoard> {
                                           MainAxisAlignment.spaceEvenly,
                                       children: [
                                         for (int i = 0; i < status.length; i++)
-                                          Container(
-                                            height: 100.w / 4.5,
-                                            width: 100.w / 4.5,
-                                            child: Card(
-                                              elevation: 2,
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(5),
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    Text(
-                                                      counter[i],
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize: 20.sp),
-                                                    ),
-                                                    Text(
-                                                      status[i],
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    )
-                                                  ],
+                                          InkWell(
+                                            onTap: () {
+                                              orderPressed = i + 1;
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        navBar(
+                                                            index: 4, see: 0)),
+                                              );
+                                            },
+                                            child: Container(
+                                              height: 100.w / 4.5,
+                                              width: 100.w / 4.5,
+                                              child: Card(
+                                                elevation: 2,
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(5),
+                                                  child: Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Text(
+                                                        counter[i] > 99
+                                                            ? '99+'
+                                                            : counter[i]
+                                                                .toString(),
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 20.sp),
+                                                      ),
+                                                      Text(
+                                                        status[i],
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 8.sp),
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      )
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
                                             ),
@@ -370,11 +482,15 @@ class _dashBoardState extends State<dashBoard> {
                                                     MainAxisAlignment.center,
                                                 children: [
                                                   Icon(Icons.home, size: 20.sp),
+                                                  SizedBox(
+                                                    height: 3,
+                                                  ),
                                                   Text(
-                                                    "My store",
+                                                    'My Store',
                                                     style: TextStyle(
                                                         fontWeight:
-                                                            FontWeight.bold),
+                                                            FontWeight.bold,
+                                                        fontSize: 8.sp),
                                                   ),
                                                 ],
                                               ),
@@ -441,8 +557,12 @@ class _dashBoardState extends State<dashBoard> {
                                       ),
                                       InkWell(
                                         onTap: () {
-                                          Get.to(
-                                            navBar(index: 3, see: 0),
+                                          print('hello');
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    navBar(index: 3, see: 0)),
                                           );
                                         },
                                         child: Container(
@@ -483,7 +603,7 @@ class _dashBoardState extends State<dashBoard> {
                                     ),
                                     height: 40.h,
                                     child: getUserList.isEmpty
-                                        ? Center(child: Text('No Users'))
+                                        ? Center(child: Text('No Messages'))
                                         : ListView(
                                             children: [
                                               for (int i = 0;
@@ -551,6 +671,9 @@ class _dashBoardState extends State<dashBoard> {
                                                             )
                                                           : SizedBox(),
                                                       subtitle: Text(
+                                                        maxLines: 2,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
                                                         getUserList[i]
                                                             .lastMessage,
                                                         style: TextStyle(
@@ -563,10 +686,10 @@ class _dashBoardState extends State<dashBoard> {
                                                           children: [
                                                             Text(
                                                                 getUserList[i]
-                                                                    .createdAt
+                                                                    .updatedAt
                                                                     .toString()
                                                                     .substring(
-                                                                        14, 19),
+                                                                        11, 16),
                                                                 style: TextStyle(
                                                                     color: Colors
                                                                         .grey))
