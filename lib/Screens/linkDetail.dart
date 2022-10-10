@@ -4,11 +4,13 @@ import 'package:af24/api/global_variable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:horizontal_data_table/horizontal_data_table.dart';
 import 'package:sizer/sizer.dart';
 
 import '../api/auth_af24.dart';
 import '../constants.dart';
+import '../localization/languages/languages.dart';
 
 class linkDetail extends StatefulWidget {
   final int index;
@@ -26,14 +28,21 @@ class _linkDetailState extends State<linkDetail> {
     setState(() {
       loader = true;
     });
-
+    Map<String, dynamic> getuser = {
+      'product_id': productlistContent[widget.index].id.toString()
+    };
+    // await DataApiService.instance.getSecretUser(getuser, context);
+    await DataApiService.instance.getlinkUsers(getuser, context);
+/* 
     await DataApiService.instance
-        .getAllLinks(productLinks[widget.index].id.toString(), context);
+        .getAllLinks(productLinks[widget.index].id.toString(), context); */
 
     setState(() {
       loader = false;
     });
   }
+
+  bool reason = false;
 
   final spinkit = SpinKitSpinningLines(
     size: 5.h,
@@ -41,6 +50,16 @@ class _linkDetailState extends State<linkDetail> {
   );
   bool loaderAlert = false;
   final spinkitalert = SpinKitSpinningLines(
+    size: 2.h,
+    color: Colors.black,
+  );
+  bool loaderAccept = false;
+  final spinkitAlert = SpinKitSpinningLines(
+    size: 2.h,
+    color: Colors.black,
+  );
+  bool loaderReject = false;
+  final spinkitReject = SpinKitSpinningLines(
     size: 2.h,
     color: Colors.black,
   );
@@ -58,7 +77,7 @@ class _linkDetailState extends State<linkDetail> {
           elevation: 0,
           backgroundColor: Colors.white,
           title: Text(
-            'Edit Payment Link',
+            'Offer Detail',
             style: const TextStyle(color: Colors.black),
           ),
           leading: InkWell(
@@ -73,19 +92,19 @@ class _linkDetailState extends State<linkDetail> {
         ),
         body: loader
             ? spinkit
-            : getlinkContent.isEmpty
-                ? Center(child: Text('No Links Found'))
+            : getlinkuser.isEmpty
+                ? Center(child: Text(Languages.of(context)!.NO_LINKS))
                 : Column(
                     children: <Widget>[
                       Expanded(
                         child: HorizontalDataTable(
                           leftHandSideColumnWidth: 80,
-                          rightHandSideColumnWidth: 450,
+                          rightHandSideColumnWidth: 750,
                           isFixedHeader: true,
                           headerWidgets: _getTitleWidget(),
                           leftSideItemBuilder: _generateFirstColumnRow,
                           rightSideItemBuilder: _generateRightHandSideColumnRow,
-                          itemCount: getlinkContent.length,
+                          itemCount: getlinkuser.length,
                           rowSeparatorWidget: const Divider(
                             color: Colors.black54,
                             height: 1.0,
@@ -101,11 +120,14 @@ class _linkDetailState extends State<linkDetail> {
 
   List<Widget> _getTitleWidget() {
     return [
-      _getTitleItemWidget('Link No.', 100),
-      _getTitleItemWidget('Date of Order', 100),
-      _getTitleItemWidget('Customer Name', 150),
-      _getTitleItemWidget('Price', 100),
-      _getTitleItemWidget('Edit', 100),
+      _getTitleItemWidget(Languages.of(context)!.LINK_NO, 100),
+      _getTitleItemWidget(Languages.of(context)!.DATE_OF_ORDER, 100),
+      _getTitleItemWidget(Languages.of(context)!.CUSTOMER_NAME, 150),
+      _getTitleItemWidget(Languages.of(context)!.PRICE, 100),
+      _getTitleItemWidget('Quantity', 100),
+      _getTitleItemWidget('Size', 100),
+      _getTitleItemWidget('Color', 100),
+      _getTitleItemWidget('Status', 100),
     ];
   }
 
@@ -139,10 +161,8 @@ class _linkDetailState extends State<linkDetail> {
               Center(
                   child: Padding(
                 padding: const EdgeInsets.only(left: 18.0),
-                child: Text(getlinkContent[index]
-                    .updatedAt
-                    .toString()
-                    .substring(0, 10)),
+                child: Text(
+                    getlinkuser[index].updatedAt.toString().substring(0, 10)),
               ))
             ],
           ),
@@ -152,7 +172,7 @@ class _linkDetailState extends State<linkDetail> {
           alignment: Alignment.centerLeft,
         ),
         Container(
-          child: Center(child: Text(getlinkContent[index].userName)),
+          child: Center(child: Text(getlinkuser[index].userName.toString())),
           width: 150,
           height: 52,
           padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
@@ -163,13 +183,41 @@ class _linkDetailState extends State<linkDetail> {
           height: 52,
           padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
           alignment: Alignment.centerLeft,
+          child: Center(child: Text(getlinkuser[index].price.toString())),
+        ),
+        Container(
+          width: 100,
+          height: 52,
+          padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
+          alignment: Alignment.centerLeft,
+          child: Center(child: Text(getlinkContent[index].quantity.toString())),
+        ),
+        Container(
+          width: 100,
+          height: 52,
+          padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
+          alignment: Alignment.centerLeft,
           child: Center(
-              child: Text(getlinkContent[index].priceSetBySeller.toString())),
+              child: getlinkuser[index].size == null
+                  ? Text('-')
+                  : Text(getlinkuser[index].size.toString())),
+        ),
+        Container(
+          width: 100,
+          height: 52,
+          padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
+          alignment: Alignment.centerLeft,
+          child: Center(
+              child: Container(
+            height: 20,
+            width: 20,
+            color: HexColor(getlinkuser[index].color),
+          )),
         ),
         Container(
           // ignore: sort_child_properties_last
           child: Center(
-            child: ElevatedButton(
+            child: /* ElevatedButton(
               onPressed: () async {
                 _textFieldController.text =
                     getlinkContent[index].priceSetBySeller.toString();
@@ -178,7 +226,7 @@ class _linkDetailState extends State<linkDetail> {
                   builder: (BuildContext context) {
                     return StatefulBuilder(builder: (context, setState) {
                       return AlertDialog(
-                        title: const Text('Enter Price in €'),
+                        title: Text(Languages.of(context)!.EDIT_PRICE),
                         content: TextField(
                           keyboardType: TextInputType.number,
                           onChanged: (value) {},
@@ -223,7 +271,7 @@ class _linkDetailState extends State<linkDetail> {
                                 width: 50,
                                 child: loaderAlert
                                     ? spinkitalert
-                                    : Text('Update')),
+                                    : Text(Languages.of(context)!.UPDATE)),
                           ),
                         ],
                       );
@@ -236,7 +284,279 @@ class _linkDetailState extends State<linkDetail> {
                 style: TextStyle(color: Colors.white, fontSize: 11.sp),
               ),
               style: ElevatedButton.styleFrom(primary: Colors.blue),
-            ),
+            ), */
+                getlinkuser[index].requestStatus == '2'
+                    ? Padding(
+                        padding: const EdgeInsets.only(right: 7.0),
+                        child: Text('Offer Accepted'),
+                      )
+                    : getlinkuser[index].requestStatus == '3'
+                        ? Padding(
+                            padding: const EdgeInsets.only(right: 7.0),
+                            child: Text('Offer Rejected'),
+                          )
+                        : ElevatedButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return StatefulBuilder(
+                                      builder: (context, setState) {
+                                    return AlertDialog(
+                                      title: const Text('Offered Price  '),
+                                      content: SingleChildScrollView(
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: <Widget>[
+                                                Text('Price'),
+                                                Text(
+                                                    /* getlinkuser[index]
+                                                                              .price */
+                                                    '50')
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: <Widget>[
+                                                Text('Name'),
+                                                Text(getlinkuser[index]
+                                                    .userName
+                                                    .toString())
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: <Widget>[
+                                                Text('Quantity'),
+                                                Text(getlinkuser[index]
+                                                    .quantity
+                                                    .toString())
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: <Widget>[
+                                                Text('Size'),
+                                                Text(getlinkuser[index].size ==
+                                                        null
+                                                    ? '--'
+                                                    : getlinkuser[index]
+                                                        .size
+                                                        .toString())
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: <Widget>[
+                                                Text('Color'),
+                                                Container(
+                                                  height: 20,
+                                                  width: 20,
+                                                  color: HexColor(
+                                                      getlinkuser[index].color),
+                                                )
+                                              ],
+                                            ),
+                                            reason
+                                                ? TextField(
+                                                    onChanged: (value) {},
+                                                    controller:
+                                                        _textFieldController,
+                                                    decoration:
+                                                        const InputDecoration(
+                                                      hintText: "Reason",
+                                                    ),
+                                                  )
+                                                : SizedBox()
+                                          ],
+                                        ),
+                                      ),
+                                      actions: [
+                                        reason
+                                            ? FlatButton(
+                                                textColor: Colors.black,
+                                                onPressed: () async {
+                                                  if (_textFieldController
+                                                      .text.isNotEmpty) {
+                                                    setState(() {
+                                                      loaderReject = true;
+                                                    });
+                                                    Map<String, dynamic>
+                                                        sendlink = {
+                                                      'request_id':
+                                                          getlinkuser[index]
+                                                              .id
+                                                              .toString(),
+                                                      'request_status': '3',
+                                                      'reject_reason':
+                                                          _textFieldController
+                                                              .text,
+                                                    };
+                                                    await DataApiService
+                                                        .instance
+                                                        .sendLink(
+                                                            sendlink, context);
+                                                    setState(() {
+                                                      loaderReject = false;
+                                                      // sizepicker = true;
+                                                    });
+                                                    GlobalSnackBar.show(
+                                                        context, snackmessage);
+
+                                                    _textFieldController
+                                                        .clear();
+                                                    Navigator.pop(context);
+                                                    Navigator.pushReplacement(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                            builder: (BuildContext
+                                                                    context) =>
+                                                                linkDetail(widget
+                                                                    .index)));
+                                                    reason = false;
+                                                  }
+                                                },
+                                                child: Container(
+                                                  height: 20,
+                                                  width: 40,
+                                                  child: loaderReject
+                                                      ? spinkitAlert
+                                                      : Text('Send'),
+                                                ),
+                                              )
+                                            : Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: <Widget>[
+                                                  FlatButton(
+                                                    textColor: Colors.black,
+                                                    onPressed: () async {
+                                                      setState(() {
+                                                        loaderAlert = true;
+                                                      });
+                                                      Map<String, dynamic>
+                                                          sendlink = {
+                                                        'request_id':
+                                                            getlinkuser[index]
+                                                                .id
+                                                                .toString(),
+                                                        'request_status': '2'
+                                                      };
+                                                      await DataApiService
+                                                          .instance
+                                                          .sendLink(sendlink,
+                                                              context);
+                                                      setState(() {
+                                                        loaderAlert = false;
+                                                        // sizepicker = true;
+                                                      });
+                                                      GlobalSnackBar.show(
+                                                          context,
+                                                          snackmessage);
+
+                                                      Navigator.pop(context);
+                                                      Navigator.pushReplacement(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                              builder: (BuildContext
+                                                                      context) =>
+                                                                  linkDetail(widget
+                                                                      .index)));
+                                                    },
+                                                    child: Container(
+                                                      height: 20,
+                                                      width: 45,
+                                                      child: loaderAlert
+                                                          ? spinkitAlert
+                                                          : Text('Accept'),
+                                                    ),
+                                                  ),
+                                                  FlatButton(
+                                                    textColor: Colors.black,
+                                                    onPressed: () async {
+                                                      setState(() {
+                                                        reason = true;
+                                                      });
+                                                      /*   setState(
+                                                                          () {
+                                                                        loaderAlert =
+                                                                            true;
+                                                                      });
+                                                                      Map<String,
+                                                                              dynamic>
+                                                                          sendlink =
+                                                                          {
+                                                                        'price':
+                                                                            _textFieldController.text,
+                                                                        'request_id': getlinkuser[index]
+                                                                            .id
+                                                                            .toString()
+                                                                      };
+                                                                      await DataApiService
+                                                                          .instance
+                                                                          .sendLink(
+                                                                              sendlink,
+                                                                              context);
+                                                                      setState(
+                                                                          () {
+                                                                        loaderAlert =
+                                                                            false;
+                                                                        // sizepicker = true;
+                                                                      });
+                                                                      GlobalSnackBar.show(
+                                                                          context,
+                                                                          snackmessage);
+ */
+                                                      /*   Navigator.of(
+                                                                              context,
+                                                                              rootNavigator: true)
+                                                                          .pop(); */
+                                                    },
+                                                    child: Container(
+                                                      height: 20,
+                                                      width: 40,
+                                                      child: Text('Reject'),
+                                                    ),
+                                                  ),
+                                                ],
+                                              )
+                                      ],
+                                    );
+                                  });
+                                },
+                              );
+                            },
+                            style:
+                                ElevatedButton.styleFrom(primary: Colors.black),
+                            child: const Text(
+                              'Offer Detail',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
           ),
           width: 100,
           height: 52,

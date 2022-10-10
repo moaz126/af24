@@ -19,6 +19,7 @@ import 'package:sizer/sizer.dart';
 import 'package:af24/Screens/chat_Inbox.dart';
 import '../Model/dashBoardChart.dart';
 
+import '../localization/languages/languages.dart';
 import 'newBar.dart';
 
 class dashBoard extends StatefulWidget {
@@ -39,12 +40,14 @@ class _dashBoardState extends State<dashBoard> {
     setState(() {
       loader = false;
     });
+    firstTimeDashboard = false;
   }
 
   @override
   void initState() {
-    callApi();
+    firstTimeDashboard ? callApi() : null;
     super.initState();
+    status = ['Pending', 'Processing', 'Cancelled'];
   }
 
   final RefreshController _refreshController =
@@ -59,11 +62,11 @@ class _dashBoardState extends State<dashBoard> {
       context: context,
       dialogType: DialogType.QUESTION,
       animType: AnimType.BOTTOMSLIDE,
-      title: 'Exit',
-      desc: 'Are you sure you want to Exit?',
+      title: Languages.of(context)!.EXIT,
+      desc: Languages.of(context)!.EXIT_APP_TEXT,
       btnCancelOnPress: () {},
-      btnCancelText: 'No',
-      btnOkText: 'Yes',
+      btnCancelText: Languages.of(context)!.NO,
+      btnOkText: Languages.of(context)!.YES,
       btnOkOnPress: () async {
         setUserLoggedIn(false);
 
@@ -86,7 +89,7 @@ class _dashBoardState extends State<dashBoard> {
     'Item 4',
     'Item 5',
   ];
-  List<String> status = ['Pending', 'Processing', 'Cancelled'];
+  List<String> status = [];
   List<int> counter = [
     getDashboardContent!.pending == null ? 0 : getDashboardContent!.pending,
     getDashboardContent!.processing_count,
@@ -145,6 +148,9 @@ class _dashBoardState extends State<dashBoard> {
                                     ),
                                     PopupMenuButton<int>(
                                       // ignore: sort_child_properties_last
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10)),
                                       child: ClipOval(
                                         child: CachedNetworkImage(
                                           height: 40,
@@ -170,7 +176,8 @@ class _dashBoardState extends State<dashBoard> {
                                               SizedBox(
                                                 width: 10,
                                               ),
-                                              Text("Edit Profile")
+                                              Text(Languages.of(context)!
+                                                  .EDIT_PROFILE)
                                             ],
                                           ),
                                         ),
@@ -182,7 +189,8 @@ class _dashBoardState extends State<dashBoard> {
                                               SizedBox(
                                                 width: 10,
                                               ),
-                                              Text("Logout")
+                                              Text(
+                                                  Languages.of(context)!.LOGOUT)
                                             ],
                                           ),
                                         ),
@@ -199,18 +207,23 @@ class _dashBoardState extends State<dashBoard> {
                                             context: context,
                                             dialogType: DialogType.QUESTION,
                                             animType: AnimType.TOPSLIDE,
-                                            title: 'Logout',
-                                            desc:
-                                                'Are you sure you want to Logout?',
+                                            title:
+                                                Languages.of(context)!.LOGOUT,
+                                            desc: Languages.of(context)!
+                                                .LOGOUT_TEXT,
                                             btnCancelOnPress: () {},
-                                            btnCancelText: 'No',
-                                            btnOkText: 'Yes',
+                                            btnCancelText:
+                                                Languages.of(context)!.NO,
+                                            btnOkText:
+                                                Languages.of(context)!.YES,
                                             btnOkOnPress: () async {
                                               DataApiService.instance.logout(
                                                   shopinfoContent.sellerId);
                                               setUserLoggedIn(false);
-                                              GlobalSnackBar.show(context,
-                                                  'Logout Successfully');
+                                              GlobalSnackBar.show(
+                                                  context,
+                                                  Languages.of(context)!
+                                                      .LOGOUT_SUCCESS);
                                               Get.offAll(Login());
                                             },
                                           ).show();
@@ -273,13 +286,16 @@ class _dashBoardState extends State<dashBoard> {
                                                       fontWeight:
                                                           FontWeight.bold),
                                                 ),
-                                                Text("Issued",
+                                                Text(
+                                                    Languages.of(context)!
+                                                        .ISSUED,
                                                     style: TextStyle(
                                                         color: Colors.white,
                                                         fontWeight:
                                                             FontWeight.bold)),
                                                 Text(
-                                                  "Payment Page",
+                                                  Languages.of(context)!
+                                                      .PAYMENT_PAGE,
                                                   style: TextStyle(
                                                     color: Colors.white,
                                                     fontWeight: FontWeight.bold,
@@ -330,12 +346,16 @@ class _dashBoardState extends State<dashBoard> {
                                                       fontWeight:
                                                           FontWeight.bold),
                                                 ),
-                                                Text("Order",
+                                                Text(
+                                                    Languages.of(context)!
+                                                        .ORDER,
                                                     style: TextStyle(
                                                         color: Colors.white,
                                                         fontWeight:
                                                             FontWeight.bold)),
-                                                Text("Confirmed",
+                                                Text(
+                                                    Languages.of(context)!
+                                                        .CONFIRMED,
                                                     style: TextStyle(
                                                         color: Colors.white,
                                                         fontWeight:
@@ -345,7 +365,7 @@ class _dashBoardState extends State<dashBoard> {
                                           ),
                                         ),
                                         InkWell(
-                                           onTap: () {
+                                          onTap: () {
                                             orderPressed = 5;
                                             Navigator.push(
                                               context,
@@ -386,7 +406,9 @@ class _dashBoardState extends State<dashBoard> {
                                                             FontWeight.bold),
                                                   ),
                                                 ),
-                                                Text("Delivered",
+                                                Text(
+                                                    Languages.of(context)!
+                                                        .DELIVERED,
                                                     style: TextStyle(
                                                         color: Colors.white,
                                                         fontWeight:
@@ -486,7 +508,8 @@ class _dashBoardState extends State<dashBoard> {
                                                     height: 3,
                                                   ),
                                                   Text(
-                                                    'My Store',
+                                                    Languages.of(context)!
+                                                        .MY_STORE,
                                                     style: TextStyle(
                                                         fontWeight:
                                                             FontWeight.bold,
@@ -512,7 +535,7 @@ class _dashBoardState extends State<dashBoard> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        'Earnings',
+                                        Languages.of(context)!.EARNINGS,
                                         style: TextStyle(
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold),
@@ -550,7 +573,7 @@ class _dashBoardState extends State<dashBoard> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        'Chatting with users',
+                                        Languages.of(context)!.CATTING_WITH,
                                         style: TextStyle(
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold),
@@ -571,7 +594,9 @@ class _dashBoardState extends State<dashBoard> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceEvenly,
                                             children: [
-                                              Text('View All',
+                                              Text(
+                                                  Languages.of(context)!
+                                                      .VIEW_ALL,
                                                   style: TextStyle(
                                                       fontSize: 13,
                                                       color: Colors.black
@@ -603,7 +628,9 @@ class _dashBoardState extends State<dashBoard> {
                                     ),
                                     height: 40.h,
                                     child: getUserList.isEmpty
-                                        ? Center(child: Text('No Messages'))
+                                        ? Center(
+                                            child: Text(Languages.of(context)!
+                                                .NO_MESSAGES))
                                         : ListView(
                                             children: [
                                               for (int i = 0;

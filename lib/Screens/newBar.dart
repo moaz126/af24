@@ -4,6 +4,7 @@ import 'package:af24/Screens/productDetail.dart';
 import 'package:af24/Screens/uploadProduct.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import '../localization/languages/languages.dart';
 import 'chatNotification.dart';
 import 'dashBoard.dart';
 import 'OrdersList.dart';
@@ -62,7 +63,7 @@ class _newNavBarState extends State<newNavBar> {
                           ),
                   ),
                   Text(
-                    'Home',
+                    Languages.of(context)!.HOME,
                     style: TextStyle(fontSize: 10),
                   )
                 ],
@@ -86,7 +87,7 @@ class _newNavBarState extends State<newNavBar> {
                           ),
                   ),
                   Text(
-                    'Products',
+                    Languages.of(context)!.PRODUCTS,
                     style: TextStyle(fontSize: 10),
                   )
                 ],
@@ -110,7 +111,7 @@ class _newNavBarState extends State<newNavBar> {
                           ),
                   ),
                   Text(
-                    'Sell',
+                    Languages.of(context)!.SELL,
                     style: TextStyle(fontSize: 10),
                   )
                 ],
@@ -135,7 +136,7 @@ class _newNavBarState extends State<newNavBar> {
                                   height: 3.h),
                             )),
                   Text(
-                    'Notification',
+                    Languages.of(context)!.NOTIFICATION,
                     style: TextStyle(fontSize: 10),
                   )
                 ],
@@ -158,7 +159,7 @@ class _newNavBarState extends State<newNavBar> {
                                   height: 3.h),
                             )),
                   Text(
-                    'My Orders',
+                    Languages.of(context)!.MY_ORDERS,
                     style: TextStyle(fontSize: 10),
                   )
                 ],

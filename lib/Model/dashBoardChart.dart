@@ -15,6 +15,7 @@ class dashBoardChart extends StatefulWidget {
 
 class _dashBoardChartState extends State<dashBoardChart> {
   bool loader = false;
+  TooltipBehavior? _tooltipBehavior;
   fun() async {
     setState(() {
       loader = true;
@@ -29,7 +30,10 @@ class _dashBoardChartState extends State<dashBoardChart> {
   void initState() {
     // TODO: implement initState
     fun();
+    _tooltipBehavior = TooltipBehavior(enable: true);
+
     super.initState();
+
     setState(() {});
   }
 
@@ -43,8 +47,12 @@ class _dashBoardChartState extends State<dashBoardChart> {
   );
   List<String> x_axis = getDashboardContent!.xAxis;
   List<int> y_axis = getDashboardContent!.yAxis;
+
   @override
   Widget build(BuildContext context) {
+    print('Graph');
+    print(getDashboardContent!.yAxis);
+    print(getDashboardContent!.xAxis);
     return Scaffold(
         body: loader == true
             ? spinkit
@@ -54,6 +62,7 @@ class _dashBoardChartState extends State<dashBoardChart> {
                     child: SfCartesianChart(
                         // Initialize category axis
                         primaryXAxis: CategoryAxis(),
+                        tooltipBehavior: _tooltipBehavior,
                         series: <LineSeries<SalesData, String>>[
                           LineSeries<SalesData, String>(
                               // Bind data source
@@ -63,7 +72,8 @@ class _dashBoardChartState extends State<dashBoardChart> {
                                       y_axis[i].toDouble()),
                               ],
                               xValueMapper: (SalesData sales, _) => sales.year,
-                              yValueMapper: (SalesData sales, _) => sales.sales)
+                              yValueMapper: (SalesData sales, _) =>
+                                  sales.sales),
                         ]))));
   }
 }

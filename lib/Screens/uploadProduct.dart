@@ -9,6 +9,7 @@ import 'package:af24/api/global_variable.dart';
 import 'package:af24/constants.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:ensure_visible_when_focused/ensure_visible_when_focused.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sizer/sizer.dart';
+import '../localization/languages/languages.dart';
 import 'navBar.dart';
 
 class uploadProduct extends StatefulWidget {
@@ -48,12 +50,15 @@ class _uploadProductState extends State<uploadProduct> {
   bool showGenerate = false;
   bool getvalue = false;
   final _formKey = GlobalKey<FormState>();
+  var containerKey = GlobalKey();
 // ValueChanged<Color> callback
   void changeColor(Color color) {
     setState(() => pickerColor = color);
   }
 
   XFile? _picked;
+  final ImagePicker imagePicker = ImagePicker();
+  List<XFile>? imageFileList = [];
   FocusNode myFocusNode = FocusNode();
   FocusNode myFocusNodeConsumer = FocusNode();
   FocusNode myFocusNodeWhole = FocusNode();
@@ -114,6 +119,8 @@ class _uploadProductState extends State<uploadProduct> {
   } */
 
   List<String> combination = [];
+  late FocusNode _focusNode;
+  late FocusNode _focusNode1;
 
   genrateTextController() {
     if (sizeVarient.isEmpty) {
@@ -177,6 +184,9 @@ class _uploadProductState extends State<uploadProduct> {
       setState(() {});
     });
 
+    _focusNode = FocusNode();
+    _focusNode1 = FocusNode();
+
     super.initState();
   }
 
@@ -185,11 +195,11 @@ class _uploadProductState extends State<uploadProduct> {
       context: context,
       dialogType: DialogType.QUESTION,
       animType: AnimType.BOTTOMSLIDE,
-      title: 'Exit',
-      desc: 'Are you sure you want to Exit?',
+      title: Languages.of(context)!.EXIT,
+      desc: Languages.of(context)!.EXIT_APP_TEXT,
       btnCancelOnPress: () {},
-      btnCancelText: 'No',
-      btnOkText: 'Yes',
+      btnCancelText: Languages.of(context)!.NO,
+      btnOkText: Languages.of(context)!.YES,
       btnOkOnPress: () async {
         SystemNavigator.pop();
       },
@@ -203,6 +213,7 @@ class _uploadProductState extends State<uploadProduct> {
     myImages.clear();
     imagesfile.clear();
     combination.clear();
+    pickedImage.clear();
     super.dispose();
   }
 
@@ -221,8 +232,8 @@ class _uploadProductState extends State<uploadProduct> {
         appBar: AppBar(
           elevation: 0,
           backgroundColor: Colors.white,
-          title: const Text(
-            'Upload Product',
+          title: Text(
+            Languages.of(context)!.UPLOAD_PRODUCT,
             style: TextStyle(color: Colors.black),
           ),
           leading: InkWell(
@@ -252,8 +263,8 @@ class _uploadProductState extends State<uploadProduct> {
                 children: [
                   Container(
                     width: MediaQuery.of(context).size.width,
-                    child: const Text(
-                      'Product Details',
+                    child: Text(
+                      Languages.of(context)!.PRODUCT_DETAIL,
                       style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
@@ -264,9 +275,10 @@ class _uploadProductState extends State<uploadProduct> {
                     height: 20,
                   ),
                   Container(
+                    key: containerKey,
                     width: MediaQuery.of(context).size.width,
                     child: Text(
-                      'Add Images',
+                      Languages.of(context)!.ADD_IMAGES,
                       style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
@@ -294,7 +306,13 @@ class _uploadProductState extends State<uploadProduct> {
                                         'image': file.toString(),
                                         'type': 'product',
                                       }; */
-                                      await _uploadImage();
+                                      // await _uploadImage();
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                imageCropperAddProduct(i)),
+                                      );
                                     },
                                     child: Container(
                                       height: 140,
@@ -351,12 +369,68 @@ class _uploadProductState extends State<uploadProduct> {
                             ),
                             InkWell(
                               onTap: () async {
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                          title: Text(Languages.of(context)!
+                                              .PICK_IMAGE),
+                                          content: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
+                                            children: <Widget>[
+                                              InkWell(
+                                                onTap: () {
+                                                  _uploadImageByCamera();
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Container(
+                                                  height: 60,
+                                                  child: Column(
+                                                    children: [
+                                                      Icon(Icons.camera_alt),
+                                                      Center(
+                                                        child: Text(
+                                                            Languages.of(
+                                                                    context)!
+                                                                .CAMERA),
+                                                      )
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 20,
+                                              ),
+                                              InkWell(
+                                                onTap: () {
+                                                  _uploadImage();
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Container(
+                                                  height: 60,
+                                                  child: Column(
+                                                    children: [
+                                                      Icon(Icons.filter),
+                                                      Center(
+                                                        child: Text(
+                                                            Languages.of(
+                                                                    context)!
+                                                                .GALLERY),
+                                                      )
+                                                    ],
+                                                  ),
+                                                ),
+                                              )
+                                            ],
+                                          ));
+                                    });
                                 /*   await selectFile();
                                 Map<String, dynamic> upload = {
                                   'image': file.toString(),
                                   'type': 'product',
                                 }; */
-                                await _uploadImage();
+                                // await _uploadImage();
                                 /*  Get.to(imageCrop()); */
                               },
                               child: Container(
@@ -401,12 +475,12 @@ class _uploadProductState extends State<uploadProduct> {
                         SizedBox(
                             width: MediaQuery.of(context).size.width / 2.18,
                             child: Text(
-                              'Product Name',
+                              Languages.of(context)!.PRODUCT_NAME,
                               style: TextStyle(
                                   fontSize: 15.sp, fontWeight: FontWeight.bold),
                             )),
                         Text(
-                          'Sub Name',
+                          Languages.of(context)!.SUB_NAME,
                           style: TextStyle(
                               fontSize: 15.sp, fontWeight: FontWeight.bold),
                         )
@@ -424,41 +498,45 @@ class _uploadProductState extends State<uploadProduct> {
                             width: MediaQuery.of(context).size.width / 2.3,
 
                             // color: Colors.white,
-                            child: TextFormField(
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return "This field is required";
-                                }
-                              },
-                              onTap: () {
-                                setState(() {
-                                  ProductName = NmaeController.text;
-                                });
-                              },
-                              controller: NmaeController,
-                              decoration: InputDecoration(
-                                filled: true,
-                                contentPadding: const EdgeInsets.symmetric(
-                                    vertical: 5.0, horizontal: 10.0),
-                                fillColor: Colors.white,
-                                enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Colors.grey.withOpacity(0.2),
-                                    ),
-                                    borderRadius: BorderRadius.circular(6)),
-                                focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Colors.grey.withOpacity(0.2),
-                                    ),
-                                    borderRadius: BorderRadius.circular(6)),
-                                border: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Colors.grey.withOpacity(0.2),
-                                    ),
-                                    borderRadius: BorderRadius.circular(6)),
-                                hintText: 'Product Name',
+                            child: EnsureVisibleWhenFocused(
+                              focusNode: _focusNode,
+                              child: TextFormField(
+                                focusNode: _focusNode,
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return Languages.of(context)!.VALIDATOR;
+                                  }
+                                },
+                                onTap: () {
+                                  setState(() {
+                                    ProductName = NmaeController.text;
+                                  });
+                                },
+                                controller: NmaeController,
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 5.0, horizontal: 10.0),
+                                  fillColor: Colors.white,
+                                  enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Colors.grey.withOpacity(0.2),
+                                      ),
+                                      borderRadius: BorderRadius.circular(6)),
+                                  focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Colors.grey.withOpacity(0.2),
+                                      ),
+                                      borderRadius: BorderRadius.circular(6)),
+                                  border: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Colors.grey.withOpacity(0.2),
+                                      ),
+                                      borderRadius: BorderRadius.circular(6)),
+                                  hintText: Languages.of(context)!.PRODUCT_NAME,
+                                ),
+                                maxLines: 1,
                               ),
-                              maxLines: 1,
                             )),
                         Padding(
                           padding: const EdgeInsets.only(left: 10),
@@ -466,41 +544,45 @@ class _uploadProductState extends State<uploadProduct> {
                             // padding: EdgeInsets.only(left: 10, right: 10),
                             width: MediaQuery.of(context).size.width / 2.3,
 
-                            child: TextFormField(
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return "This field is required";
-                                }
-                              },
-                              onTap: () {
-                                setState(() {
-                                  SubName = SubnameController.text;
-                                });
-                              },
-                              controller: SubnameController,
-                              decoration: InputDecoration(
-                                filled: true,
-                                contentPadding: const EdgeInsets.symmetric(
-                                    vertical: 5.0, horizontal: 10.0),
-                                fillColor: Colors.white,
-                                enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Colors.grey.withOpacity(0.2),
-                                    ),
-                                    borderRadius: BorderRadius.circular(6)),
-                                focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Colors.grey.withOpacity(0.2),
-                                    ),
-                                    borderRadius: BorderRadius.circular(6)),
-                                border: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Colors.grey.withOpacity(0.2),
-                                    ),
-                                    borderRadius: BorderRadius.circular(6)),
-                                hintText: 'Sub Name',
+                            child: EnsureVisibleWhenFocused(
+                              focusNode: _focusNode1,
+                              child: TextFormField(
+                                focusNode: _focusNode1,
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return Languages.of(context)!.VALIDATOR;
+                                  }
+                                },
+                                onTap: () {
+                                  setState(() {
+                                    SubName = SubnameController.text;
+                                  });
+                                },
+                                controller: SubnameController,
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 5.0, horizontal: 10.0),
+                                  fillColor: Colors.white,
+                                  enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Colors.grey.withOpacity(0.2),
+                                      ),
+                                      borderRadius: BorderRadius.circular(6)),
+                                  focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Colors.grey.withOpacity(0.2),
+                                      ),
+                                      borderRadius: BorderRadius.circular(6)),
+                                  border: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Colors.grey.withOpacity(0.2),
+                                      ),
+                                      borderRadius: BorderRadius.circular(6)),
+                                  hintText: Languages.of(context)!.SUB_NAME,
+                                ),
+                                maxLines: 1,
                               ),
-                              maxLines: 1,
                             ),
                           ),
                         ),
@@ -514,13 +596,13 @@ class _uploadProductState extends State<uploadProduct> {
                         SizedBox(
                             width: MediaQuery.of(context).size.width / 2.18,
                             child: Text(
-                              'Category',
+                              Languages.of(context)!.CATEGORY,
                               style: TextStyle(
                                   fontSize: 15.sp, fontWeight: FontWeight.bold),
                             )),
                         showsub == true
                             ? Text(
-                                'Sub Catgory',
+                                Languages.of(context)!.SUB_CATEGORY,
                                 style: TextStyle(
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.bold),
@@ -544,7 +626,7 @@ class _uploadProductState extends State<uploadProduct> {
                             child: DropdownButtonFormField(
                               validator: (value) {
                                 if (value == null) {
-                                  return "This field is required";
+                                  return Languages.of(context)!.VALIDATOR;
                                 }
                               },
                               decoration: InputDecoration(
@@ -560,12 +642,12 @@ class _uploadProductState extends State<uploadProduct> {
                                         color: Colors.grey.withOpacity(0.2),
                                       ),
                                       borderRadius: BorderRadius.circular(6)),
-                                  hintText: ' Category'),
+                                  hintText: Languages.of(context)!.CATEGORY),
 
                               borderRadius:
                                   const BorderRadius.all(Radius.circular(7)),
                               icon: const Icon(Icons.keyboard_arrow_down),
-                              hint: const Text('Category'),
+                              hint: Text(Languages.of(context)!.CATEGORY),
                               // value: dropdownvalue,
                               items: catergorylist.map((CategoryModel item) {
                                 return DropdownMenuItem(
@@ -638,10 +720,12 @@ class _uploadProductState extends State<uploadProduct> {
                                               ),
                                               borderRadius:
                                                   BorderRadius.circular(6)),
-                                          hintText: 'Sub Category'),
+                                          hintText: Languages.of(context)!
+                                              .SUB_CATEGORY),
                                       validator: (value) {
                                         if (value == null) {
-                                          return "This field is required";
+                                          return Languages.of(context)!
+                                              .VALIDATOR;
                                         }
                                       },
                                       borderRadius: const BorderRadius.all(
@@ -699,12 +783,12 @@ class _uploadProductState extends State<uploadProduct> {
                         SizedBox(
                             width: MediaQuery.of(context).size.width / 2.18,
                             child: Text(
-                              'Brand',
+                              Languages.of(context)!.BRANDS,
                               style: TextStyle(
                                   fontSize: 15.sp, fontWeight: FontWeight.bold),
                             )),
                         Text(
-                          'Status',
+                          Languages.of(context)!.STATUS,
                           style: TextStyle(
                               fontSize: 15.sp, fontWeight: FontWeight.bold),
                         )
@@ -724,7 +808,7 @@ class _uploadProductState extends State<uploadProduct> {
                             child: DropdownButtonFormField(
                               validator: (value) {
                                 if (value == null) {
-                                  return "This field is required";
+                                  return Languages.of(context)!.VALIDATOR;
                                 }
                               },
                               // value: dropdownvalue4,
@@ -741,8 +825,12 @@ class _uploadProductState extends State<uploadProduct> {
                                         color: Colors.grey.withOpacity(0.2),
                                       ),
                                       borderRadius: BorderRadius.circular(6)),
-                                  hintText: 'Brands'),
-                              hint: const Text('Brands'),
+                                  hintText: Languages.of(context)!.BRANDS),
+                              hint: Text(
+                                Languages.of(context)!.BRANDS,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                               borderRadius:
                                   const BorderRadius.all(Radius.circular(7)),
                               icon: Icon(
@@ -752,9 +840,14 @@ class _uploadProductState extends State<uploadProduct> {
                               items: brandlist.map((GetBrandModel items) {
                                 return DropdownMenuItem(
                                   value: items,
-                                  child: Text(
-                                    items.name,
-                                    style: TextStyle(color: Colors.grey[600]),
+                                  child: Container(
+                                    width: 100,
+                                    child: Text(
+                                      items.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(color: Colors.grey[600]),
+                                    ),
                                   ),
                                 );
                               }).toList(),
@@ -782,7 +875,7 @@ class _uploadProductState extends State<uploadProduct> {
                               child: DropdownButtonFormField(
                                 validator: (value) {
                                   if (value == null) {
-                                    return "This field is required";
+                                    return Languages.of(context)!.VALIDATOR;
                                   }
                                 },
                                 // value: dropdownvalue4,
@@ -799,8 +892,8 @@ class _uploadProductState extends State<uploadProduct> {
                                           color: Colors.grey.withOpacity(0.2),
                                         ),
                                         borderRadius: BorderRadius.circular(6)),
-                                    hintText: 'Status'),
-                                hint: const Text('Status'),
+                                    hintText: Languages.of(context)!.STATUS),
+                                hint: Text(Languages.of(context)!.STATUS),
                                 borderRadius:
                                     const BorderRadius.all(Radius.circular(7)),
                                 icon: Icon(
@@ -833,13 +926,13 @@ class _uploadProductState extends State<uploadProduct> {
                             SizedBox(
                                 width: MediaQuery.of(context).size.width / 2.18,
                                 child: Text(
-                                  'Size',
+                                  Languages.of(context)!.SIZE,
                                   style: TextStyle(
                                       fontSize: 15.sp,
                                       fontWeight: FontWeight.bold),
                                 )),
                             Text(
-                              'Color',
+                              Languages.of(context)!.COLOR,
                               style: TextStyle(
                                   fontSize: 15.sp, fontWeight: FontWeight.bold),
                             )
@@ -861,46 +954,50 @@ class _uploadProductState extends State<uploadProduct> {
                                   child: sizepicker[i]
                                       ? Center(
                                           child: TextFormField(
-                                            validator: (value) {
-                                              if (value!.isEmpty) {
-                                                return "This field is required";
-                                              }
-                                            },
-                                            onTap: () {
-                                              setState(() {
-                                                sizepicker[i] = false;
-                                              });
-                                            },
-                                            readOnly: true,
-                                            controller: _textSizeController,
-                                            decoration: InputDecoration(
-                                                enabledBorder:
-                                                    OutlineInputBorder(
-                                                        borderSide: BorderSide(
-                                                          color: Colors.grey
-                                                              .withOpacity(0.2),
-                                                        ),
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(6)),
-                                                filled: true,
-                                                fillColor: Colors.white,
-                                                border: OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                      color: Colors.grey
-                                                          .withOpacity(0.2),
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            6)),
-                                                hintText: 'Size'),
-                                          ),
+                                              validator: (value) {
+                                                if (value!.isEmpty) {
+                                                  return Languages.of(context)!
+                                                      .VALIDATOR;
+                                                }
+                                              },
+                                              onTap: () {
+                                                setState(() {
+                                                  sizepicker[i] = false;
+                                                });
+                                              },
+                                              readOnly: true,
+                                              controller: _textSizeController,
+                                              decoration: InputDecoration(
+                                                  enabledBorder:
+                                                      OutlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(
+                                                            color: Colors.grey
+                                                                .withOpacity(
+                                                                    0.2),
+                                                          ),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(6)),
+                                                  filled: true,
+                                                  fillColor: Colors.white,
+                                                  border: OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: Colors.grey
+                                                            .withOpacity(0.2),
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              6)),
+                                                  hintText:
+                                                      Languages.of(context)!
+                                                          .SIZE)),
                                         )
                                       : DropdownButtonHideUnderline(
                                           child: DropdownButtonFormField(
                                             /*   validator: (value) {
                                               if (value == null) {
-                                                return "This field is required";
+                                                return Languages.of(context)!.VALIDATOR;
                                               }
                                             }, */
                                             // value: dropdownvalue4,
@@ -924,8 +1021,10 @@ class _uploadProductState extends State<uploadProduct> {
                                                     borderRadius:
                                                         BorderRadius.circular(
                                                             6)),
-                                                hintText: 'Size'),
-                                            hint: const Text('Size'),
+                                                hintText: Languages.of(context)!
+                                                    .SIZE),
+                                            hint: Text(
+                                                Languages.of(context)!.SIZE),
                                             borderRadius:
                                                 const BorderRadius.all(
                                                     Radius.circular(7)),
@@ -966,7 +1065,7 @@ class _uploadProductState extends State<uploadProduct> {
                                                         content: TextFormField(
                                                           validator: (value) {
                                                             if (value!.isEmpty) {
-                                                              return "This field is required";
+                                                              return Languages.of(context)!.VALIDATOR;
                                                             }
                                                           },
                                                           onChanged: (value) {},
@@ -1113,25 +1212,30 @@ class _uploadProductState extends State<uploadProduct> {
                                                 builder:
                                                     (BuildContext context) {
                                                   return AlertDialog(
-                                                    title: const Text(
-                                                        'Add new size'),
+                                                    title: Text(
+                                                        Languages.of(context)!
+                                                            .ADD_MORE_SIZE),
                                                     content: TextFormField(
                                                       validator: (value) {
                                                         if (value!.isEmpty) {
-                                                          return "This field is required";
+                                                          return Languages.of(
+                                                                  context)!
+                                                              .VALIDATOR;
                                                         }
                                                       },
                                                       inputFormatters: [
                                                         FilteringTextInputFormatter
                                                             .allow(RegExp(
-                                                                "[a-zA-Z]")),
+                                                                "[a-zA-Z0-9]")),
                                                       ],
                                                       onChanged: (value) {},
                                                       controller:
                                                           _textSizeController,
                                                       decoration:
-                                                          const InputDecoration(
-                                                        hintText: "Size",
+                                                          InputDecoration(
+                                                        hintText: Languages.of(
+                                                                context)!
+                                                            .SIZE,
                                                       ),
                                                     ),
                                                     actions: [
@@ -1218,10 +1322,12 @@ class _uploadProductState extends State<uploadProduct> {
                                                                         .INFO,
                                                                 animType: AnimType
                                                                     .BOTTOMSLIDE,
-                                                                title:
-                                                                    'Match Found',
-                                                                desc:
-                                                                    'Size Already Exist!',
+                                                                title: Languages.of(
+                                                                        context)!
+                                                                    .MATCH_FOUND,
+                                                                desc: Languages.of(
+                                                                        context)!
+                                                                    .ALREADY_SIZE,
                                                                 btnOkOnPress:
                                                                     () {},
                                                               ).show();
@@ -1230,8 +1336,10 @@ class _uploadProductState extends State<uploadProduct> {
                                                             /*  } */
                                                           }
                                                         },
-                                                        child:
-                                                            const Text('ADD'),
+                                                        child: Text(
+                                                            Languages.of(
+                                                                    context)!
+                                                                .ADD),
                                                       ),
                                                     ],
                                                   );
@@ -1274,7 +1382,9 @@ class _uploadProductState extends State<uploadProduct> {
                                             child: TextFormField(
                                                 validator: (value) {
                                                   if (value!.isEmpty) {
-                                                    return "This field is required";
+                                                    return Languages.of(
+                                                            context)!
+                                                        .VALIDATOR;
                                                   }
                                                 },
                                                 onTap: () {
@@ -1298,11 +1408,12 @@ class _uploadProductState extends State<uploadProduct> {
                                           )
                                         : DropdownButtonHideUnderline(
                                             child: DropdownButtonFormField(
-                                              /*  validator: (value) {
+                                              validator: (value) {
                                                 if (value == null) {
-                                                  return "This field is required";
+                                                  return Languages.of(context)!
+                                                      .VALIDATOR;
                                                 }
-                                              }, */
+                                              },
                                               // value: dropdownvalue4,
                                               decoration: InputDecoration(
                                                   enabledBorder:
@@ -1327,7 +1438,8 @@ class _uploadProductState extends State<uploadProduct> {
                                                           BorderRadius.circular(
                                                               6)),
                                                   hintText: ''),
-                                              hint: const Text('Color'),
+                                              hint: Text(
+                                                  Languages.of(context)!.COLOR),
                                               borderRadius:
                                                   const BorderRadius.all(
                                                       Radius.circular(7)),
@@ -1383,7 +1495,7 @@ class _uploadProductState extends State<uploadProduct> {
                                                                         (value) {
                                                                       if (value!
                                                                           .isEmpty) {
-                                                                        return "This field is required";
+                                                                        return Languages.of(context)!.VALIDATOR;
                                                                       }
                                                                     },
                                                                     onChanged:
@@ -1579,8 +1691,10 @@ class _uploadProductState extends State<uploadProduct> {
                                                     builder:
                                                         (BuildContext context) {
                                                       return AlertDialog(
-                                                        title: const Text(
-                                                            'Pick a color!'),
+                                                        title: Text(
+                                                            Languages.of(
+                                                                    context)!
+                                                                .PICK_COLOR),
                                                         content:
                                                             SingleChildScrollView(
                                                           child: Column(
@@ -1596,7 +1710,9 @@ class _uploadProductState extends State<uploadProduct> {
                                                                     (value) {
                                                                   if (value!
                                                                       .isEmpty) {
-                                                                    return "This field is required";
+                                                                    return Languages.of(
+                                                                            context)!
+                                                                        .VALIDATOR;
                                                                   }
                                                                 },
                                                                 inputFormatters: [
@@ -1608,10 +1724,10 @@ class _uploadProductState extends State<uploadProduct> {
                                                                     (value) {},
                                                                 controller:
                                                                     _textColorController,
-                                                                decoration:
-                                                                    const InputDecoration(
-                                                                        hintText:
-                                                                            "Color Name"),
+                                                                decoration: InputDecoration(
+                                                                    hintText: Languages.of(
+                                                                            context)!
+                                                                        .COLOR_NAME),
                                                               ),
                                                             ],
                                                           ),
@@ -1623,7 +1739,9 @@ class _uploadProductState extends State<uploadProduct> {
                                                                 ElevatedButton(
                                                               child: loaderColor
                                                                   ? spinkitColor
-                                                                  : Text('Add'),
+                                                                  : Text(Languages.of(
+                                                                          context)!
+                                                                      .ADD),
                                                               onPressed:
                                                                   () async {
                                                                 if (_textColorController
@@ -1731,10 +1849,12 @@ class _uploadProductState extends State<uploadProduct> {
                                                                       animType:
                                                                           AnimType
                                                                               .BOTTOMSLIDE,
-                                                                      title:
-                                                                          'Match Found',
-                                                                      desc:
-                                                                          'Color Already Exist!',
+                                                                      title: Languages.of(
+                                                                              context)!
+                                                                          .MATCH_FOUND,
+                                                                      desc: Languages.of(
+                                                                              context)!
+                                                                          .ALREADY_COLOR,
                                                                       btnOkOnPress:
                                                                           () {},
                                                                     ).show();
@@ -1771,7 +1891,9 @@ class _uploadProductState extends State<uploadProduct> {
                                                         BorderRadius.circular(
                                                             5),
                                                     color: Colors.black),
-                                                child: Text('Add More Color',
+                                                child: Text(
+                                                    Languages.of(context)!
+                                                        .ADD_MORE_COLOR,
                                                     style: TextStyle(
                                                         color: Colors.white)),
                                               ),
@@ -1800,8 +1922,8 @@ class _uploadProductState extends State<uploadProduct> {
                                 await generateCombintaion();
                                 print(combination);
                                 if (combination.isEmpty) {
-                                  GlobalSnackBar.show(
-                                      context, 'Please Add Color and Size');
+                                  GlobalSnackBar.show(context,
+                                      Languages.of(context)!.ADD_CLR_SZ);
                                 }
                                 setState(() {
                                   generateVarient = true;
@@ -1820,8 +1942,9 @@ class _uploadProductState extends State<uploadProduct> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        const Text(
-                                          'Generate Variants',
+                                        Text(
+                                          Languages.of(context)!
+                                              .GENERATE_VARIANTS,
                                           style: TextStyle(color: Colors.white),
                                         )
                                       ],
@@ -1967,7 +2090,7 @@ class _uploadProductState extends State<uploadProduct> {
                                         child: TextFormField(
                                           validator: (value) {
                                             if (value!.isEmpty) {
-                                              return "This field is required";
+                                              return Languages.of(context)!.VALIDATOR;
                                             }
                                           },
                                           controller: skuController[i],
@@ -2021,7 +2144,7 @@ class _uploadProductState extends State<uploadProduct> {
                                               child: TextFormField(
                                                 validator: (value) {
                                                   if (value!.isEmpty) {
-                                                    return "This field is required";
+                                                    return Languages.of(context)!.VALIDATOR;
                                                   }
                                                 },
                                                 controller:
@@ -2115,13 +2238,13 @@ class _uploadProductState extends State<uploadProduct> {
                                       width: MediaQuery.of(context).size.width /
                                           2.18,
                                       child: Text(
-                                        'SKU',
+                                        Languages.of(context)!.SKU,
                                         style: TextStyle(
                                             fontSize: 15.sp,
                                             fontWeight: FontWeight.bold),
                                       )),
                                   Text(
-                                    'Quantity',
+                                    Languages.of(context)!.QUANTITY,
                                     style: TextStyle(
                                         fontSize: 15.sp,
                                         fontWeight: FontWeight.bold),
@@ -2142,13 +2265,14 @@ class _uploadProductState extends State<uploadProduct> {
                                       child: TextFormField(
                                         validator: (value) {
                                           if (value!.isEmpty) {
-                                            return "This field is required";
+                                            return Languages.of(context)!
+                                                .VALIDATOR;
                                           }
                                         },
                                         controller: skucontro,
                                         keyboardType: TextInputType.number,
                                         decoration: InputDecoration(
-                                          hintText: 'SKU',
+                                          hintText: Languages.of(context)!.SKU,
                                           filled: true,
                                           contentPadding:
                                               const EdgeInsets.symmetric(
@@ -2196,7 +2320,8 @@ class _uploadProductState extends State<uploadProduct> {
                                             child: TextFormField(
                                               validator: (value) {
                                                 if (value!.isEmpty) {
-                                                  return "This field is required";
+                                                  return Languages.of(context)!
+                                                      .VALIDATOR;
                                                 }
                                               },
                                               controller: quantitycontrol,
@@ -2208,7 +2333,8 @@ class _uploadProductState extends State<uploadProduct> {
                                               keyboardType:
                                                   TextInputType.number,
                                               decoration: InputDecoration(
-                                                hintText: 'Quantity',
+                                                hintText: Languages.of(context)!
+                                                    .QUANTITY,
                                                 filled: true,
                                                 contentPadding:
                                                     const EdgeInsets.symmetric(
@@ -2264,12 +2390,12 @@ class _uploadProductState extends State<uploadProduct> {
                         SizedBox(
                             width: MediaQuery.of(context).size.width / 2.18,
                             child: Text(
-                              'Shipping Cost',
+                              Languages.of(context)!.SHIPPING_COST,
                               style: TextStyle(
                                   fontSize: 15.sp, fontWeight: FontWeight.bold),
                             )),
                         Text(
-                          'Company',
+                          Languages.of(context)!.COMPANY,
                           style: TextStyle(
                               fontSize: 15.sp, fontWeight: FontWeight.bold),
                         )
@@ -2326,11 +2452,11 @@ class _uploadProductState extends State<uploadProduct> {
                             child: TextFormField(
                               validator: (value) {
                                 if (value!.isEmpty) {
-                                  return "This field is required";
+                                  return Languages.of(context)!.VALIDATOR;
                                 }
                               },
                               decoration: InputDecoration(
-                                hintText: 'Company',
+                                hintText: Languages.of(context)!.COMPANY,
                                 filled: true,
                                 contentPadding: const EdgeInsets.symmetric(
                                     vertical: 5.0, horizontal: 10.0),
@@ -2365,12 +2491,12 @@ class _uploadProductState extends State<uploadProduct> {
                         SizedBox(
                             width: MediaQuery.of(context).size.width / 2.18,
                             child: Text(
-                              'Wholesale Price',
+                              Languages.of(context)!.WHOLESALE_PRICE,
                               style: TextStyle(
                                   fontSize: 15.sp, fontWeight: FontWeight.bold),
                             )),
                         Text(
-                          'Consumer Price',
+                          Languages.of(context)!.CONSUMER_PRICE,
                           style: TextStyle(
                               fontSize: 15.sp, fontWeight: FontWeight.bold),
                         )
@@ -2387,7 +2513,7 @@ class _uploadProductState extends State<uploadProduct> {
                             child: TextFormField(
                               validator: (value) {
                                 if (value!.isEmpty) {
-                                  return "This field is required";
+                                  return Languages.of(context)!.VALIDATOR;
                                 }
                               },
                               onTap: () {},
@@ -2427,7 +2553,7 @@ class _uploadProductState extends State<uploadProduct> {
                               child: TextFormField(
                                 validator: (value) {
                                   if (value!.isEmpty) {
-                                    return "This field is required";
+                                    return Languages.of(context)!.VALIDATOR;
                                   }
                                 },
                                 onTap: () {},
@@ -2472,7 +2598,7 @@ class _uploadProductState extends State<uploadProduct> {
                         SizedBox(
                             width: MediaQuery.of(context).size.width / 2.18,
                             child: Text(
-                              'Description',
+                              Languages.of(context)!.DESCRIPTION,
                               style: TextStyle(
                                   fontSize: 15.sp, fontWeight: FontWeight.bold),
                             )),
@@ -2495,14 +2621,14 @@ class _uploadProductState extends State<uploadProduct> {
                         child: TextFormField(
                           validator: (value) {
                             if (value!.isEmpty) {
-                              return "This field is required";
+                              return Languages.of(context)!.VALIDATOR;
                             }
                           },
                           keyboardType: TextInputType.multiline,
                           maxLines: null,
                           controller: DescriptionController,
-                          decoration: const InputDecoration.collapsed(
-                              hintText: 'Enter Description'),
+                          decoration: InputDecoration.collapsed(
+                              hintText: Languages.of(context)!.DESC_HINT),
                         ),
                       ),
                     ),
@@ -2519,8 +2645,13 @@ class _uploadProductState extends State<uploadProduct> {
                           if (loader == false) {
                             if (_formKey.currentState!.validate()) {
                               if (myImages.isEmpty) {
-                                GlobalSnackBar.show(
-                                    context, 'Please Upload Images');
+                                GlobalSnackBar.show(context,
+                                    Languages.of(context)!.UPLOAD_IMAGE);
+                                Scrollable.ensureVisible(
+                                  containerKey.currentContext!,
+                                  duration: const Duration(milliseconds: 400),
+                                  curve: Curves.easeInOut,
+                                );
                               } else {
                                 setState(() {
                                   loader = true;
@@ -2725,12 +2856,14 @@ class _uploadProductState extends State<uploadProduct> {
                                         context: context,
                                         dialogType: DialogType.SUCCES,
                                         animType: AnimType.BOTTOMSLIDE,
-                                        title: 'Success',
-                                        desc: 'Product Added Successfully',
+                                        title: Languages.of(context)!.SUCCESS,
+                                        desc: Languages.of(context)!
+                                            .PRODUCT_ADDED,
                                         btnOkOnPress: () {
                                           images.clear();
                                           myImages.clear();
                                           imagesfile.clear();
+                                          pickedImage.clear();
                                           Navigator.of(context).push(
                                               MaterialPageRoute(
                                                   builder: (context) => navBar(
@@ -2738,13 +2871,18 @@ class _uploadProductState extends State<uploadProduct> {
                                         },
                                       ).show();
                               }
+                            } else {
+                              final _form = _formKey.currentState!;
+                              _form.validate();
+                              _focusNode.requestFocus();
+                              _focusNode1.requestFocus();
                             }
                           }
                         },
                         child: loader
                             ? spinkit
                             : Text(
-                                'Upload Now',
+                                Languages.of(context)!.UPLOAD_NOW,
                                 style: TextStyle(
                                     color: Colors.white, fontSize: 15.sp),
                               ),
@@ -2762,7 +2900,17 @@ class _uploadProductState extends State<uploadProduct> {
   }
 
   Future<void> _uploadImage() async {
-    final pickedFile =
+    myImages.clear();
+    final List<XFile>? selectedImages = await imagePicker.pickMultiImage();
+    if (selectedImages!.isNotEmpty) {
+      pickedImage.addAll(selectedImages);
+    }
+    print("Image List Length:" + pickedImage.length.toString());
+    setState(() {});
+    for (var i = 0; i < pickedImage.length; i++) {
+      myImages.add(pickedImage[i]!.path);
+    }
+    /*  final pickedFile =
         await ImagePicker().pickImage(source: ImageSource.camera);
     print('asdfsaf');
     print(pickedFile);
@@ -2776,7 +2924,36 @@ class _uploadProductState extends State<uploadProduct> {
               builder: (context) => const imageCropperAddProduct()),
         );
       });
+    } */
+  }
+
+  Future<void> _uploadImageByCamera() async {
+    final XFile? selectedImages =
+        await ImagePicker().pickImage(source: ImageSource.camera);
+    if (selectedImages != null) {
+      pickedImage.add(selectedImages);
+      myImages.add(pickedImage.last!.path);
     }
+    print('picked image length ' + pickedImage.length.toString());
+    print('my images length ' + myImages.length.toString());
+
+    setState(() {});
+
+    /*  final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.camera);
+    print('asdfsaf');
+    print(pickedFile);
+    if (pickedFile != null) {
+      pickedImage = pickedFile;
+      setState(() {
+        _picked = pickedFile;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const imageCropperAddProduct()),
+        );
+      });
+    } */
   }
 
   Future selectFile() async {
@@ -2804,7 +2981,7 @@ class _uploadProductState extends State<uploadProduct> {
           Padding(
             padding: const EdgeInsets.only(top: 5),
             child: Text(
-              "Allow buy requests",
+              Languages.of(context)!.ALLOW_BUY,
               style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
             ),
           ),
@@ -2847,13 +3024,13 @@ class _uploadProductState extends State<uploadProduct> {
                             SizedBox(
                                 width: MediaQuery.of(context).size.width / 2.18,
                                 child: Text(
-                                  'SKU',
+                                  Languages.of(context)!.SKU,
                                   style: TextStyle(
                                       fontSize: 15.sp,
                                       fontWeight: FontWeight.bold),
                                 )),
                             Text(
-                              'Quantity',
+                              Languages.of(context)!.QUANTITY,
                               style: TextStyle(
                                   fontSize: 15.sp, fontWeight: FontWeight.bold),
                             )
@@ -2872,13 +3049,13 @@ class _uploadProductState extends State<uploadProduct> {
                                 child: TextFormField(
                                   validator: (value) {
                                     if (value!.isEmpty) {
-                                      return "This field is required";
+                                      return Languages.of(context)!.VALIDATOR;
                                     }
                                   },
                                   controller: skuController[index],
                                   keyboardType: TextInputType.number,
                                   decoration: InputDecoration(
-                                    hintText: 'SKU',
+                                    hintText: Languages.of(context)!.SKU,
                                     filled: true,
                                     contentPadding: const EdgeInsets.symmetric(
                                         vertical: 5.0, horizontal: 10.0),
@@ -2914,7 +3091,8 @@ class _uploadProductState extends State<uploadProduct> {
                                       child: TextFormField(
                                         validator: (value) {
                                           if (value!.isEmpty) {
-                                            return "This field is required";
+                                            return Languages.of(context)!
+                                                .VALIDATOR;
                                           }
                                         },
                                         controller: quantityController[index],
@@ -2923,7 +3101,8 @@ class _uploadProductState extends State<uploadProduct> {
                                         ],
                                         keyboardType: TextInputType.number,
                                         decoration: InputDecoration(
-                                          hintText: 'Quantity',
+                                          hintText:
+                                              Languages.of(context)!.QUANTITY,
                                           filled: true,
                                           contentPadding:
                                               const EdgeInsets.symmetric(
@@ -3005,13 +3184,13 @@ class _uploadProductState extends State<uploadProduct> {
                           SizedBox(
                               width: MediaQuery.of(context).size.width / 2.18,
                               child: Text(
-                                'SKU',
+                                Languages.of(context)!.SKU,
                                 style: TextStyle(
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.bold),
                               )),
                           Text(
-                            'Quantity',
+                            Languages.of(context)!.QUANTITY,
                             style: TextStyle(
                                 fontSize: 15.sp, fontWeight: FontWeight.bold),
                           )
@@ -3030,13 +3209,13 @@ class _uploadProductState extends State<uploadProduct> {
                               child: TextFormField(
                                 validator: (value) {
                                   if (value!.isEmpty) {
-                                    return "This field is required";
+                                    return Languages.of(context)!.VALIDATOR;
                                   }
                                 },
                                 controller: skuController[index],
                                 keyboardType: TextInputType.number,
                                 decoration: InputDecoration(
-                                  hintText: 'SKU',
+                                  hintText: Languages.of(context)!.SKU,
                                   filled: true,
                                   contentPadding: const EdgeInsets.symmetric(
                                       vertical: 5.0, horizontal: 10.0),
@@ -3072,7 +3251,8 @@ class _uploadProductState extends State<uploadProduct> {
                                     child: TextFormField(
                                       validator: (value) {
                                         if (value!.isEmpty) {
-                                          return "This field is required";
+                                          return Languages.of(context)!
+                                              .VALIDATOR;
                                         }
                                       },
                                       controller: quantityController[index],
@@ -3081,7 +3261,8 @@ class _uploadProductState extends State<uploadProduct> {
                                       ],
                                       keyboardType: TextInputType.number,
                                       decoration: InputDecoration(
-                                        hintText: 'Quantity',
+                                        hintText:
+                                            Languages.of(context)!.QUANTITY,
                                         filled: true,
                                         contentPadding:
                                             const EdgeInsets.symmetric(

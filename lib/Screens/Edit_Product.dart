@@ -21,6 +21,7 @@ import 'package:af24/api/auth_af24.dart';
 import 'package:af24/api/global_variable.dart';
 import 'package:af24/constants.dart';
 
+import '../localization/languages/languages.dart';
 import 'navBar.dart';
 import 'newBar.dart';
 
@@ -270,7 +271,7 @@ class _edit_ProductState extends State<edit_Product> {
         elevation: 0,
         backgroundColor: Colors.white,
         title: Text(
-          'Edit Product',
+          Languages.of(context)!.EDIT_PRODUCT,
           style: TextStyle(color: Colors.black),
         ),
         leading: InkWell(
@@ -295,7 +296,7 @@ class _edit_ProductState extends State<edit_Product> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Product Details',
+                  Languages.of(context)!.PRODUCT_DETAIL,
                   style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
@@ -305,7 +306,7 @@ class _edit_ProductState extends State<edit_Product> {
                   height: 20,
                 ),
                 Text(
-                  'Add Images',
+                  Languages.of(context)!.ADD_IMAGES,
                   style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
@@ -493,12 +494,12 @@ class _edit_ProductState extends State<edit_Product> {
                       SizedBox(
                           width: MediaQuery.of(context).size.width / 2.18,
                           child: Text(
-                            'Product Name',
+                            Languages.of(context)!.PRODUCT_NAME,
                             style: TextStyle(
                                 fontSize: 15.sp, fontWeight: FontWeight.bold),
                           )),
                       Text(
-                        'Sub Name',
+                        Languages.of(context)!.SUB_NAME,
                         style: TextStyle(
                             fontSize: 15.sp, fontWeight: FontWeight.bold),
                       )
@@ -526,7 +527,7 @@ class _edit_ProductState extends State<edit_Product> {
                             },
                             controller: NameController,
                             decoration: InputDecoration(
-                                hintText: 'Product Name',
+                                hintText: Languages.of(context)!.PRODUCT_NAME,
                                 enabledBorder: InputBorder.none),
                             maxLines: 1,
                           )),
@@ -550,7 +551,7 @@ class _edit_ProductState extends State<edit_Product> {
                             },
                             controller: SubnameController,
                             decoration: InputDecoration(
-                                hintText: 'Sub Name',
+                                hintText: Languages.of(context)!.SUB_NAME,
                                 enabledBorder: InputBorder.none),
                             maxLines: 1,
                           ),
@@ -566,13 +567,13 @@ class _edit_ProductState extends State<edit_Product> {
                       SizedBox(
                           width: MediaQuery.of(context).size.width / 2.18,
                           child: Text(
-                            'Category',
+                            Languages.of(context)!.CATEGORY,
                             style: TextStyle(
                                 fontSize: 15.sp, fontWeight: FontWeight.bold),
                           )),
                       showsub == true
                           ? Text(
-                              'Sub Catgory',
+                              Languages.of(context)!.SUB_CATEGORY,
                               style: TextStyle(
                                   fontSize: 15.sp, fontWeight: FontWeight.bold),
                             )
@@ -605,7 +606,7 @@ class _edit_ProductState extends State<edit_Product> {
                             hint: Text(
                                 productlistContent[widget.index].categoryName ==
                                         null
-                                    ? 'Category'
+                                    ? Languages.of(context)!.CATEGORY
                                     : productlistContent[widget.index]
                                         .categoryName),
                             // value: dropdownvalue,
@@ -673,7 +674,7 @@ class _edit_ProductState extends State<edit_Product> {
                                     hint: Text(productlistContent[widget.index]
                                                 .subCategoryName ==
                                             null
-                                        ? 'SubCategory'
+                                        ? Languages.of(context)!.SUB_CATEGORY
                                         : productlistContent[widget.index]
                                             .subCategoryName!),
                                     value: dropcat,
@@ -725,7 +726,7 @@ class _edit_ProductState extends State<edit_Product> {
                       SizedBox(
                           width: MediaQuery.of(context).size.width / 2.18,
                           child: Text(
-                            'Brand',
+                            Languages.of(context)!.BRANDS,
                             style: TextStyle(
                                 fontSize: 15.sp, fontWeight: FontWeight.bold),
                           )),
@@ -760,9 +761,14 @@ class _edit_ProductState extends State<edit_Product> {
                             items: brandlist.map((GetBrandModel items) {
                               return DropdownMenuItem(
                                 value: items,
-                                child: Text(
-                                  items.name,
-                                  style: TextStyle(color: Colors.grey[600]),
+                                child: Container(
+                                  width: 100,
+                                  child: Text(
+                                    items.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(color: Colors.grey[600]),
+                                  ),
                                 ),
                               );
                             }).toList(),
@@ -792,13 +798,13 @@ class _edit_ProductState extends State<edit_Product> {
                           SizedBox(
                               width: MediaQuery.of(context).size.width / 2.18,
                               child: Text(
-                                'Size',
+                                Languages.of(context)!.SIZE,
                                 style: TextStyle(
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.bold),
                               )),
                           Text(
-                            'Color',
+                            Languages.of(context)!.COLOR,
                             style: TextStyle(
                                 fontSize: 15.sp, fontWeight: FontWeight.bold),
                           )
@@ -819,7 +825,7 @@ class _edit_ProductState extends State<edit_Product> {
                                         child: TextFormField(
                                           validator: (value) {
                                             if (value!.isEmpty) {
-                                              return "This field is required";
+                                              return Languages.of(context)!.VALIDATOR;
                                             }
                                           },
                                           onTap: () {
@@ -859,7 +865,7 @@ class _edit_ProductState extends State<edit_Product> {
                                   child: DropdownButtonFormField(
                                     validator: (value) {
                                       if (value == null) {
-                                        return "This field is required";
+                                        return Languages.of(context)!.VALIDATOR;
                                       }
                                     },
                                     // value: dropdownvalue4,
@@ -884,7 +890,7 @@ class _edit_ProductState extends State<edit_Product> {
                                     hint: Text(
                                         sizeVarient.asMap().containsKey(i)
                                             ? sizeVarient[i]
-                                            : 'Size'),
+                                            : Languages.of(context)!.SIZE),
                                     borderRadius:
                                         BorderRadius.all(Radius.circular(7)),
                                     icon: Icon(
@@ -916,11 +922,15 @@ class _edit_ProductState extends State<edit_Product> {
                                             context: context,
                                             builder: (BuildContext context) {
                                               return AlertDialog(
-                                                title: Text('Add new size'),
+                                                title: Text(
+                                                    Languages.of(context)!
+                                                        .ADD_NEW_SIZE),
                                                 content: TextFormField(
                                                   validator: (value) {
                                                     if (value!.isEmpty) {
-                                                      return "This field is required";
+                                                      return Languages.of(
+                                                              context)!
+                                                          .VALIDATOR;
                                                     }
                                                   },
                                                   onChanged: (value) {},
@@ -956,9 +966,12 @@ class _edit_ProductState extends State<edit_Product> {
                                                               DialogType.INFO,
                                                           animType: AnimType
                                                               .BOTTOMSLIDE,
-                                                          title: 'Match Found',
-                                                          desc:
-                                                              'Size Already Exist!',
+                                                          title: Languages.of(
+                                                                  context)!
+                                                              .MATCH_FOUND,
+                                                          desc: Languages.of(
+                                                                  context)!
+                                                              .ALREADY_SIZE,
                                                           btnOkOnPress: () {},
                                                         ).show();
                                                       } else {
@@ -986,7 +999,9 @@ class _edit_ProductState extends State<edit_Product> {
                                                             .pop();
                                                       }
                                                     },
-                                                    child: Text('ADD'),
+                                                    child: Text(
+                                                        Languages.of(context)!
+                                                            .ADD),
                                                   ),
                                                 ],
                                               );
@@ -1040,12 +1055,15 @@ class _edit_ProductState extends State<edit_Product> {
                                               context: context,
                                               builder: (BuildContext context) {
                                                 return AlertDialog(
-                                                  title: const Text(
-                                                      'Add new size'),
+                                                  title: Text(
+                                                      Languages.of(context)!
+                                                          .ADD_NEW_SIZE),
                                                   content: TextFormField(
                                                     validator: (value) {
                                                       if (value!.isEmpty) {
-                                                        return "This field is required";
+                                                        return Languages.of(
+                                                                context)!
+                                                            .VALIDATOR;
                                                       }
                                                     },
                                                     inputFormatters: [
@@ -1056,9 +1074,10 @@ class _edit_ProductState extends State<edit_Product> {
                                                     onChanged: (value) {},
                                                     controller:
                                                         _textSizeController,
-                                                    decoration:
-                                                        const InputDecoration(
-                                                      hintText: "Size",
+                                                    decoration: InputDecoration(
+                                                      hintText:
+                                                          Languages.of(context)!
+                                                              .SIZE,
                                                     ),
                                                   ),
                                                   actions: [
@@ -1084,10 +1103,12 @@ class _edit_ProductState extends State<edit_Product> {
                                                                       .INFO,
                                                               animType: AnimType
                                                                   .BOTTOMSLIDE,
-                                                              title:
-                                                                  'Match Found',
-                                                              desc:
-                                                                  'Size Already Exist!',
+                                                              title: Languages.of(
+                                                                      context)!
+                                                                  .MATCH_FOUND,
+                                                              desc: Languages.of(
+                                                                      context)!
+                                                                  .ALREADY_SIZE,
                                                               btnOkOnPress:
                                                                   () {},
                                                             ).show();
@@ -1136,7 +1157,9 @@ class _edit_ProductState extends State<edit_Product> {
                                                           }
                                                         }
                                                       },
-                                                      child: const Text('ADD'),
+                                                      child: Text(
+                                                          Languages.of(context)!
+                                                              .ADD),
                                                     ),
                                                   ],
                                                 );
@@ -1152,7 +1175,9 @@ class _edit_ProductState extends State<edit_Product> {
                                                 borderRadius:
                                                     BorderRadius.circular(5),
                                                 color: Colors.black),
-                                            child: Text('Add More Size',
+                                            child: Text(
+                                                Languages.of(context)!
+                                                    .ADD_NEW_SIZE,
                                                 style: TextStyle(
                                                     color: Colors.white)),
                                           ),
@@ -1177,7 +1202,7 @@ class _edit_ProductState extends State<edit_Product> {
                                           ? TextFormField(
                                               validator: (value) {
                                                 if (value!.isEmpty) {
-                                                  return "This field is required";
+                                                  return Languages.of(context)!.VALIDATOR;
                                                 }
                                               },
                                               onTap: () {
@@ -1193,7 +1218,8 @@ class _edit_ProductState extends State<edit_Product> {
                                         child: DropdownButtonFormField(
                                           validator: (value) {
                                             if (value == null) {
-                                              return "This field is required";
+                                              return Languages.of(context)!
+                                                  .VALIDATOR;
                                             }
                                           },
                                           // value: dropdownvalue4,
@@ -1257,8 +1283,10 @@ class _edit_ProductState extends State<edit_Product> {
                                                     builder:
                                                         (BuildContext context) {
                                                       return AlertDialog(
-                                                        title: const Text(
-                                                            'Pick a color!'),
+                                                        title: Text(
+                                                            Languages.of(
+                                                                    context)!
+                                                                .PICK_COLOR),
                                                         content:
                                                             SingleChildScrollView(
                                                           child: Column(
@@ -1274,25 +1302,29 @@ class _edit_ProductState extends State<edit_Product> {
                                                                     (value) {
                                                                   if (value!
                                                                       .isEmpty) {
-                                                                    return "This field is required";
+                                                                    return Languages.of(
+                                                                            context)!
+                                                                        .VALIDATOR;
                                                                   }
                                                                 },
                                                                 onChanged:
                                                                     (value) {},
                                                                 controller:
                                                                     _textColorController,
-                                                                decoration:
-                                                                    InputDecoration(
-                                                                        hintText:
-                                                                            "Color Name"),
+                                                                decoration: InputDecoration(
+                                                                    hintText: Languages.of(
+                                                                            context)!
+                                                                        .COLOR_NAME),
                                                               ),
                                                             ],
                                                           ),
                                                         ),
                                                         actions: <Widget>[
                                                           ElevatedButton(
-                                                              child: const Text(
-                                                                  'Got it'),
+                                                              child: Text(
+                                                                  Languages.of(
+                                                                          context)!
+                                                                      .ADD),
                                                               onPressed:
                                                                   () async {
                                                                 setState(() {
@@ -1329,10 +1361,12 @@ class _edit_ProductState extends State<edit_Product> {
                                                                     animType:
                                                                         AnimType
                                                                             .BOTTOMSLIDE,
-                                                                    title:
-                                                                        'Match Found',
-                                                                    desc:
-                                                                        'Color Already Exist!',
+                                                                    title: Languages.of(
+                                                                            context)!
+                                                                        .MATCH_FOUND,
+                                                                    desc: Languages.of(
+                                                                            context)!
+                                                                        .ALREADY_COLOR,
                                                                     btnOkOnPress:
                                                                         () {},
                                                                   ).show();
@@ -1430,8 +1464,9 @@ class _edit_ProductState extends State<edit_Product> {
                                                   builder:
                                                       (BuildContext context) {
                                                     return AlertDialog(
-                                                      title: const Text(
-                                                          'Pick a color!'),
+                                                      title: Text(
+                                                          Languages.of(context)!
+                                                              .PICK_COLOR),
                                                       content:
                                                           SingleChildScrollView(
                                                         child: Column(
@@ -1443,27 +1478,28 @@ class _edit_ProductState extends State<edit_Product> {
                                                                   changeColor,
                                                             ),
                                                             TextFormField(
-                                                              validator:
-                                                                  (value) {
-                                                                if (value!
-                                                                    .isEmpty) {
-                                                                  return "This field is required";
-                                                                }
-                                                              },
-                                                              inputFormatters: [
-                                                                FilteringTextInputFormatter
-                                                                    .allow(RegExp(
-                                                                        "[a-zA-Z]")),
-                                                              ],
-                                                              onChanged:
-                                                                  (value) {},
-                                                              controller:
-                                                                  _textColorController,
-                                                              decoration:
-                                                                  const InputDecoration(
-                                                                      hintText:
-                                                                          "Color Name"),
-                                                            ),
+                                                                validator:
+                                                                    (value) {
+                                                                  if (value!
+                                                                      .isEmpty) {
+                                                                    return Languages.of(
+                                                                            context)!
+                                                                        .VALIDATOR;
+                                                                  }
+                                                                },
+                                                                inputFormatters: [
+                                                                  FilteringTextInputFormatter
+                                                                      .allow(RegExp(
+                                                                          "[a-zA-Z]")),
+                                                                ],
+                                                                onChanged:
+                                                                    (value) {},
+                                                                controller:
+                                                                    _textColorController,
+                                                                decoration: InputDecoration(
+                                                                    hintText: Languages.of(
+                                                                            context)!
+                                                                        .COLOR_NAME)),
                                                           ],
                                                         ),
                                                       ),
@@ -1471,7 +1507,10 @@ class _edit_ProductState extends State<edit_Product> {
                                                         SizedBox(
                                                           width: 100,
                                                           child: ElevatedButton(
-                                                            child: Text('Add'),
+                                                            child: Text(
+                                                                Languages.of(
+                                                                        context)!
+                                                                    .ADD),
                                                             onPressed:
                                                                 () async {
                                                               if (_textColorController
@@ -1514,10 +1553,12 @@ class _edit_ProductState extends State<edit_Product> {
                                                                     animType:
                                                                         AnimType
                                                                             .BOTTOMSLIDE,
-                                                                    title:
-                                                                        'Match Found',
-                                                                    desc:
-                                                                        'Color Already Exist!',
+                                                                    title: Languages.of(
+                                                                            context)!
+                                                                        .MATCH_FOUND,
+                                                                    desc: Languages.of(
+                                                                            context)!
+                                                                        .ALREADY_COLOR,
                                                                     btnOkOnPress:
                                                                         () {},
                                                                   ).show();
@@ -1596,7 +1637,9 @@ class _edit_ProductState extends State<edit_Product> {
                                                   borderRadius:
                                                       BorderRadius.circular(5),
                                                   color: Colors.black),
-                                              child: Text('Add More Color',
+                                              child: Text(
+                                                  Languages.of(context)!
+                                                      .ADD_MORE_COLOR,
                                                   style: TextStyle(
                                                       color: Colors.white)),
                                             ),
@@ -1626,7 +1669,7 @@ class _edit_ProductState extends State<edit_Product> {
                               print(combination);
                               if (combination.isEmpty) {
                                 GlobalSnackBar.show(
-                                    context, 'Please Add Color and Size');
+                                    context, Languages.of(context)!.ADD_CLR_SZ);
                               }
                               setState(() {
                                 generateVarient = true;
@@ -1650,7 +1693,8 @@ class _edit_ProductState extends State<edit_Product> {
                                   color: Colors.white,
                                 ), */
                                       Text(
-                                        'Generate Variants',
+                                        Languages.of(context)!
+                                            .GENERATE_VARIANTS,
                                         style: TextStyle(color: Colors.white),
                                       )
                                     ],
@@ -1796,7 +1840,7 @@ class _edit_ProductState extends State<edit_Product> {
                                       child: TextFormField(
                                         validator: (value) {
                                           if (value!.isEmpty) {
-                                            return "This field is required";
+                                            return Languages.of(context)!.VALIDATOR;
                                           }
                                         },
                                         controller: skuController[i],
@@ -1850,7 +1894,7 @@ class _edit_ProductState extends State<edit_Product> {
                                             child: TextFormField(
                                               validator: (value) {
                                                 if (value!.isEmpty) {
-                                                  return "This field is required";
+                                                  return Languages.of(context)!.VALIDATOR;
                                                 }
                                               },
                                               controller: quantityController[i],
@@ -1929,7 +1973,7 @@ class _edit_ProductState extends State<edit_Product> {
                       SizedBox(
                           width: MediaQuery.of(context).size.width / 2.18,
                           child: Text(
-                            'Shipping Cost',
+                            Languages.of(context)!.SHIPPING_COST,
                             style: TextStyle(
                                 fontSize: 15.sp, fontWeight: FontWeight.bold),
                           )),
@@ -1978,12 +2022,12 @@ class _edit_ProductState extends State<edit_Product> {
                       SizedBox(
                           width: MediaQuery.of(context).size.width / 2.18,
                           child: Text(
-                            'Wholesale Price',
+                            Languages.of(context)!.WHOLESALE_PRICE,
                             style: TextStyle(
                                 fontSize: 15.sp, fontWeight: FontWeight.bold),
                           )),
                       Text(
-                        'Consumer Price',
+                        Languages.of(context)!.CONSUMER_PRICE,
                         style: TextStyle(
                             fontSize: 15.sp, fontWeight: FontWeight.bold),
                       )
@@ -2000,7 +2044,7 @@ class _edit_ProductState extends State<edit_Product> {
                           child: TextFormField(
                             validator: (value) {
                               if (value!.isEmpty) {
-                                return "This field is required";
+                                return Languages.of(context)!.VALIDATOR;
                               }
                             },
                             onTap: () {},
@@ -2040,7 +2084,7 @@ class _edit_ProductState extends State<edit_Product> {
                             child: TextFormField(
                               validator: (value) {
                                 if (value!.isEmpty) {
-                                  return "This field is required";
+                                  return Languages.of(context)!.VALIDATOR;
                                 }
                               },
                               onTap: () {},
@@ -2085,7 +2129,7 @@ class _edit_ProductState extends State<edit_Product> {
                       SizedBox(
                           width: MediaQuery.of(context).size.width / 2.18,
                           child: Text(
-                            'Description',
+                            Languages.of(context)!.DESCRIPTION,
                             style: TextStyle(
                                 fontSize: 15.sp, fontWeight: FontWeight.bold),
                           )),
@@ -2106,7 +2150,7 @@ class _edit_ProductState extends State<edit_Product> {
                       child: TextField(
                         controller: DescriptionController,
                         decoration: new InputDecoration.collapsed(
-                            hintText: 'Enter Description'),
+                            hintText: Languages.of(context)!.DESC_HINT),
                       ),
                     ),
                   ),
@@ -2121,7 +2165,7 @@ class _edit_ProductState extends State<edit_Product> {
                       if (loader == false) {
                         if (generateVarient == false) {
                           GlobalSnackBar.show(
-                              context, 'Please generate variants');
+                              context, Languages.of(context)!.VARIENT_MSG);
                         } else {
                           setState(() {
                             loader = true;
@@ -2196,8 +2240,8 @@ class _edit_ProductState extends State<edit_Product> {
                                 context: context,
                                 dialogType: DialogType.SUCCES,
                                 animType: AnimType.BOTTOMSLIDE,
-                                title: 'Success',
-                                desc: 'Updated Successfully',
+                                title: Languages.of(context)!.SUCCESS,
+                                desc: Languages.of(context)!.UPDATE_SUCCESS,
                                 btnOkOnPress: () {
                                   Get.off(() => navBar(index: 1, see: 0));
                                 },
@@ -2270,8 +2314,8 @@ class _edit_ProductState extends State<edit_Product> {
                                 context: context,
                                 dialogType: DialogType.SUCCES,
                                 animType: AnimType.BOTTOMSLIDE,
-                                title: 'Success',
-                                desc: 'Updated Successfully',
+                                title: Languages.of(context)!.SUCCESS,
+                                desc: Languages.of(context)!.UPDATE_SUCCESS,
                                 btnOkOnPress: () {
                                   Get.off(() => navBar(index: 1, see: 0));
                                 },
@@ -2339,8 +2383,8 @@ class _edit_ProductState extends State<edit_Product> {
                                 context: context,
                                 dialogType: DialogType.SUCCES,
                                 animType: AnimType.BOTTOMSLIDE,
-                                title: 'Success',
-                                desc: 'Updated Successfully',
+                                title: Languages.of(context)!.SUCCESS,
+                                desc: Languages.of(context)!.UPDATE_SUCCESS,
                                 btnOkOnPress: () {
                                   Get.off(() => navBar(index: 1, see: 0));
                                 },
@@ -2353,7 +2397,7 @@ class _edit_ProductState extends State<edit_Product> {
                     child: loader
                         ? spinkit
                         : Text(
-                            'Update',
+                            Languages.of(context)!.UPDATE,
                             style:
                                 TextStyle(color: Colors.white, fontSize: 15.sp),
                           ),
@@ -2397,13 +2441,13 @@ class _edit_ProductState extends State<edit_Product> {
                             SizedBox(
                                 width: MediaQuery.of(context).size.width / 2.18,
                                 child: Text(
-                                  'SKU',
+                                  Languages.of(context)!.SKU,
                                   style: TextStyle(
                                       fontSize: 15.sp,
                                       fontWeight: FontWeight.bold),
                                 )),
                             Text(
-                              'Quantity',
+                              Languages.of(context)!.QUANTITY,
                               style: TextStyle(
                                   fontSize: 15.sp, fontWeight: FontWeight.bold),
                             )
@@ -2422,13 +2466,13 @@ class _edit_ProductState extends State<edit_Product> {
                                 child: TextFormField(
                                   validator: (value) {
                                     if (value!.isEmpty) {
-                                      return "This field is required";
+                                      return Languages.of(context)!.VALIDATOR;
                                     }
                                   },
                                   controller: skuController[index],
                                   keyboardType: TextInputType.number,
                                   decoration: InputDecoration(
-                                    hintText: 'SKU',
+                                    hintText: Languages.of(context)!.SKU,
                                     filled: true,
                                     contentPadding: const EdgeInsets.symmetric(
                                         vertical: 5.0, horizontal: 10.0),
@@ -2464,7 +2508,8 @@ class _edit_ProductState extends State<edit_Product> {
                                       child: TextFormField(
                                         validator: (value) {
                                           if (value!.isEmpty) {
-                                            return "This field is required";
+                                            return Languages.of(context)!
+                                                .VALIDATOR;
                                           }
                                         },
                                         controller: quantityController[index],
@@ -2473,7 +2518,8 @@ class _edit_ProductState extends State<edit_Product> {
                                         ],
                                         keyboardType: TextInputType.number,
                                         decoration: InputDecoration(
-                                          hintText: 'Quantity',
+                                          hintText:
+                                              Languages.of(context)!.QUANTITY,
                                           filled: true,
                                           contentPadding:
                                               const EdgeInsets.symmetric(
@@ -2555,13 +2601,13 @@ class _edit_ProductState extends State<edit_Product> {
                           SizedBox(
                               width: MediaQuery.of(context).size.width / 2.18,
                               child: Text(
-                                'SKU',
+                                Languages.of(context)!.SKU,
                                 style: TextStyle(
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.bold),
                               )),
                           Text(
-                            'Quantity',
+                            Languages.of(context)!.QUANTITY,
                             style: TextStyle(
                                 fontSize: 15.sp, fontWeight: FontWeight.bold),
                           )
@@ -2580,13 +2626,13 @@ class _edit_ProductState extends State<edit_Product> {
                               child: TextFormField(
                                 validator: (value) {
                                   if (value!.isEmpty) {
-                                    return "This field is required";
+                                    return Languages.of(context)!.VALIDATOR;
                                   }
                                 },
                                 controller: skuController[index],
                                 keyboardType: TextInputType.number,
                                 decoration: InputDecoration(
-                                  hintText: 'SKU',
+                                  hintText: Languages.of(context)!.SKU,
                                   filled: true,
                                   contentPadding: const EdgeInsets.symmetric(
                                       vertical: 5.0, horizontal: 10.0),
@@ -2622,7 +2668,8 @@ class _edit_ProductState extends State<edit_Product> {
                                     child: TextFormField(
                                       validator: (value) {
                                         if (value!.isEmpty) {
-                                          return "This field is required";
+                                          return Languages.of(context)!
+                                              .VALIDATOR;
                                         }
                                       },
                                       controller: quantityController[index],
@@ -2631,7 +2678,8 @@ class _edit_ProductState extends State<edit_Product> {
                                       ],
                                       keyboardType: TextInputType.number,
                                       decoration: InputDecoration(
-                                        hintText: 'Quantity',
+                                        hintText:
+                                            Languages.of(context)!.QUANTITY,
                                         filled: true,
                                         contentPadding:
                                             const EdgeInsets.symmetric(
@@ -2752,8 +2800,8 @@ class _edit_ProductState extends State<edit_Product> {
       context: context,
       dialogType: DialogType.SUCCES,
       animType: AnimType.BOTTOMSLIDE,
-      title: 'Success',
-      desc: 'Updated Successfully',
+      title: Languages.of(context)!.SUCCESS,
+      desc: Languages.of(context)!.UPDATE_SUCCESS,
       btnOkOnPress: () {
         Get.off(() => navBar(index: 1, see: 0));
       },
@@ -2806,8 +2854,8 @@ class _edit_ProductState extends State<edit_Product> {
       context: context,
       dialogType: DialogType.SUCCES,
       animType: AnimType.BOTTOMSLIDE,
-      title: 'Success',
-      desc: 'Updated Successfully',
+      title: Languages.of(context)!.SUCCESS,
+      desc: Languages.of(context)!.UPDATE_SUCCESS,
       btnOkOnPress: () {
         Get.off(() => navBar(index: 1, see: 0));
       },
@@ -2859,8 +2907,8 @@ class _edit_ProductState extends State<edit_Product> {
       context: context,
       dialogType: DialogType.SUCCES,
       animType: AnimType.BOTTOMSLIDE,
-      title: 'Success',
-      desc: 'Updated Successfully',
+      title: Languages.of(context)!.SUCCESS,
+      desc: Languages.of(context)!.UPDATE_SUCCESS,
       btnOkOnPress: () {
         Get.off(() => navBar(index: 1, see: 0));
       },

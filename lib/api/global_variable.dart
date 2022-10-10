@@ -52,12 +52,15 @@ List<GetAllLinks> getlinkContent = [];
 // List<GetDashboardModel> getDashboardContent = [];
 GetDashboardModel? getDashboardContent;
 bool dialogUploadproduct = false;
+bool firstTimeDashboard = true;
+String email='';
+String password='';
 int orderPressed = 0;
 String imagepath = '';
 String thumbnail = '';
 String imageName = '';
 String thumbnaiImage = '';
-XFile? pickedImage;
+List<XFile?> pickedImage = [];
 String snackmessage = '';
 String? ProductName;
 String? SubName;
@@ -109,3 +112,17 @@ Future getUserDataToken() async {
   String? result = pref.getString("token");
   return result;
 }
+void saveCredsList(List<String> list) async {
+  print("save creds");
+  print(list);
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.setStringList("creds", list);
+}
+
+Future getCredsList() async {
+  print("get creds");
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  var log = prefs.getStringList("creds") ?? [];
+  return log;
+}
+

@@ -7,6 +7,7 @@ import 'package:af24/Screens/productDetail.dart';
 import 'package:af24/Screens/splashscreen.dart';
 import 'package:af24/api/auth_af24.dart';
 import 'package:af24/api/global_variable.dart';
+import 'package:af24/localization/locale_constants.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
+
+import 'localization/localizations_delegate.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -157,10 +160,40 @@ Future<void> main() async {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
+  static void setLocale(BuildContext context, Locale newLocale) {
+    var state = context.findAncestorStateOfType<_MyAppState>();
+    state!.setLocale(newLocale);
+  }
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Locale? _locale;
   // This widget is the root of your application.
+  void setLocale(Locale locale) {
+    setState(() {
+      _locale = locale;
+      // _locale = Locale(DEVICE_LOCALE.value, '');
+    });
+  }
+
+  @override
+  void didChangeDependencies() async {
+    getLocale().then((locale) {
+      setState(() {
+        _locale = locale;
+        // _locale = Locale(DEVICE_LOCALE.value, '');
+      });
+    });
+
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
@@ -168,11 +201,39 @@ class MyApp extends StatelessWidget {
     ]);
     return Sizer(builder: (context, orientation, deviceType) {
       return GetMaterialApp(
+        locale: _locale,
         theme: ThemeData(
           fontFamily: "Myriad",
         ),
+        supportedLocales: const [
+          Locale('en', ''),
+          // Locale('ar', ''),
+          // Locale('hi', '')
+        ],
+        localizationsDelegates: const [
+          AppLocalizationsDelegate(),
+        ],
+        localeResolutionCallback: (locale, supportedLocales) {
+          for (var supportedLocale in supportedLocales) {
+            if (supportedLocale.languageCode == locale?.languageCode &&
+                supportedLocale.countryCode == locale?.countryCode) {
+              return supportedLocale;
+            }
+          }
+          return supportedLocales.first;
+        },
         debugShowCheckedModeBanner: false,
         home: SplashScreen(),
+        builder: (context, child) {
+          return Directionality(
+            textDirection: _locale == null
+                ? TextDirection.ltr
+                : (_locale!.languageCode == "en"
+                    ? TextDirection.ltr
+                    : TextDirection.rtl),
+            child: child!,
+          );
+        },
       );
     });
   }

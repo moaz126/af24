@@ -36,7 +36,7 @@ class GetAllLinks {
   int quantity;
   dynamic price;
   String color;
-  String size;
+  String? size;
   int? priceSetBySeller;
   int seenBySeller;
   String? generatedLink;

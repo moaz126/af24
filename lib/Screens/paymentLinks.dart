@@ -15,6 +15,7 @@ import 'package:horizontal_data_table/refresh/pull_to_refresh/src/smart_refreshe
 import 'package:sizer/sizer.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
+import '../localization/languages/languages.dart';
 import 'dashBoard.dart';
 import 'newBar.dart';
 
@@ -69,7 +70,7 @@ class _paymentLinkState extends State<paymentLink> {
         elevation: 0,
         backgroundColor: Colors.white,
         title: Text(
-          'Payment Links',
+          'Offers',
           style: const TextStyle(color: Colors.black),
         ),
         leading: InkWell(
@@ -85,8 +86,8 @@ class _paymentLinkState extends State<paymentLink> {
       body: loader
           ? spinkit
           : productLinks.isEmpty
-              ? const Center(
-                  child: Text('List is Empty'),
+              ? Center(
+                  child: Text(Languages.of(context)!.EMPTY_LIST),
                 )
               : SmartRefresher(
                   enablePullDown: true,

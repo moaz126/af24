@@ -12,6 +12,7 @@ import 'package:horizontal_data_table/horizontal_data_table.dart';
 import 'package:sizer/sizer.dart';
 
 import '../api/auth_af24.dart';
+import '../localization/languages/languages.dart';
 
 class orderDetail extends StatefulWidget {
   final String id;
@@ -164,13 +165,14 @@ class _orderDetailState extends State<orderDetail> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          "Orders details",
+        title: Text(
+          Languages.of(context)!.ORDERS_DETAILS,
           style: TextStyle(color: Colors.black),
         ),
         leading: InkWell(
             onTap: () {
-              Get.off(navBar(index: 4, see: 0));
+              // Get.off(navBar(index: 4, see: 0));
+              Get.back();
             },
             child: const Icon(
               Icons.arrow_back_ios,
@@ -191,18 +193,25 @@ class _orderDetailState extends State<orderDetail> {
                       scrollDirection: Axis.vertical,
                       itemCount: sellerOrderDetails.length,
                       itemBuilder: (context, index) {
-                        grandTotal = grandTotal +
-                            (sellerOrderDetails[index].qty.toDouble() *
-                                sellerOrderDetails[index].price.toDouble()) +
-                            sellerOrderDetails[index].tax.toDouble() +
-                            sellerOrderDetails[index]
-                                .productDetails
-                                .shippingCost
-                                .toDouble() -
-                            sellerOrderDetails[index]
-                                .productDetails
-                                .discount
-                                .toDouble();
+                        if (sellerOrderDetails[index].paymentMethod ==
+                            'cash_on_delivery') {
+                          grandTotal = grandTotal +
+                              (sellerOrderDetails[index].qty.toDouble() *
+                                  sellerOrderDetails[index].price.toDouble()) +
+                              sellerOrderDetails[index].tax.toDouble() +
+                              sellerOrderDetails[index]
+                                  .productDetails
+                                  .shippingCost
+                                  .toDouble() -
+                              sellerOrderDetails[index]
+                                  .productDetails
+                                  .discount
+                                  .toDouble();
+                        } else {
+                          grandTotal =
+                              grandTotal + sellerOrderDetails[index].price;
+                        }
+
                         return Container(
                           decoration: const BoxDecoration(color: Colors.white),
                           child: Padding(
@@ -222,7 +231,8 @@ class _orderDetailState extends State<orderDetail> {
                                             padding: const EdgeInsets.only(
                                                 bottom: 8.0),
                                             child: Text(
-                                              "Order_No: ${sellerOrderDetails[index].orderId}",
+                                              Languages.of(context)!.ORDER_NO +
+                                                  " ${sellerOrderDetails[index].orderId}",
                                               style: const TextStyle(
                                                   fontWeight: FontWeight.bold),
                                             ),
@@ -239,8 +249,9 @@ class _orderDetailState extends State<orderDetail> {
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.start,
                                                   children: [
-                                                    const Text(
-                                                      "Method: ",
+                                                    Text(
+                                                      Languages.of(context)!
+                                                          .METHOD,
                                                       style: TextStyle(
                                                           fontWeight:
                                                               FontWeight.bold),
@@ -271,8 +282,9 @@ class _orderDetailState extends State<orderDetail> {
                                                 bottom: 12.0),
                                             child: Row(
                                               children: [
-                                                const Text(
-                                                  "Order status",
+                                                Text(
+                                                  Languages.of(context)!
+                                                      .ORDER_STATUS,
                                                   style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold),
@@ -369,16 +381,20 @@ class _orderDetailState extends State<orderDetail> {
                                                                       animType:
                                                                           AnimType
                                                                               .BOTTOMSLIDE,
-                                                                      title:
-                                                                          'Change Status',
-                                                                      desc:
-                                                                          'Are you sure you want to Change Status?',
+                                                                      title: Languages.of(
+                                                                              context)!
+                                                                          .CHANGE_STATUS,
+                                                                      desc: Languages.of(
+                                                                              context)!
+                                                                          .STATUS_TEXT,
                                                                       btnCancelOnPress:
                                                                           () {},
                                                                       btnCancelText:
-                                                                          'No',
+                                                                          Languages.of(context)!
+                                                                              .NO,
                                                                       btnOkText:
-                                                                          'Yes',
+                                                                          Languages.of(context)!
+                                                                              .YES,
                                                                       btnOkOnPress:
                                                                           () async {
                                                                         print(sellerOrderDetails[index]
@@ -412,6 +428,7 @@ class _orderDetailState extends State<orderDetail> {
                                                             EdgeInsets.only(
                                                                 left: 17.w),
                                                         child: Container(
+                                                          height: 17,
                                                           width: 18.w,
                                                           decoration:
                                                               BoxDecoration(
@@ -424,10 +441,11 @@ class _orderDetailState extends State<orderDetail> {
                                                           ),
                                                           child: Center(
                                                               child: Text(
-                                                            sellerOrderDetails[
+                                                            /*  sellerOrderDetails[
                                                                     index]
                                                                 .orderStatus
-                                                                .toString(),
+                                                                .toString(), */
+                                                            'Delivered',
                                                             style: TextStyle(
                                                                 color: Colors
                                                                     .white),
@@ -442,8 +460,9 @@ class _orderDetailState extends State<orderDetail> {
                                                 bottom: 12.0),
                                             child: Row(
                                               children: [
-                                                const Text(
-                                                  "Payment status",
+                                                Text(
+                                                  Languages.of(context)!
+                                                      .PYMENT_STATUS,
                                                   style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold),
@@ -461,6 +480,7 @@ class _orderDetailState extends State<orderDetail> {
                                                             EdgeInsets.only(
                                                                 left: 17.w),
                                                         child: Container(
+                                                          height: 17,
                                                           width: 18.w,
                                                           decoration:
                                                               BoxDecoration(
@@ -473,7 +493,7 @@ class _orderDetailState extends State<orderDetail> {
                                                           ),
                                                           child: Center(
                                                               child: Text(
-                                                            'paid',
+                                                            'Paid',
                                                             style: TextStyle(
                                                                 color: Colors
                                                                     .white),
@@ -562,16 +582,20 @@ class _orderDetailState extends State<orderDetail> {
                                                                       animType:
                                                                           AnimType
                                                                               .BOTTOMSLIDE,
-                                                                      title:
-                                                                          'Change Status',
-                                                                      desc:
-                                                                          'Are you sure you want to Change Status?',
+                                                                      title: Languages.of(
+                                                                              context)!
+                                                                          .CHANGE_STATUS,
+                                                                      desc: Languages.of(
+                                                                              context)!
+                                                                          .STATUS_TEXT,
                                                                       btnCancelOnPress:
                                                                           () {},
                                                                       btnCancelText:
-                                                                          'No',
+                                                                          Languages.of(context)!
+                                                                              .NO,
                                                                       btnOkText:
-                                                                          'Yes',
+                                                                          Languages.of(context)!
+                                                                              .YES,
                                                                       btnOkOnPress:
                                                                           () async {
                                                                         await DataApiService.instance.changePymentStatus(
@@ -606,8 +630,9 @@ class _orderDetailState extends State<orderDetail> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          const Text(
-                                            "Customer Contact Details",
+                                          Text(
+                                            Languages.of(context)!
+                                                .CUSTOMER_DETAIL,
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold),
                                           ),
@@ -616,8 +641,8 @@ class _orderDetailState extends State<orderDetail> {
                                           ),
                                           Row(
                                             children: [
-                                              const Text(
-                                                "Name :",
+                                              Text(
+                                                Languages.of(context)!.NAME,
                                                 style: TextStyle(
                                                     fontWeight:
                                                         FontWeight.bold),
@@ -634,8 +659,9 @@ class _orderDetailState extends State<orderDetail> {
                                           ),
                                           Row(
                                             children: [
-                                              const Text(
-                                                "Email :",
+                                              Text(
+                                                Languages.of(context)!.EMAIL +
+                                                    ' : ',
                                                 style: TextStyle(
                                                     fontWeight:
                                                         FontWeight.bold),
@@ -652,8 +678,8 @@ class _orderDetailState extends State<orderDetail> {
                                           ),
                                           Row(
                                             children: [
-                                              const Text(
-                                                "contact :",
+                                              Text(
+                                                Languages.of(context)!.CONTACT,
                                                 style: TextStyle(
                                                     fontWeight:
                                                         FontWeight.bold),
@@ -662,8 +688,12 @@ class _orderDetailState extends State<orderDetail> {
                                                 width: 1.w,
                                               ),
                                               Text(sellerOrderDetails[index]
-                                                  .shippingData
-                                                  .phone),
+                                                          .shippingData ==
+                                                      null
+                                                  ? ''
+                                                  : sellerOrderDetails[index]
+                                                      .shippingData!
+                                                      .phone),
                                             ],
                                           ),
                                           const SizedBox(
@@ -671,20 +701,25 @@ class _orderDetailState extends State<orderDetail> {
                                           ),
                                           Row(
                                             children: [
-                                              const Text(
-                                                "Address : ",
+                                              Text(
+                                                Languages.of(context)!.ADDRESS,
                                                 style: TextStyle(
                                                     fontWeight:
                                                         FontWeight.bold),
                                               ),
                                               Text(
                                                 sellerOrderDetails[index]
-                                                        .shippingData
-                                                        .address +
-                                                    ' ' +
-                                                    sellerOrderDetails[index]
-                                                        .shippingData
-                                                        .city,
+                                                            .shippingData ==
+                                                        null
+                                                    ? ''
+                                                    : (sellerOrderDetails[index]
+                                                            .shippingData!
+                                                            .address +
+                                                        ' ' +
+                                                        sellerOrderDetails[
+                                                                index]
+                                                            .shippingData!
+                                                            .city),
                                                 style: TextStyle(
                                                     fontWeight:
                                                         FontWeight.normal),
@@ -786,11 +821,21 @@ class _orderDetailState extends State<orderDetail> {
                                             const SizedBox(
                                               height: 5,
                                             ),
-                                            Text(
-                                              "${sellerOrderDetails[index].price} €  x ${sellerOrderDetails[index].qty}",
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold),
-                                            ),
+                                            sellerOrderDetails[index]
+                                                        .paymentMethod ==
+                                                    'cash_on_delivery'
+                                                ? Text(
+                                                    "${sellerOrderDetails[index].price} €  x ${sellerOrderDetails[index].qty}",
+                                                    style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  )
+                                                : Text(
+                                                    "${(sellerOrderDetails[index].price - sellerOrderDetails[index].productDetails.shippingCost) / sellerOrderDetails[index].qty} €  x ${sellerOrderDetails[index].qty}",
+                                                    style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
                                             const SizedBox(
                                               height: 5,
                                             ),
@@ -853,17 +898,28 @@ class _orderDetailState extends State<orderDetail> {
                                             children: [
                                               SizedBox(
                                                 width: 30.w,
-                                                child: const Text("Sub Total"),
+                                                child: Text(
+                                                    Languages.of(context)!
+                                                        .SUB_TOTAL),
                                               ),
                                               SizedBox(
                                                 width: 30.w,
                                               ),
-                                              SizedBox(
-                                                width: 20.w,
-                                                child: Text(
-                                                  "(+)${(sellerOrderDetails[index].price.toDouble() * sellerOrderDetails[index].qty)} €",
-                                                ),
-                                              )
+                                              sellerOrderDetails[index]
+                                                          .paymentMethod ==
+                                                      'cash_on_delivery'
+                                                  ? SizedBox(
+                                                      width: 20.w,
+                                                      child: Text(
+                                                        "(+)${(sellerOrderDetails[index].price.toDouble() * sellerOrderDetails[index].qty)} €",
+                                                      ),
+                                                    )
+                                                  : SizedBox(
+                                                      width: 20.w,
+                                                      child: Text(
+                                                        "(+)${((sellerOrderDetails[index].price - sellerOrderDetails[index].productDetails.shippingCost) / sellerOrderDetails[index].qty) * sellerOrderDetails[index].qty} €",
+                                                      ),
+                                                    )
                                             ],
                                           ),
                                           Row(
@@ -872,7 +928,8 @@ class _orderDetailState extends State<orderDetail> {
                                             children: [
                                               SizedBox(
                                                 width: 30.w,
-                                                child: const Text("Tax"),
+                                                child: Text(
+                                                    Languages.of(context)!.TAX),
                                               ),
                                               SizedBox(
                                                 width: 30.w,
@@ -891,7 +948,9 @@ class _orderDetailState extends State<orderDetail> {
                                             children: [
                                               SizedBox(
                                                 width: 30.w,
-                                                child: const Text("Discount"),
+                                                child: Text(
+                                                    Languages.of(context)!
+                                                        .DISCOUNT),
                                               ),
                                               SizedBox(
                                                 width: 30.w,
@@ -910,7 +969,9 @@ class _orderDetailState extends State<orderDetail> {
                                             children: [
                                               SizedBox(
                                                 width: 30.w,
-                                                child: const Text("Coupon"),
+                                                child: Text(
+                                                    Languages.of(context)!
+                                                        .COUPON),
                                               ),
                                               SizedBox(
                                                 width: 30.w,
@@ -929,8 +990,9 @@ class _orderDetailState extends State<orderDetail> {
                                             children: [
                                               SizedBox(
                                                 width: 30.w,
-                                                child:
-                                                    const Text("Shipping Fee"),
+                                                child: Text(
+                                                    Languages.of(context)!
+                                                        .SHIPPING_FEE),
                                               ),
                                               SizedBox(
                                                 width: 30.w,
@@ -954,8 +1016,9 @@ class _orderDetailState extends State<orderDetail> {
                                             children: [
                                               SizedBox(
                                                 width: 30.w,
-                                                child: const Text(
-                                                  "Total Amount",
+                                                child: Text(
+                                                  Languages.of(context)!
+                                                      .TOTAL_AMOUNT,
                                                   style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold),
@@ -964,15 +1027,29 @@ class _orderDetailState extends State<orderDetail> {
                                               SizedBox(
                                                 width: 30.w,
                                               ),
-                                              SizedBox(
-                                                width: 20.w,
-                                                child: Text(
-                                                  "${(sellerOrderDetails[index].qty.toDouble() * sellerOrderDetails[index].price.toDouble()) + sellerOrderDetails[index].tax.toDouble() + sellerOrderDetails[index].productDetails.shippingCost.toDouble() - sellerOrderDetails[index].productDetails.discount.toDouble()} €",
-                                                  style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                              )
+                                              sellerOrderDetails[index]
+                                                          .paymentMethod ==
+                                                      'cash_on_delivery'
+                                                  ? SizedBox(
+                                                      width: 20.w,
+                                                      child: Text(
+                                                        "${(sellerOrderDetails[index].qty.toDouble() * sellerOrderDetails[index].price.toDouble()) + sellerOrderDetails[index].tax.toDouble() + sellerOrderDetails[index].productDetails.shippingCost.toDouble() - sellerOrderDetails[index].productDetails.discount.toDouble()} €",
+                                                        style: const TextStyle(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                    )
+                                                  : SizedBox(
+                                                      width: 20.w,
+                                                      child: Text(
+                                                        "${sellerOrderDetails[index].price.toDouble()} €",
+                                                        style: const TextStyle(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                    )
                                             ],
                                           ),
                                         ]),
@@ -1108,8 +1185,9 @@ class _orderDetailState extends State<orderDetail> {
                                                   children: [
                                                     SizedBox(
                                                       width: 30.w,
-                                                      child: const Text(
-                                                        "Grand Total",
+                                                      child: Text(
+                                                        Languages.of(context)!
+                                                            .GRAND_TOTAL,
                                                         style: TextStyle(
                                                             fontWeight:
                                                                 FontWeight

@@ -21,6 +21,7 @@ import 'package:http/http.dart';
 import 'package:sizer/sizer.dart';
 
 //
+import '../localization/languages/languages.dart';
 import 'navBar.dart';
 import 'newBar.dart';
 
@@ -108,11 +109,11 @@ class _chatNotificationState extends State<chatNotification> {
       context: context,
       dialogType: DialogType.QUESTION,
       animType: AnimType.BOTTOMSLIDE,
-      title: 'Exit',
-      desc: 'Are you sure you want to Exit?',
+      title: Languages.of(context)!.EXIT,
+      desc: Languages.of(context)!.EXIT_APP_TEXT,
       btnCancelOnPress: () {},
-      btnCancelText: 'No',
-      btnOkText: 'Yes',
+      btnCancelText: Languages.of(context)!.NO,
+      btnOkText: Languages.of(context)!.YES,
       btnOkOnPress: () async {
         SystemNavigator.pop();
       },
@@ -156,7 +157,7 @@ class _chatNotificationState extends State<chatNotification> {
                         Icons.arrow_back_ios,
                         color: Colors.black,
                       )),
-                  title: const Text("My Messages",
+                  title:  Text(Languages.of(context)!.MY_MESSAGES,
                       style: TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold)),
                   actions: [
@@ -321,7 +322,7 @@ class _chatNotificationState extends State<chatNotification> {
                                 ? Center(
                                     child: Padding(
                                       padding: EdgeInsets.only(top: 30.0.h),
-                                      child: const Text('No Notification'),
+                                      child:  Text(Languages.of(context)!.NO_NOTIFICATIONS),
                                     ),
                                   )
                                 : Expanded(
@@ -590,8 +591,8 @@ class _chatNotificationState extends State<chatNotification> {
                                 child: loader
                                     ? spinkit
                                     : getUserList.isEmpty
-                                        ? const Center(
-                                            child: Text('No Users'),
+                                        ?  Center(
+                                            child: Text(Languages.of(context)!.NO_MESSAGES),
                                           )
                                         : SmartRefresher(
                                             enablePullDown: true,

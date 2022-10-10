@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 
 import '../api/auth_af24.dart';
+import '../localization/languages/languages.dart';
 import 'login.dart';
 
 class signup extends StatefulWidget {
@@ -132,7 +133,7 @@ class _signupState extends State<signup> {
                           margin: EdgeInsets.fromLTRB(3.h, 2.h, 0, 0),
                           alignment: Alignment.topLeft,
                           child: Text(
-                            "First name *",
+                            Languages.of(context)!.FIRST_NAME,
                             style:
                                 TextStyle(color: Colors.black.withOpacity(0.7)),
                           ),
@@ -146,12 +147,12 @@ class _signupState extends State<signup> {
                           child: TextFormField(
                             validator: (value) {
                               if (value!.isEmpty) {
-                                return "This field is required";
+                                return Languages.of(context)!.VALIDATOR;
                               }
                             },
                             controller: FNameController,
                             decoration: InputDecoration(
-                                hintText: 'First Name',
+                                hintText: Languages.of(context)!.FIRST_NAME,
                                 enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                       color: Colors.grey.withOpacity(0.2),
@@ -174,7 +175,7 @@ class _signupState extends State<signup> {
                           margin: EdgeInsets.fromLTRB(3.h, 2.h, 0, 0),
                           alignment: Alignment.topLeft,
                           child: Text(
-                            "Last name *",
+                            Languages.of(context)!.LAST_NAME,
                             style:
                                 TextStyle(color: Colors.black.withOpacity(0.7)),
                           ),
@@ -188,12 +189,12 @@ class _signupState extends State<signup> {
                           child: TextFormField(
                             validator: (value) {
                               if (value!.isEmpty) {
-                                return "This field is required";
+                                return Languages.of(context)!.VALIDATOR;
                               }
                             },
                             controller: LNameController,
                             decoration: InputDecoration(
-                                hintText: 'Last Name',
+                                hintText: Languages.of(context)!.LAST_NAME,
                                 enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                       color: Colors.grey.withOpacity(0.2),
@@ -216,7 +217,7 @@ class _signupState extends State<signup> {
                           margin: EdgeInsets.fromLTRB(3.h, 2.h, 0, 0),
                           alignment: Alignment.topLeft,
                           child: Text(
-                            "Mobile number *",
+                            Languages.of(context)!.MOBILE_NUMBER,
                             style:
                                 TextStyle(color: Colors.black.withOpacity(0.7)),
                           ),
@@ -235,7 +236,7 @@ class _signupState extends State<signup> {
                               child: TextFormField(
                                 validator: (value) {
                                   if (value!.isEmpty) {
-                                    return "This field is required";
+                                    return Languages.of(context)!.VALIDATOR;
                                   }
                                 },
                                 keyboardType: TextInputType.phone,
@@ -245,7 +246,8 @@ class _signupState extends State<signup> {
                                   LengthLimitingTextInputFormatter(15)
                                 ],
                                 decoration: InputDecoration(
-                                    hintText: "12345678",
+                                    hintText:
+                                        Languages.of(context)!.NUMBER_HINT,
                                     enabledBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
                                           color: Colors.grey.withOpacity(0.2),
@@ -273,7 +275,7 @@ class _signupState extends State<signup> {
                           margin: EdgeInsets.fromLTRB(3.h, 0, 0, 0),
                           alignment: Alignment.topLeft,
                           child: Text(
-                            "Email *",
+                            Languages.of(context)!.EMAIL,
                             style:
                                 TextStyle(color: Colors.black.withOpacity(0.7)),
                           ),
@@ -287,12 +289,12 @@ class _signupState extends State<signup> {
                           child: TextFormField(
                             validator: (value) {
                               if (value!.isEmpty) {
-                                return "This field is required";
+                                return Languages.of(context)!.VALIDATOR;
                               }
                             },
                             controller: EmailController,
                             decoration: InputDecoration(
-                                hintText: "Email Address",
+                                hintText: Languages.of(context)!.EMAIL_HINT,
                                 enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                       color: Colors.grey.withOpacity(0.2),
@@ -315,7 +317,7 @@ class _signupState extends State<signup> {
                           margin: EdgeInsets.fromLTRB(3.h, 2.h, 0, 0),
                           alignment: Alignment.topLeft,
                           child: Text(
-                            "Password *",
+                            Languages.of(context)!.PASSWORD,
                             style:
                                 TextStyle(color: Colors.black.withOpacity(0.7)),
                           ),
@@ -330,7 +332,7 @@ class _signupState extends State<signup> {
                             obscureText: view1,
                             validator: (value) {
                               if (value!.isEmpty) {
-                                return "This field is required";
+                                return Languages.of(context)!.VALIDATOR;
                               }
                             },
                             controller: PasswordController,
@@ -344,7 +346,7 @@ class _signupState extends State<signup> {
                                     child: Icon(view1
                                         ? Icons.visibility_off
                                         : Icons.visibility)),
-                                hintText: "Password",
+                                hintText: Languages.of(context)!.PASSWORD,
                                 enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                       color: Colors.grey.withOpacity(0.2),
@@ -367,7 +369,7 @@ class _signupState extends State<signup> {
                           padding: EdgeInsets.fromLTRB(25, 5, 0, 0),
                           alignment: Alignment.topLeft,
                           child: Text(
-                            "Password must have at least 8 characters",
+                            Languages.of(context)!.PASSWORD_MSG,
                             style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey.withOpacity(0.9)),
@@ -377,7 +379,7 @@ class _signupState extends State<signup> {
                           margin: EdgeInsets.fromLTRB(3.h, 2.h, 0, 0),
                           alignment: Alignment.topLeft,
                           child: Text(
-                            "Confirm Password *",
+                            Languages.of(context)!.CONFIRM_PASS,
                             style:
                                 TextStyle(color: Colors.black.withOpacity(0.7)),
                           ),
@@ -392,7 +394,7 @@ class _signupState extends State<signup> {
                             controller: confirmPasswordContoller,
                             validator: (value) {
                               if (value!.isEmpty) {
-                                return "This field is required";
+                                return Languages.of(context)!.VALIDATOR;
                               }
                             },
                             obscureText: view2,
@@ -406,7 +408,7 @@ class _signupState extends State<signup> {
                                     child: Icon(view2
                                         ? Icons.visibility_off
                                         : Icons.visibility)),
-                                hintText: 'Confirm Password',
+                                hintText: Languages.of(context)!.CONFIRM_PASS,
                                 enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                       color: Colors.grey.withOpacity(0.2),
@@ -494,7 +496,7 @@ class _signupState extends State<signup> {
                           margin: EdgeInsets.fromLTRB(3.h, 2.h, 0, 0),
                           alignment: Alignment.topLeft,
                           child: Text(
-                            "Shop name",
+                            Languages.of(context)!.SHOP_NAME,
                             style:
                                 TextStyle(color: Colors.black.withOpacity(0.7)),
                           ),
@@ -508,12 +510,12 @@ class _signupState extends State<signup> {
                           child: TextFormField(
                             validator: (value) {
                               if (value!.isEmpty) {
-                                return "This field is required";
+                                return Languages.of(context)!.VALIDATOR;
                               }
                             },
                             controller: ShopNameController,
                             decoration: InputDecoration(
-                                hintText: 'Shop Name',
+                                hintText: Languages.of(context)!.SHOP_NAME,
                                 enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                       color: Colors.grey.withOpacity(0.2),
@@ -536,7 +538,7 @@ class _signupState extends State<signup> {
                           margin: EdgeInsets.fromLTRB(3.h, 2.h, 0, 0),
                           alignment: Alignment.topLeft,
                           child: Text(
-                            "Shop Address",
+                            Languages.of(context)!.SHOP_ADDRESS,
                             style:
                                 TextStyle(color: Colors.black.withOpacity(0.7)),
                           ),
@@ -551,11 +553,11 @@ class _signupState extends State<signup> {
                             controller: shopAddressController,
                             validator: (value) {
                               if (value!.isEmpty) {
-                                return "This field is required";
+                                return Languages.of(context)!.VALIDATOR;
                               }
                             },
                             decoration: InputDecoration(
-                                hintText: 'Shop Address',
+                                hintText: Languages.of(context)!.SHOP_ADDRESS,
                                 enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                       color: Colors.grey.withOpacity(0.2),
@@ -620,7 +622,7 @@ class _signupState extends State<signup> {
                                                 context: context,
                                                 dialogType: DialogType.SUCCES,
                                                 animType: AnimType.BOTTOMSLIDE,
-                                                title: 'Success',
+                                                title: Languages.of(context)!.SUCCESS,
                                                 desc: SnackMessage,
                                                 btnOkOnPress: () {
                                                   Navigator.of(context).push(
@@ -634,22 +636,22 @@ class _signupState extends State<signup> {
                                                 context: context,
                                                 dialogType: DialogType.ERROR,
                                                 animType: AnimType.BOTTOMSLIDE,
-                                                title: 'Error',
+                                                title: Languages.of(context)!.ERROR,
                                                 desc: SnackMessage,
                                                 btnOkOnPress: () {},
                                               ).show();
                                             }
                                           } else {
                                             GlobalSnackBar.show(context,
-                                                'Please enter a valid email');
+                                                Languages.of(context)!.ENTER_EMAIL);
                                           }
                                         } else {
                                           GlobalSnackBar.show(context,
-                                              'Password must be atleast 8 characters');
+                                              Languages.of(context)!.PASS_ERROR);
                                         }
                                       } else {
                                         GlobalSnackBar.show(
-                                            context, 'Passwords do not match');
+                                            context, Languages.of(context)!.PASS_NOMATCH);
                                       }
                                     }
                                   }
@@ -657,7 +659,7 @@ class _signupState extends State<signup> {
                                 child: loader == true
                                     ? spinkit
                                     : Text(
-                                        "Register",
+                                        Languages.of(context)!.REGISTER,
                                         style: TextStyle(
                                             color: Colors.white,
                                             fontSize: 15,
@@ -674,7 +676,7 @@ class _signupState extends State<signup> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                "Already have an account?  ",
+                                Languages.of(context)!.ALREADY,
                                 style: TextStyle(
                                     color: Colors.black.withOpacity(0.7)),
                               ),
@@ -683,7 +685,7 @@ class _signupState extends State<signup> {
                                   Get.back();
                                 },
                                 child: Text(
-                                  "Login",
+                                  Languages.of(context)!.LOGIN,
                                   style: TextStyle(
                                       color: Colors.black.withOpacity(0.7),
                                       fontWeight: FontWeight.bold),

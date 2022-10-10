@@ -18,6 +18,8 @@ import '../Model/getChatModel.dart';
 import '../api/urls.dart';
 import 'package:cron/cron.dart';
 
+import '../localization/languages/languages.dart';
+
 class chatBox extends StatefulWidget {
   final String imagePath;
   final int index;
@@ -196,7 +198,7 @@ class _chatBoxState extends State<chatBox> {
                             Container(
                               alignment: Alignment.topCenter,
                               child: Text(
-                                "A quick answer, usually in a few minutes",
+                                Languages.of(context)!.QUICK_ANSWER,
                                 style: TextStyle(
                                   fontSize: 15,
                                   color: Colors.grey,
@@ -220,7 +222,7 @@ class _chatBoxState extends State<chatBox> {
                     SizedBox(
                       height: 53.5.h,
                       child: getChatList.isEmpty
-                          ? Center(child: Text('No Messages found'))
+                          ? Center(child: Text(Languages.of(context)!.NO_MESSAGES))
                           : ListView.builder(
                               itemCount: getChatList.length,
                               reverse: true,
@@ -456,7 +458,7 @@ class _chatBoxState extends State<chatBox> {
                                   }
                                 },
                                 child: Icon(Icons.send, size: 20)),
-                            hintText: "Write a message",
+                            hintText: Languages.of(context)!.WRITE_MESS,
                             hintStyle: TextStyle(
                               color: Colors.black26,
                             ),

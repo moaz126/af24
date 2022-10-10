@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:af24/Screens/navBar.dart';
 import 'package:af24/Screens/uploadProduct.dart';
 import 'package:af24/api/global_variable.dart';
+import 'package:af24/localization/languages/languages.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,7 @@ import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
-class imageCrop extends StatelessWidget {
+/* class imageCrop extends StatelessWidget {
   const imageCrop({Key? key}) : super(key: key);
 
   // This widget is the root of your application.
@@ -55,18 +56,15 @@ class imageCrop extends StatelessWidget {
                   (states) => const BorderSide(color: Colors.black)),
             ),
           )),
-      home: const HomePage(title: 'Crop Image'),
+      home:  HomePage(),
     );
   }
-}
+} */
 
 class HomePage extends StatefulWidget {
-  final String title;
+  final int index;
 
-  const HomePage({
-    Key? key,
-    required this.title,
-  }) : super(key: key);
+  HomePage(this.index);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -79,7 +77,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: !kIsWeb ? AppBar(title: Text(widget.title)) : null,
+      appBar: !kIsWeb ? AppBar(title: Text(Languages.of(context)!.CROP_IMAGE)) : null,
       body: Column(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,7 +86,7 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: const EdgeInsets.all(kIsWeb ? 24.0 : 16.0),
               child: Text(
-                widget.title,
+                Languages.of(context)!.CROP_IMAGE,
                 style: Theme.of(context)
                     .textTheme
                     .displayMedium!
@@ -146,7 +144,7 @@ class _HomePageState extends State<HomePage> {
         child: kIsWeb ? Image.network(path) : Image.file(File(path)),
       );
     } else if (pickedImage != null) {
-      final path = pickedImage!.path;
+      final path = pickedImage[widget.index]!.path;
       return ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: 0.8 * screenWidth,
@@ -178,9 +176,10 @@ class _HomePageState extends State<HomePage> {
           onPressed: () {
             if (_croppedFile == null) {
               setState(() {
-                _pickedFile = pickedImage;
+                _pickedFile = pickedImage[widget.index];
                 final path = _pickedFile!.path;
-                myImages.add(path);
+                // myImages.add(path);
+                myImages[widget.index] = path;
               });
             }
             Navigator.pushReplacement(
@@ -280,7 +279,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _cropImage() async {
     if (pickedImage != null) {
       final croppedFile = await ImageCropper().cropImage(
-        sourcePath: pickedImage!.path,
+        sourcePath: pickedImage[widget.index]!.path,
         compressFormat: ImageCompressFormat.jpg,
         compressQuality: 100,
         uiSettings: [
@@ -312,7 +311,8 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           _croppedFile = croppedFile;
           final path = _croppedFile!.path;
-          myImages.add(path);
+          // myImages.add(path);
+          myImages[widget.index] = path;
         });
       }
     }
@@ -321,7 +321,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _pickedImage() async {
     if (pickedImage != null) {
       final croppedFile = await ImageCropper().cropImage(
-        sourcePath: pickedImage!.path,
+        sourcePath: pickedImage[0]!.path,
         compressFormat: ImageCompressFormat.jpg,
         compressQuality: 100,
         uiSettings: [
@@ -353,7 +353,8 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           _croppedFile = croppedFile;
           final path = _croppedFile!.path;
-          myImages.add(path);
+          // myImages.add(path);
+          myImages[widget.index] = path;
         });
       }
     }
@@ -373,14 +374,15 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _pickedFile = null;
       _croppedFile = null;
-      pickedImage = null;
-      myImages.removeLast();
+      // pickedImage = null;
+      // myImages.removeLast();
     });
   }
 }
 
 class imageCropperAddProduct extends StatefulWidget {
-  const imageCropperAddProduct({super.key});
+  final int index;
+  imageCropperAddProduct(this.index);
 
   @override
   State<imageCropperAddProduct> createState() => _imageCropperAddProductState();
@@ -464,7 +466,7 @@ class _imageCropperAddProductState extends State<imageCropperAddProduct> {
         child: kIsWeb ? Image.network(path) : Image.file(File(path)),
       );
     } else if (pickedImage != null) {
-      final path = pickedImage!.path;
+      final path = pickedImage[widget.index]!.path;
       return ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: 0.8 * screenWidth,
@@ -485,10 +487,11 @@ class _imageCropperAddProductState extends State<imageCropperAddProduct> {
           heroTag: '4',
           onPressed: () {
             _clear();
-            Navigator.pushReplacement(
+            /*  Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => navBar(index: 2, see: 0)),
-            );
+            ); */
+            Navigator.pop(context);
           },
           backgroundColor: Colors.redAccent,
           tooltip: 'Delete',
@@ -503,13 +506,15 @@ class _imageCropperAddProductState extends State<imageCropperAddProduct> {
             if (_croppedFile != null) {
               setState(() {
                 final path = _croppedFile!.path;
-                myImages.add(path);
+                // myImages.add(path);
+                myImages[widget.index] = path;
               });
             } else {
               setState(() {
-                _pickedFile = pickedImage;
+                _pickedFile = pickedImage[widget.index];
                 final path = _pickedFile!.path;
-                myImages.add(path);
+                // myImages.add(path);
+                myImages[widget.index] = path;
               });
             }
             Navigator.pushReplacement(
@@ -612,7 +617,7 @@ class _imageCropperAddProductState extends State<imageCropperAddProduct> {
   Future<void> _cropImage() async {
     if (pickedImage != null) {
       final croppedFile = await ImageCropper().cropImage(
-        sourcePath: pickedImage!.path,
+        sourcePath: pickedImage[widget.index]!.path,
         compressFormat: ImageCompressFormat.jpg,
         compressQuality: 100,
         uiSettings: [
@@ -653,7 +658,7 @@ class _imageCropperAddProductState extends State<imageCropperAddProduct> {
   Future<void> _pickedImage() async {
     if (pickedImage != null) {
       final croppedFile = await ImageCropper().cropImage(
-        sourcePath: pickedImage!.path,
+        sourcePath: pickedImage[widget.index]!.path,
         compressFormat: ImageCompressFormat.jpg,
         compressQuality: 100,
         uiSettings: [
@@ -685,7 +690,8 @@ class _imageCropperAddProductState extends State<imageCropperAddProduct> {
         setState(() {
           _croppedFile = croppedFile;
           final path = _croppedFile!.path;
-          myImages.add(path);
+          // myImages.add(path);
+          myImages[widget.index] = path;
         });
       }
     }
@@ -705,7 +711,7 @@ class _imageCropperAddProductState extends State<imageCropperAddProduct> {
     setState(() {
       _pickedFile = null;
       _croppedFile = null;
-      pickedImage = null;
+      // pickedImage = null;
     });
   }
 }

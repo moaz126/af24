@@ -6,6 +6,7 @@ import 'package:sizer/sizer.dart';
 
 import '../api/auth_af24.dart';
 import '../constants.dart';
+import '../localization/languages/languages.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({Key? key}) : super(key: key);
@@ -69,7 +70,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 alignment: Alignment.center,
                 // margin: EdgeInsets.fromLTRB(3.h, 0, 0, 0),
                 child: Text(
-                  "You will receive a reset password link on your email",
+                  Languages.of(context)!.EMAIL_VERIFICATION_TEXT,
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
@@ -90,12 +91,12 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 child: TextFormField(
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return "This field is required";
+                      return Languages.of(context)!.VALIDATOR;
                     }
                   },
                   controller: emailcontroller,
                   decoration: InputDecoration(
-                      hintText: "Your email address",
+                      hintText: Languages.of(context)!.EMAIL_HINT,
                       enabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(
                             color: Colors.grey.withOpacity(0.2),
@@ -121,7 +122,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 //color: Colors.red,
                 width: 88.w,
                 height: 6.h,
-      
+
                 child: FlatButton(
                     onPressed: () async {
                       if (loader == false) {
@@ -147,7 +148,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     child: loader == true
                         ? spinkit
                         : Text(
-                            "Send",
+                            Languages.of(context)!.SEND,
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 15,

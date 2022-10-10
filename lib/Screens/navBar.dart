@@ -6,6 +6,8 @@ import 'package:af24/Screens/uploadProduct.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
+import '../localization/languages/languages.dart';
+
 class navBar extends StatefulWidget {
   navBar({Key? key, required this.index, required this.see}) : super(key: key);
   final int index;
@@ -74,7 +76,7 @@ class _navBarState extends State<navBar> {
                           ),
                   ),
                   Text(
-                    'Home',
+                    Languages.of(context)!.HOME,
                     style: TextStyle(fontSize: 10),
                   )
                 ],
@@ -98,7 +100,7 @@ class _navBarState extends State<navBar> {
                           ),
                   ),
                   Text(
-                    'Products',
+                    Languages.of(context)!.PRODUCTS,
                     style: TextStyle(fontSize: 10),
                   )
                 ],
@@ -122,7 +124,7 @@ class _navBarState extends State<navBar> {
                           ),
                   ),
                   Text(
-                    'Sell',
+                    Languages.of(context)!.SELL,
                     style: TextStyle(fontSize: 10),
                   )
                 ],
@@ -147,7 +149,7 @@ class _navBarState extends State<navBar> {
                                   height: 3.h),
                             )),
                   Text(
-                    'Notification',
+                    Languages.of(context)!.NOTIFICATION,
                     style: TextStyle(fontSize: 10),
                   )
                 ],
@@ -170,7 +172,7 @@ class _navBarState extends State<navBar> {
                                   height: 3.h),
                             )),
                   Text(
-                    'My Orders',
+                    Languages.of(context)!.MY_ORDERS,
                     style: TextStyle(fontSize: 10),
                   )
                 ],

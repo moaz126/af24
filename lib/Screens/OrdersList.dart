@@ -5,6 +5,7 @@ import 'package:af24/Screens/login.dart';
 
 import 'package:af24/api/auth_af24.dart';
 import 'package:af24/api/global_variable.dart';
+import 'package:af24/constants.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +15,7 @@ import 'package:horizontal_data_table/horizontal_data_table.dart';
 import 'package:http/http.dart';
 import 'package:sizer/sizer.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import '../localization/languages/languages.dart';
 import 'navBar.dart';
 import 'newBar.dart';
 import 'orderDetail.dart';
@@ -27,14 +29,7 @@ class newOrderConfirmed extends StatefulWidget {
 class _newOrderConfirmed extends State<newOrderConfirmed> {
   int pressed = 0;
 
-  List<String> buttontext = [
-    'All',
-    'Pending',
-    'Processing',
-    'Confirmed',
-    'Delivered',
-    'Canceled',
-  ];
+  List<String> buttontext = [];
   String now = DateFormat("dd-MM-yyyy").format(DateTime.now());
   List<SellerOrderListModel> neworderlist = [];
   List<SellerOrderListModel> pendingOrderList = [];
@@ -50,6 +45,7 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
   List<TextEditingController> deliveryController = [];
   DateTime selectdate = DateTime.now();
   int count = 0;
+  bool searchDate = false;
 
   bool loader = false;
   filterListByStatus() {
@@ -93,14 +89,18 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
     canceledOrderList.clear();
     for (var model in sellerOrderList) {
       if (date.toString().substring(0, 10) ==
-                  model.createdAt.toString().substring(0, 10) &&
+              model.createdAt.toString().substring(0,
+                  10) /* &&
               model.orderStatus == 'pending' ||
           model.orderStatus == 'processing' ||
           model.orderStatus == 'confirmed' ||
           model.orderStatus == 'delivered' ||
-          model.orderStatus == 'canceled') {
+          model.orderStatus == 'canceled' */
+          ) {
         dateOrderList.add(model);
       }
+      print('dateOrderList');
+      print(dateOrderList.length);
 
       if (date.toString().substring(0, 10) ==
               model.createdAt.toString().substring(0, 10) &&
@@ -123,9 +123,9 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
               model.createdAt.toString().substring(0, 10) &&
           model.orderStatus == 'canceled') {
         canceledOrderList.add(model);
-      } else {
+      } /*  else {
         dateOrderList.add(model);
-      }
+      } */
     }
   }
 
@@ -189,11 +189,11 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
       context: context,
       dialogType: DialogType.QUESTION,
       animType: AnimType.BOTTOMSLIDE,
-      title: 'Exit',
-      desc: 'Are you sure you want to Exit?',
+      title: Languages.of(context)!.EXIT,
+      desc: Languages.of(context)!.EXIT_APP_TEXT,
       btnCancelOnPress: () {},
-      btnCancelText: 'No',
-      btnOkText: 'Yes',
+      btnCancelText: Languages.of(context)!.NO,
+      btnOkText: Languages.of(context)!.YES,
       btnOkOnPress: () async {
         SystemNavigator.pop();
       },
@@ -205,6 +205,14 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
     callApi();
 
     super.initState();
+    buttontext = [
+      'All',
+      'Pending',
+      'Processing',
+      'Confirmed',
+      'Delivered',
+      'Cancelled',
+    ];
   }
 /* 
   @override
@@ -240,7 +248,7 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
                 )),
             backgroundColor: Colors.white,
             title: Text(
-              "My Order",
+              Languages.of(context)!.MY_ORDER,
               style: TextStyle(
                 color: Colors.black,
               ),
@@ -306,10 +314,15 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
                                                   .toString());
                                         }, onConfirm: (date) async {
                                           setState(() {
+                                            searchDate = true;
                                             loadertable = true;
                                             selectdate = date;
                                             // pressed = 0;
                                             filterbyDate(date);
+                                            if (pressed == 0) {
+                                              selectedOrderList = dateOrderList;
+                                              generateController();
+                                            }
                                             generateController();
                                             // selectedOrderList = dateOrderList;
                                             print('Confirem $date');
@@ -323,7 +336,7 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
                                       },
                                       child: Icon(Icons.date_range)),
                                   Text(
-                                    'Search Date',
+                                    Languages.of(context)!.SEARCH_DATE,
                                     style: TextStyle(fontSize: 10.sp),
                                   )
                                 ],
@@ -375,8 +388,14 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
                                                 canceledOrderList;
                                             generateController();
                                           } else {
-                                            selectedOrderList = sellerOrderList;
-                                            generateController();
+                                            if (searchDate) {
+                                              selectedOrderList = dateOrderList;
+                                              generateController();
+                                            } else {
+                                              selectedOrderList =
+                                                  sellerOrderList;
+                                              generateController();
+                                            }
                                           }
                                           loader = false;
                                           print(pressed);
@@ -414,7 +433,7 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
                       Expanded(
                         child: selectedOrderList.isEmpty
                             ? Center(
-                                child: Text('No Orders Found'),
+                                child: Text(Languages.of(context)!.NO_ORDERS),
                               )
                             : loadertable
                                 ? spinkittable
@@ -447,10 +466,10 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
 
   List<Widget> _getTitleWidget() {
     return [
-      _getTitleItemWidget('Order No.', 100),
-      _getTitleItemWidget('Date of Order', 100),
-      _getTitleItemWidget('Customer ID', 100),
-      _getTitleItemWidget('Tracking ID', 90),
+      _getTitleItemWidget(Languages.of(context)!.ORDERS_NO, 100),
+      _getTitleItemWidget(Languages.of(context)!.DATE_OF_ORDER, 100),
+      _getTitleItemWidget(Languages.of(context)!.CUSTOMER_ID, 100),
+      _getTitleItemWidget(Languages.of(context)!.TRAKING_ID, 90),
       _getTitleItemWidget('Delivery Company', 150),
       // _getTitleItemWidget('Size', 100),
       // _getTitleItemWidget('Color', 100)
@@ -458,8 +477,8 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
       // _getTitleItemWidget('HSCODE', 100),
       /*  _getTitleItemWidget('Price', 100),
       _getTitleItemWidget('Delivery', 100), */
-      _getTitleItemWidget('Order Details', 100),
-      _getTitleItemWidget('Save Details', 100),
+      _getTitleItemWidget(Languages.of(context)!.ORDERS_DETAILS, 100),
+      _getTitleItemWidget(Languages.of(context)!.SAVE_DETAILS, 100),
     ];
   }
 
@@ -516,11 +535,11 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
         Container(
           child: Padding(
             padding: const EdgeInsets.only(right: 5.0),
-            child: sellerOrderList[index].thirdPartyDeliveryTrackingId == null
+            child: selectedOrderList[index].thirdPartyDeliveryTrackingId == null
                 ? TextField(
                     controller: trackController[index],
                     decoration: InputDecoration(
-                        hintText: 'Enter Tracking ID',
+                        hintText: Languages.of(context)!.ENTER_TRAK_ID,
                         enabledBorder: InputBorder.none),
                     maxLines: 1,
                   )
@@ -537,11 +556,11 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
         Container(
           child: Padding(
             padding: const EdgeInsets.only(left: 5.0),
-            child: sellerOrderList[index].deliveryServiceName == null
+            child: selectedOrderList[index].deliveryServiceName == null
                 ? TextField(
                     controller: deliveryController[index],
                     decoration: InputDecoration(
-                        hintText: 'Enter Delivery Company',
+                        hintText: Languages.of(context)!.ENTER_DELIV_ID,
                         enabledBorder: InputBorder.none),
                     maxLines: 1,
                   )
@@ -581,7 +600,7 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
                 // selectedOrderList.clear();
               },
               child: Text(
-                'Details',
+                Languages.of(context)!.DETAILS,
                 style: TextStyle(color: Colors.white, fontSize: 11.sp),
               ),
               style: ElevatedButton.styleFrom(primary: Colors.blue),
@@ -595,49 +614,64 @@ class _newOrderConfirmed extends State<newOrderConfirmed> {
         Container(
           child: Center(
             child: SizedBox(
-              height: 37,
-              width: 72,
-              child: ElevatedButton(
-                onPressed: () async {
-                  checkloader = index;
-                  setState(() {
-                    loaderButton = true;
-                  });
-                  Map<String, dynamic> save = {
-                    'order_id': sellerOrderList[index].id.toString(),
-                    'delivery_service_name': deliveryController[index].text,
-                    'third_party_delivery_tracking_id':
-                        trackController[index].text,
-                  };
-                  print(save);
-                  await DataApiService.instance.sendOrderDetail(save, context);
-                  AwesomeDialog(
-                    context: context,
-                    dialogType: DialogType.SUCCES,
-                    animType: AnimType.BOTTOMSLIDE,
-                    title: 'Success',
-                    desc: 'Save Successfully',
-                    btnOkOnPress: () {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (BuildContext context) =>
-                                  navBar(index: 4, see: 0)));
-                    },
-                  ).show();
-                  setState(() {
-                    loaderButton = false;
-                  });
-                },
-                child: checkloader == index && loaderButton
-                    ? saveSpinkit
-                    : Text(
-                        'Save',
-                        style: TextStyle(color: Colors.white, fontSize: 11.sp),
-                      ),
-                style: ElevatedButton.styleFrom(primary: Colors.blue),
-              ),
-            ),
+                height: 37,
+                width: 72,
+                child: selectedOrderList[index].thirdPartyDeliveryTrackingId ==
+                            null &&
+                        selectedOrderList[index].deliveryServiceName == null
+                    ? ElevatedButton(
+                        onPressed: () async {
+                          if (deliveryController[index].text.isNotEmpty &&
+                              trackController[index].text.isNotEmpty) {
+                            checkloader = index;
+                            setState(() {
+                              loaderButton = true;
+                            });
+                            Map<String, dynamic> save = {
+                              'order_id':
+                                  selectedOrderList[index].id.toString(),
+                              'delivery_service_name':
+                                  deliveryController[index].text,
+                              'third_party_delivery_tracking_id':
+                                  trackController[index].text,
+                            };
+                            print(save);
+                            await DataApiService.instance
+                                .sendOrderDetail(save, context);
+                            AwesomeDialog(
+                              context: context,
+                              dialogType: DialogType.SUCCES,
+                              animType: AnimType.BOTTOMSLIDE,
+                              title: Languages.of(context)!.SUCCESS,
+                              desc: Languages.of(context)!.SAVE_SUCCESS,
+                              btnOkOnPress: () {
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (BuildContext context) =>
+                                            navBar(index: 4, see: 0)));
+                              },
+                            ).show();
+                            setState(() {
+                              loaderButton = false;
+                            });
+                          } else {
+                            GlobalSnackBar.show(context,
+                                'Please Enter Tracking ID and Delivery Company');
+                          }
+                        },
+                        child: checkloader == index && loaderButton
+                            ? saveSpinkit
+                            : Text(
+                                Languages.of(context)!.SAVE,
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 11.sp),
+                              ),
+                        style: ElevatedButton.styleFrom(primary: Colors.blue),
+                      )
+                    : Center(
+                        child: Text('Saved'),
+                      )),
           ),
           width: 100,
           height: 52,

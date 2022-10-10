@@ -18,6 +18,7 @@ import 'package:sizer/sizer.dart';
 import 'package:flutter/services.dart';
 
 import '../api/auth_af24.dart';
+import '../localization/languages/languages.dart';
 
 class shopInfo extends StatefulWidget {
   const shopInfo({Key? key}) : super(key: key);
@@ -190,7 +191,7 @@ class _shopInfoState extends State<shopInfo> {
                                     controller: Namecontroller,
                                     validator: (value) {
                                       if (value!.isEmpty) {
-                                        return "This field is required";
+                                        return Languages.of(context)!.VALIDATOR;
                                       }
                                     },
                                     decoration: InputDecoration(
@@ -239,7 +240,7 @@ class _shopInfoState extends State<shopInfo> {
                                     controller: Contactcontroller,
                                     validator: (value) {
                                       if (value!.isEmpty) {
-                                        return "This field is required";
+                                        return Languages.of(context)!.VALIDATOR;
                                       }
                                     },
                                     keyboardType: TextInputType.phone,
@@ -286,7 +287,7 @@ class _shopInfoState extends State<shopInfo> {
                                     controller: Addresscontroller,
                                     validator: (value) {
                                       if (value!.isEmpty) {
-                                        return "This field is required";
+                                        return Languages.of(context)!.VALIDATOR;
                                       }
                                     },
                                     decoration: InputDecoration(
@@ -333,7 +334,7 @@ class _shopInfoState extends State<shopInfo> {
                                           context: context,
                                           dialogType: DialogType.SUCCES,
                                           animType: AnimType.BOTTOMSLIDE,
-                                          title: 'Update',
+                                          title:  Languages.of(context)!.UPDATE,
                                           desc: snackmessage,
                                           btnOkOnPress: () {
                                             Get.to(navBar(index: 0, see: 1));

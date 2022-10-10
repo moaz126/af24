@@ -27,6 +27,7 @@ class GetlinkModel {
     required this.createdAt,
     required this.updatedAt,
     required this.userName,
+    required this.requestStatus,
   });
 
   int id;
@@ -44,6 +45,7 @@ class GetlinkModel {
   DateTime createdAt;
   DateTime updatedAt;
   String? userName;
+  String requestStatus;
 
   factory GetlinkModel.fromJson(Map<String, dynamic> json) => GetlinkModel(
         id: json["id"],
@@ -61,6 +63,7 @@ class GetlinkModel {
         createdAt: DateTime.parse(json["created_at"]),
         updatedAt: DateTime.parse(json["updated_at"]),
         userName: json["user_name"],
+        requestStatus: json["request_status"].toString(),
       );
 
   Map<String, dynamic> toJson() => {

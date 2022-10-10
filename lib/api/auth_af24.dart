@@ -14,6 +14,7 @@ import 'package:af24/Model/getbrand.dart';
 import 'package:af24/Model/getsizeModel.dart';
 import 'package:af24/Screens/login.dart';
 import 'package:af24/constants.dart';
+import 'package:af24/localization/languages/languages.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
@@ -165,7 +166,7 @@ class DataApiService {
         GlobalSnackBar.show(context, result['message']);
         return result;
       } else if (response.statusCode == 401) {
-        GlobalSnackBar.show(context, 'Session Expired!');
+        GlobalSnackBar.show(context, Languages.of(context)!.SESSION_EXPIRE);
         Get.offAll(Login());
 
         print("unsuccess");
@@ -194,10 +195,10 @@ class DataApiService {
       print(response.body);
       final result = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        GlobalSnackBar.show(context, 'Payment Status Updated Successfully');
+        GlobalSnackBar.show(context, Languages.of(context)!.STATUS_UPDATE);
         return result;
       } else if (response.statusCode == 401) {
-        GlobalSnackBar.show(context, 'Session Expired!');
+        GlobalSnackBar.show(context, Languages.of(context)!.SESSION_EXPIRE);
         Get.offAll(Login());
 
         print("unsuccess");
@@ -226,7 +227,7 @@ class DataApiService {
         // GlobalSnackBar.show(context, 'Payment Status Updated Successfully');
         return result;
       } else if (response.statusCode == 401) {
-        GlobalSnackBar.show(context, 'Session Expired!');
+        GlobalSnackBar.show(context, Languages.of(context)!.SESSION_EXPIRE);
         Get.offAll(Login());
 
         print("unsuccess");
@@ -259,7 +260,7 @@ class DataApiService {
         thumbnail = result['thumbnail_path'];
         imagepath = result['images_path'];
       } else if (response.statusCode == 401) {
-        GlobalSnackBar.show(context, 'Session Expired!');
+        GlobalSnackBar.show(context, Languages.of(context)!.SESSION_EXPIRE);
         Get.offAll(Login());
 
         print("unsuccess");
@@ -290,7 +291,7 @@ class DataApiService {
         thumbnail = result['thumbnail_path'];
         imagepath = result['images_path'];
       } else if (response.statusCode == 401) {
-        GlobalSnackBar.show(context, 'Session Expired!');
+        GlobalSnackBar.show(context, Languages.of(context)!.SESSION_EXPIRE);
         Get.offAll(Login());
 
         print("unsuccess");
@@ -326,7 +327,7 @@ class DataApiService {
         print(imagepath);
         //print(result[0]['images_path']);
       } else if (response.statusCode == 401) {
-        // GlobalSnackBar.show(context, 'Session Expired!');
+        // GlobalSnackBar.show(context,  Languages.of(context)!.SESSION_EXPIRE);
         Get.offAll(Login());
 
         print("unsuccess");
@@ -357,7 +358,7 @@ class DataApiService {
         print(catergorylist[0].subCategories[0].name);
       } else if (response.statusCode == 401) {
         Get.offAll(Login());
-        GlobalSnackBar.show(context, 'Session Expired!');
+        GlobalSnackBar.show(context, Languages.of(context)!.SESSION_EXPIRE);
         print("unsuccess");
       }
     } on Exception {
@@ -548,7 +549,7 @@ class DataApiService {
         snackmessage = result['message'];
       } else if (response.statusCode == 401) {
         dialogUploadproduct = false;
-        GlobalSnackBar.show(context, 'Session Expired!');
+        GlobalSnackBar.show(context, Languages.of(context)!.SESSION_EXPIRE);
         Get.offAll(Login());
 
         print("unsuccess");
@@ -584,7 +585,7 @@ class DataApiService {
         print('Success3');
       } else if (response.statusCode == 401) {
         dialogUploadproduct = false;
-        GlobalSnackBar.show(context, 'Session Expired!');
+        GlobalSnackBar.show(context, Languages.of(context)!.SESSION_EXPIRE);
         Get.offAll(Login());
 
         print("unsuccess");
@@ -620,7 +621,7 @@ class DataApiService {
         print('Success3');
         snackmessage = result['message'];
       } else if (response.statusCode == 401) {
-        GlobalSnackBar.show(context, 'Session Expired!');
+        GlobalSnackBar.show(context, Languages.of(context)!.SESSION_EXPIRE);
         Get.offAll(Login());
 
         print("unsuccess");
@@ -671,12 +672,13 @@ class DataApiService {
         if (result['success'] == false) {
           return false;
         } else {
+          GlobalSnackBar.show(context, 'Size Added Successfully');
           return true;
         }
 
         // snackmessage = result['message'];
       } else if (response.statusCode == 401) {
-        GlobalSnackBar.show(context, 'Session Expired!');
+        GlobalSnackBar.show(context, Languages.of(context)!.SESSION_EXPIRE);
         Get.offAll(Login());
 
         print("unsuccess");
@@ -709,12 +711,13 @@ class DataApiService {
         if (result['success'] == false) {
           return false;
         } else {
+          GlobalSnackBar.show(context, 'Color Added Successfully');
           return true;
         }
 
         // snackmessage = result['message'];
       } else if (response.statusCode == 401) {
-        GlobalSnackBar.show(context, 'Session Expired!');
+        GlobalSnackBar.show(context, Languages.of(context)!.SESSION_EXPIRE);
         Get.offAll(Login());
 
         print("unsuccess");
@@ -784,7 +787,7 @@ class DataApiService {
         imaglist.add(imageName);
         print(imaglist);
       } else if (response.statusCode == 401) {
-        GlobalSnackBar.show(context, 'Session Expired!');
+        GlobalSnackBar.show(context, Languages.of(context)!.SESSION_EXPIRE);
         Get.offAll(Login());
 
         print("unsuccess");
@@ -877,7 +880,7 @@ class DataApiService {
             result.map((x) => SellerOrderListModel.fromJson(x)));
         print(sellerOrderList.length);
       } else if (response.statusCode == 401) {
-        GlobalSnackBar.show(context, 'Session Expired!');
+        GlobalSnackBar.show(context, Languages.of(context)!.SESSION_EXPIRE);
         Get.offAll(Login());
 
         print("unsuccess");
@@ -907,7 +910,7 @@ class DataApiService {
             result["list"]["comments"].map((x) => GetSecretModel.fromJson(x)));
         print(getSecretList.length);
       } else if (response.statusCode == 401) {
-        GlobalSnackBar.show(context, 'Session Expired!');
+        GlobalSnackBar.show(context, Languages.of(context)!.SESSION_EXPIRE);
         Get.offAll(Login());
 
         print("unsuccess");

@@ -53,7 +53,7 @@ class SellerOrderDetailsModel {
   String userName;
   String userContact;
   String paymentMethod;
-  ShippingAddressData shippingData;
+  ShippingAddressData? shippingData;
 
   factory SellerOrderDetailsModel.fromJson(Map<String, dynamic> json) =>
       SellerOrderDetailsModel(
@@ -81,8 +81,9 @@ class SellerOrderDetailsModel {
         userEmail: json["user_email"],
         userName: json["user_name"],
         userContact: json["user_contact"],
-        shippingData:
-            ShippingAddressData.fromJson(json["shipping_address_data"]),
+        shippingData: json["shipping_address_data"] == null
+            ? null
+            : ShippingAddressData.fromJson(json["shipping_address_data"]),
       );
 }
 

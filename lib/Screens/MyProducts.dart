@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:af24/Screens/EditStoreInfo.dart';
 import 'package:af24/Screens/Edit_Product.dart';
 import 'package:af24/Screens/navBar.dart';
@@ -10,10 +12,13 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+
 import 'package:horizontal_data_table/refresh/pull_to_refresh/src/smart_refresher.dart';
 import 'package:sizer/sizer.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
+import '../localization/languages/languages.dart';
 import 'dashBoard.dart';
 import 'newBar.dart';
 
@@ -38,9 +43,36 @@ class _newsFeedMainState extends State<newsFeedMain> {
     });
   }
 
+  Future<void> checkConnection() async {
+    // actively listen for status updates
+    final StreamSubscription<InternetConnectionStatus> listener =
+        InternetConnectionChecker().onStatusChange.listen(
+      (InternetConnectionStatus status) {
+        switch (status) {
+          case InternetConnectionStatus.connected:
+            // print('Data connection is available.');
+            break;
+          case InternetConnectionStatus.disconnected:
+            GlobalSnackBar.show(
+              context,
+              "There seems to be a problem with internet connectivity. Please check phone connectivity and try again",
+            );
+            // Get.defaultDialog(
+            //     title: "Oops! Internet disconnected",
+            //     content: Image.asset("assets/icon/no_internet.png")
+            // );
+            break;
+        }
+      },
+    );
+    await Future<void>.delayed(const Duration(seconds: 3));
+    await listener.cancel();
+  }
+
   @override
   void initState() {
     // TODO: implement initState
+    checkConnection();
     callApi();
     super.initState();
   }
@@ -212,8 +244,8 @@ class _newsFeedMainState extends State<newsFeedMain> {
                                                   color: Colors.white,
                                                   size: 20,
                                                 ),
-                                                const Text(
-                                                  'Edit    ',
+                                                Text(
+                                                  Languages.of(context)!.EDIT,
                                                   style: TextStyle(
                                                       color: Colors.white),
                                                 ),
@@ -227,12 +259,15 @@ class _newsFeedMainState extends State<newsFeedMain> {
                                               context: context,
                                               dialogType: DialogType.QUESTION,
                                               animType: AnimType.BOTTOMSLIDE,
-                                              title: 'Delete',
-                                              desc:
-                                                  'Are you sure you want to delete',
+                                              title:
+                                                  Languages.of(context)!.DELETE,
+                                              desc: Languages.of(context)!
+                                                  .DELETE_TEXT,
                                               btnCancelOnPress: () {},
-                                              btnCancelText: 'No',
-                                              btnOkText: 'Yes',
+                                              btnCancelText:
+                                                  Languages.of(context)!.NO,
+                                              btnOkText:
+                                                  Languages.of(context)!.YES,
                                               btnOkOnPress: () async {
                                                 await DataApiService.instance
                                                     .deleteProduct(
@@ -263,8 +298,8 @@ class _newsFeedMainState extends State<newsFeedMain> {
                                                   color: Colors.white,
                                                   size: 20,
                                                 ),
-                                                const Text(
-                                                  'Delete',
+                                                Text(
+                                                  Languages.of(context)!.DELETE,
                                                   style: TextStyle(
                                                       color: Colors.white),
                                                 ),
@@ -286,7 +321,7 @@ class _newsFeedMainState extends State<newsFeedMain> {
                                         children: [
                                           Padding(
                                             padding: const EdgeInsets.only(
-                                                right: 2.0, top: 2),
+                                                right: 2.0, top: 4.5),
                                             child: Text(
                                               productlistContent[index]
                                                   .comments
@@ -306,7 +341,7 @@ class _newsFeedMainState extends State<newsFeedMain> {
                                         ],
                                       ),
                                     ),
-                                    Row(
+                                    /* Row(
                                       children: [
                                         Padding(
                                           padding:
@@ -332,7 +367,7 @@ class _newsFeedMainState extends State<newsFeedMain> {
                                           ),
                                         ),
                                       ],
-                                    ),
+                                    ), */
                                   ],
                                 ),
                               ],
